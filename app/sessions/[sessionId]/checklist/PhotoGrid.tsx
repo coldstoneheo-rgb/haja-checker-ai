@@ -55,6 +55,13 @@ export default function PhotoGrid({
             권장 사진 수({requiredPhotoCount}장) 달성.
           </p>
         )}
+        {photos.some(
+          (p) => p.qualityScore !== undefined && p.qualityScore < 0.4,
+        ) && (
+          <p className="text-[11px] font-medium text-rose-700">
+            ⚠ 화질이 낮은 사진이 있습니다. 밝은 곳에서 재촬영을 권장합니다.
+          </p>
+        )}
       </div>
       {editing && (
         <PhotoEditorDialog

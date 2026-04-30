@@ -38,9 +38,20 @@ export default function PhotoCaptureButton({
       }
     } catch (err) {
       console.error(err);
-      setError(
-        err instanceof Error ? err.message : "사진 저장 중 오류가 발생했습니다.",
-      );
+      const msg =
+        err instanceof Error ? err.message : "사진 저장 중 오류가 발생했습니다.";
+      // 카메라 권한 거부 또는 접근 불가 오류 감지
+      if (
+        msg.toLowerCase().includes("permission") ||
+        msg.toLowerCase().includes("notallowed") ||
+        msg.toLowerCase().includes("security")
+      ) {
+        setError(
+          "카메라 접근이 차단되어 있습니다. 브라우저 설정 > 사이트 권한에서 카메라를 허용해 주세요.",
+        );
+      } else {
+        setError(msg);
+      }
     } finally {
       setBusy(false);
       // 같은 파일을 다시 선택할 수 있도록 input 초기화

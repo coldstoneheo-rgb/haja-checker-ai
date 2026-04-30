@@ -4,7 +4,11 @@ import type {
   ChecklistItemStatus,
   EvidencePhoto,
 } from "@/lib/domain/types";
-import { downscaleImage, generateThumbnail } from "@/lib/util/image";
+import {
+  assessPhotoQuality,
+  downscaleImage,
+  generateThumbnail,
+} from "@/lib/util/image";
 
 export interface AddPhotoInput {
   sessionId: string;
@@ -34,7 +38,10 @@ export async function addPhoto(
     mimeType: "image/jpeg",
     quality: 0.85,
   });
-  const thumbnail = await generateThumbnail(downscaled.blob, 256);
+  const [thumbnail, qualityScore] = await Promise.all([
+    generateThumbnail(downscaled.blob, 256),
+    assessPhotoQuality(downscaled.blob),
+  ]);
 
   const db = getDB();
   const now = Date.now();
@@ -56,6 +63,7 @@ export async function addPhoto(
       ? input.quickTags
       : undefined,
     isRepresentative: false,
+    qualityScore,
     createdAt: now,
   };
 
