@@ -4,6 +4,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import { listPhotosForItem } from "@/lib/repo/photoRepo";
 import type { EvidencePhoto } from "@/lib/domain/types";
+import PhotoGuide from "@/components/PhotoGuide";
 import PhotoEditorDialog from "./PhotoEditorDialog";
 import PhotoThumbnail from "./PhotoThumbnail";
 
@@ -24,11 +25,7 @@ export default function PhotoGrid({
   const [editing, setEditing] = useState<EvidencePhoto | null>(null);
 
   if (!photos || photos.length === 0) {
-    return (
-      <p className="text-xs text-slate-400">
-        촬영된 사진이 없습니다. 권장 {requiredPhotoCount}장.
-      </p>
-    );
+    return <PhotoGuide />;
   }
 
   const lacking = Math.max(0, requiredPhotoCount - photos.length);
@@ -46,13 +43,23 @@ export default function PhotoGrid({
           ))}
         </div>
         {lacking > 0 ? (
-          <p className="text-[11px] font-medium text-amber-700">
-            권장 {requiredPhotoCount}장 중 {photos.length}장 — {lacking}장 더
-            필요합니다.
-          </p>
+          <>
+            <p className="text-[11px] font-medium text-amber-700">
+              권장 {requiredPhotoCount}장 중 {photos.length}장 — {lacking}장 더
+              필요합니다.
+            </p>
+            {photos.length < 3 && <PhotoGuide compact />}
+          </>
         ) : (
           <p className="text-[11px] font-medium text-emerald-700">
             권장 사진 수({requiredPhotoCount}장) 달성.
+          </p>
+        )}
+        {photos.some(
+          (p) => p.qualityScore !== undefined && p.qualityScore < 0.4,
+        ) && (
+          <p className="text-[11px] font-medium text-rose-700">
+            ⚠ 화질이 낮은 사진이 있습니다. 밝은 곳에서 재촬영을 권장합니다.
           </p>
         )}
       </div>

@@ -33,6 +33,15 @@ export default function PhotoThumbnail({ photo, onClick }: Props) {
           …
         </span>
       )}
+      {/* Quality warning — shown above tag/memo badges */}
+      {photo.qualityScore !== undefined && photo.qualityScore < 0.4 && (
+        <span
+          title="사진이 너무 어둡거나 해상도가 낮습니다. 재촬영을 권장합니다."
+          className="absolute top-1 right-1 rounded bg-rose-600/90 px-1 py-0.5 text-[10px] font-bold text-white"
+        >
+          ⚠
+        </span>
+      )}
       {(tagCount > 0 || hasMemo) && (
         <span className="absolute bottom-1 left-1 right-1 flex justify-between gap-1 text-[10px] font-semibold text-white">
           {hasMemo && (

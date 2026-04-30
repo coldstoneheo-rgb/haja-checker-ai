@@ -76,6 +76,31 @@ export default function SessionOverview() {
           <Stat label="의심/하자" value={progress.suspected + progress.defects} tone="amber" />
           <Stat label="미점검" value={progress.notStarted} tone="slate" />
         </div>
+
+        {/* Direct defects summary */}
+        {progress.directDefectsTotal > 0 && (
+          <Link
+            href={`/sessions/${sessionId}/defects`}
+            className="flex items-center justify-between rounded-xl bg-rose-50 px-3 py-2.5 ring-1 ring-rose-100"
+          >
+            <span className="text-xs font-semibold text-rose-800">
+              직접 추가 하자 {progress.directDefectsTotal}건
+            </span>
+            <span className="flex gap-1.5 text-xs">
+              {progress.directDefectsUrgent > 0 && (
+                <span className="rounded-full bg-rose-600 px-2 py-0.5 font-semibold text-white">
+                  긴급 {progress.directDefectsUrgent}
+                </span>
+              )}
+              {progress.directDefectsHigh > 0 && (
+                <span className="rounded-full bg-orange-500 px-2 py-0.5 font-semibold text-white">
+                  높음 {progress.directDefectsHigh}
+                </span>
+              )}
+            </span>
+          </Link>
+        )}
+
         <div className="flex gap-2 pt-1">
           <Link
             href={`/sessions/${sessionId}/checklist`}
@@ -84,16 +109,16 @@ export default function SessionOverview() {
             체크리스트 진행
           </Link>
           <Link
+            href={`/sessions/${sessionId}/defects`}
+            className="rounded-xl bg-slate-100 px-3 py-2.5 text-sm font-semibold text-slate-700"
+          >
+            하자 추가
+          </Link>
+          <Link
             href={`/sessions/${sessionId}/analysis`}
             className="rounded-xl bg-slate-100 px-3 py-2.5 text-sm font-semibold text-slate-700"
           >
             AI 분석
-          </Link>
-          <Link
-            href={`/sessions/${sessionId}/report`}
-            className="rounded-xl bg-slate-100 px-3 py-2.5 text-sm font-semibold text-slate-700"
-          >
-            보고서
           </Link>
         </div>
       </section>

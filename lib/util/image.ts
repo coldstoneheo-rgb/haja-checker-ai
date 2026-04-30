@@ -103,3 +103,45 @@ export async function generateThumbnail(
   });
   return result.blob;
 }
+
+/**
+ * 사진 품질을 0–1 점수로 평가한다.
+ * - 0.0–0.39: 재촬영 권장 (너무 어둡거나 해상도 부족)
+ * - 0.4–0.69: 보통 (사용 가능하나 추가 촬영 권장)
+ * - 0.7–1.0: 양호
+ *
+ * 32×32 샘플로 평균 밝기를 측정하고, 짧은 쪽 해상도도 함께 검사한다.
+ */
+export async function assessPhotoQuality(blob: Blob): Promise<number> {
+  const img = await blobToImage(blob);
+
+  const shortSide = Math.min(img.naturalWidth, img.naturalHeight);
+  if (shortSide < 150) return 0.15; // 극소형
+
+  const SAMPLE = 32;
+  const canvas = document.createElement("canvas");
+  canvas.width = SAMPLE;
+  canvas.height = SAMPLE;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return 0.7; // canvas 지원 없음이면 중립 점수
+
+  ctx.drawImage(img, 0, 0, SAMPLE, SAMPLE);
+  const { data } = ctx.getImageData(0, 0, SAMPLE, SAMPLE);
+
+  let totalLum = 0;
+  const pixelCount = SAMPLE * SAMPLE;
+  for (let i = 0; i < data.length; i += 4) {
+    // Rec. 709 상대 밝기
+    totalLum +=
+      0.2126 * (data[i] / 255) +
+      0.7152 * (data[i + 1] / 255) +
+      0.0722 * (data[i + 2] / 255);
+  }
+  const avgLum = totalLum / pixelCount;
+
+  if (avgLum < 0.07) return 0.15; // 거의 검정 — 렌즈 가림 또는 야간
+  if (avgLum < 0.15) return 0.35; // 매우 어두움
+  if (avgLum < 0.25) return 0.55; // 다소 어두움
+  if (avgLum > 0.92) return 0.65; // 과노출 (흰색 세부 정보 손실)
+  return 0.9; // 정상 범위
+}
