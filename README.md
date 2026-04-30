@@ -13,7 +13,7 @@ PDF 보고서로 제공하는 PWA.
 - Dexie (IndexedDB) — 오프라인 우선 저장소
 - PWA manifest + (이후) Service Worker
 - 배포: Vercel
-- AI 분석: Claude Vision API (D-7 연동 예정)
+- AI 분석: Google Gemini Vision API (`gemini-3-flash-preview`, D-7 연동)
 
 ## Development schedule (5/11 점검 기준)
 
@@ -51,8 +51,9 @@ Node `>=20` (`.nvmrc`로 22 고정).
    - Region: `icn1` (서울)
    - Build: `npm run build` · Install: `npm ci` · Output: `.next`
 3. Environment Variables 등록 (D-7 AI 연동 시점부터 필수):
-   - `ANTHROPIC_API_KEY` — Anthropic 콘솔에서 발급
-   - `ANTHROPIC_VISION_MODEL` — `claude-sonnet-4-6` 권장 (선택)
+   - `GEMINI_API_KEY` — [Google AI Studio](https://aistudio.google.com/apikey)에서 발급. 실제 사용자 사진을 다루므로 **유료(빌링 활성화) 사용 권장**. 무료 티어는 입력이 학습에 활용될 수 있음.
+   - `GEMINI_VISION_MODEL` — 기본 `gemini-3-flash-preview` (선택)
+   - `AI_ANALYZER` — `gemini`(기본) 또는 `mock`(오프라인 데모용, 선택)
 4. Deploy. 첫 배포 후 PWA 설치는 모바일 브라우저에서 "홈 화면에 추가".
 
 > 카메라/위치 권한이 PWA에서 동작하도록 `Permissions-Policy` 헤더를 vercel.json에
@@ -70,6 +71,7 @@ lib/
   db/db.ts           Dexie 스키마 (IndexedDB)
   db/id.ts           ID 생성 헬퍼 (UUID, 하자 표시 ID)
   seed/checklist.ts  국토교통부 표준점검표 기반 기본 체크리스트
+  ai/                AI 분석 추상화 (AiAnalyzer 인터페이스, Gemini/Mock 구현)
 public/
   manifest.webmanifest
   icons/             PWA 아이콘
