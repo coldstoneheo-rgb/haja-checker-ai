@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+html,
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family:
+    "Pretendard",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    "Apple SD Gothic Neo",
+    "Malgun Gothic",
+    sans-serif;
+}
