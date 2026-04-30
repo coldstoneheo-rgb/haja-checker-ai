@@ -36,10 +36,27 @@ PDF 보고서로 제공하는 PWA.
 
 ```bash
 npm install
-npm run dev
+npm run dev          # http://localhost:3000
+npm run typecheck    # tsc --noEmit
+npm run lint
+npm run build        # 프로덕션 빌드
 ```
 
-기본 주소: <http://localhost:3000>
+Node `>=20` (`.nvmrc`로 22 고정).
+
+## Deploy to Vercel
+
+1. GitHub 저장소에서 Vercel **Add New Project → Import**.
+2. Framework Preset이 **Next.js**로 자동 감지되고 `vercel.json`이 적용된다.
+   - Region: `icn1` (서울)
+   - Build: `npm run build` · Install: `npm ci` · Output: `.next`
+3. Environment Variables 등록 (D-7 AI 연동 시점부터 필수):
+   - `ANTHROPIC_API_KEY` — Anthropic 콘솔에서 발급
+   - `ANTHROPIC_VISION_MODEL` — `claude-sonnet-4-6` 권장 (선택)
+4. Deploy. 첫 배포 후 PWA 설치는 모바일 브라우저에서 "홈 화면에 추가".
+
+> 카메라/위치 권한이 PWA에서 동작하도록 `Permissions-Policy` 헤더를 vercel.json에
+> 설정해 두었다.
 
 ## Project layout
 
