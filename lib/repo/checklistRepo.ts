@@ -54,15 +54,19 @@ export interface SessionProgress {
   cannotCheck: number;
   notStarted: number;
   ratio: number;
+  directDefectsTotal: number;
+  directDefectsUrgent: number;
+  directDefectsHigh: number;
 }
 
 export async function computeSessionProgress(
   sessionId: string,
 ): Promise<SessionProgress> {
-  const items = await getDB()
-    .checklistItems.where("sessionId")
-    .equals(sessionId)
-    .toArray();
+  const db = getDB();
+  const [items, directDefects] = await Promise.all([
+    db.checklistItems.where("sessionId").equals(sessionId).toArray(),
+    db.defects.where("sessionId").equals(sessionId).toArray(),
+  ]);
 
   const total = items.length;
   let done = 0;
@@ -94,6 +98,13 @@ export async function computeSessionProgress(
     }
   }
 
+  let directDefectsUrgent = 0;
+  let directDefectsHigh = 0;
+  for (const d of directDefects) {
+    if (d.riskLevel === "URGENT") directDefectsUrgent += 1;
+    else if (d.riskLevel === "HIGH") directDefectsHigh += 1;
+  }
+
   return {
     total,
     done,
@@ -102,5 +113,8 @@ export async function computeSessionProgress(
     cannotCheck,
     notStarted,
     ratio: total === 0 ? 0 : done / total,
+    directDefectsTotal: directDefects.length,
+    directDefectsUrgent,
+    directDefectsHigh,
   };
 }
