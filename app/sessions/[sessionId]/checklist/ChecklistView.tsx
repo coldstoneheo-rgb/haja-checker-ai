@@ -12,6 +12,8 @@ import type {
   ChecklistItemStatus,
   ChecklistPriority,
 } from "@/lib/domain/types";
+import PhotoCaptureButton from "./PhotoCaptureButton";
+import PhotoGrid from "./PhotoGrid";
 
 const STATUS_BUTTONS: {
   value: ChecklistItemStatus;
@@ -93,14 +95,27 @@ export default function ChecklistView() {
 
       <ul className="flex flex-col gap-3">
         {current?.items.map((item) => (
-          <ChecklistRow key={item.id} item={item} />
+          <ChecklistRow
+            key={item.id}
+            item={item}
+            sessionId={sessionId}
+            areaName={current.area.name}
+          />
         ))}
       </ul>
     </div>
   );
 }
 
-function ChecklistRow({ item }: { item: ChecklistItem }) {
+function ChecklistRow({
+  item,
+  sessionId,
+  areaName,
+}: {
+  item: ChecklistItem;
+  sessionId: string;
+  areaName: string;
+}) {
   const [pending, setPending] = useState<ChecklistItemStatus | null>(null);
 
   async function onStatus(status: ChecklistItemStatus) {
@@ -130,6 +145,17 @@ function ChecklistRow({ item }: { item: ChecklistItem }) {
         </span>
       </div>
 
+      <PhotoGrid
+        checklistItemId={item.id}
+        requiredPhotoCount={item.requiredPhotoCount}
+      />
+
+      <PhotoCaptureButton
+        sessionId={sessionId}
+        checklistItemId={item.id}
+        areaName={areaName}
+      />
+
       <div className="grid grid-cols-4 gap-2">
         {STATUS_BUTTONS.map((b) => {
           const isActive = item.status === b.value;
@@ -152,10 +178,6 @@ function ChecklistRow({ item }: { item: ChecklistItem }) {
           );
         })}
       </div>
-
-      <p className="text-[11px] text-slate-400">
-        촬영 기능은 D-9(5/2)에 추가됩니다.
-      </p>
     </li>
   );
 }

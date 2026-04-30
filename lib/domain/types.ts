@@ -114,6 +114,7 @@ export interface EvidencePhoto {
   height: number;
   fileSize: number;
   userMemo?: string;
+  quickTags?: string[];
   isRepresentative: boolean;
   qualityScore?: number;
   createdAt: number;

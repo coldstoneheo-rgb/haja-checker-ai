@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const PHASES: { day: string; title: string; status: "done" | "now" | "todo" }[] = [
-  { day: "D-11 (4/30)", title: "프로젝트 셋업 · Dexie · PWA 매니페스트", status: "now" },
-  { day: "D-10 (5/1)", title: "세션 · 체크리스트 · 사전 준비물", status: "todo" },
-  { day: "D-9 (5/2)", title: "카메라 · IndexedDB 사진 저장 · 메모", status: "todo" },
+  { day: "D-11 (4/30)", title: "프로젝트 셋업 · Dexie · PWA 매니페스트", status: "done" },
+  { day: "D-10 (5/1)", title: "세션 · 체크리스트 · 사전 준비물", status: "done" },
+  { day: "D-9 (5/2)", title: "카메라 · IndexedDB 사진 저장 · 메모", status: "now" },
   { day: "D-8 (5/3)", title: "직접 하자 추가 · 진행률 · 하자 ID", status: "todo" },
   { day: "D-7 (5/4)", title: "Claude Vision API 연동 · 결과 편집", status: "todo" },
   { day: "D-6 (5/5)", title: "PDF 보고서 · JSON export 백업", status: "todo" },
