@@ -1,4 +1,10 @@
-import type { DefectType, RepairDifficulty, RiskLevel } from "@/lib/domain/types";
+import type {
+  ChecklistItemStatus,
+  DefectType,
+  DefectStatus,
+  RepairDifficulty,
+  RiskLevel,
+} from "@/lib/domain/types";
 
 export const DEFECT_TYPE_LABELS: Record<DefectType, string> = {
   CRACK: "균열",
@@ -44,4 +50,35 @@ export const RISK_LEVEL_COLORS: Record<RiskLevel, string> = {
   MEDIUM: "bg-amber-50 text-amber-700",
   HIGH: "bg-orange-100 text-orange-700",
   URGENT: "bg-rose-100 text-rose-700",
+};
+
+export const CHECKLIST_STATUS_LABELS: Record<ChecklistItemStatus, string> = {
+  NOT_STARTED: "미점검",
+  PHOTO_REQUIRED: "미점검",
+  PHOTO_DONE: "사진완료",
+  GOOD: "양호",
+  SUSPECTED: "의심",
+  DEFECT: "하자",
+  CANNOT_CHECK: "확인불가",
+  SKIPPED: "생략",
+};
+
+export const CHECKLIST_STATUS_COLORS: Record<ChecklistItemStatus, string> = {
+  NOT_STARTED: "text-slate-400",
+  PHOTO_REQUIRED: "text-slate-400",
+  PHOTO_DONE: "text-blue-600",
+  GOOD: "text-emerald-700",
+  SUSPECTED: "text-amber-700",
+  DEFECT: "text-rose-700",
+  CANNOT_CHECK: "text-slate-500",
+  SKIPPED: "text-slate-400",
+};
+
+export const DEFECT_STATUS_LABELS: Record<DefectStatus, string> = {
+  DRAFT: "초안",
+  ANALYZED: "분석완료",
+  USER_CONFIRMED: "확정",
+  SUBMITTED: "제출완료",
+  REPAIRED: "보수완료",
+  REJECTED: "반려",
 };

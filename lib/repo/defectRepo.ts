@@ -65,6 +65,7 @@ export async function updateDefect(
       | "userMemo"
       | "riskLevel"
       | "repairDifficulty"
+      | "requestedAction"
       | "status"
     >
   > & { status?: DefectStatus },
