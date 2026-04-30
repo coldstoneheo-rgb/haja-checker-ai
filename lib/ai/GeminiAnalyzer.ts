@@ -105,7 +105,9 @@ interface GeminiResponse {
 }
 
 /**
- * Gemini 3 Flash Preview 기반 하자 의심 분석기.
+ * Gemini Flash 계열 하자 의심 분석기. 기본 모델은 gemini-3.1-flash-lite-preview
+ * 이며, 환경변수 GEMINI_VISION_MODEL 로 다른 모델 (예: gemini-3-flash-preview)
+ * 로 갈아끼울 수 있다.
  * 서버 측에서만 인스턴스화. API 키는 절대 클라이언트로 노출 금지.
  *
  * 호출 예 (D-7 Route Handler):
@@ -122,7 +124,7 @@ export class GeminiAnalyzer implements AiAnalyzer {
       throw new AiAnalyzerError("GEMINI_API_KEY is required");
     }
     this.apiKey = options.apiKey;
-    this.model = options.model ?? "gemini-3-flash-preview";
+    this.model = options.model ?? "gemini-3.1-flash-lite-preview";
   }
 
   async analyze(
