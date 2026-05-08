@@ -15,6 +15,14 @@ interface MinimalDefect {
   riskLevel: RiskLevel;
 }
 
+function computeProgressFiltered(
+  items: MinimalChecklistItem[],
+  allDefects: MinimalDefect[],
+) {
+  const directDefects = allDefects.filter((d) => !d.checklistItemId);
+  return computeProgress(items, directDefects);
+}
+
 function computeProgress(items: MinimalChecklistItem[], directDefects: MinimalDefect[]) {
   const total = items.length;
   let done = 0;
@@ -155,5 +163,28 @@ describe("computeSessionProgress logic", () => {
     const result = computeProgress(items, []);
     expect(result.total).toBe(5);
     expect(result.done + result.cannotCheck + result.notStarted).toBe(5);
+  });
+
+  it("checklist-linked defects are excluded from directDefectsTotal", () => {
+    const allDefects: MinimalDefect[] = [
+      { riskLevel: "URGENT" },
+      { riskLevel: "HIGH" },
+      { checklistItemId: "item-1", riskLevel: "URGENT" },
+      { checklistItemId: "item-2", riskLevel: "HIGH" },
+    ];
+    const result = computeProgressFiltered([], allDefects);
+    expect(result.directDefectsTotal).toBe(2);
+    expect(result.directDefectsUrgent).toBe(1);
+    expect(result.directDefectsHigh).toBe(1);
+  });
+
+  it("all checklist-linked defects → directDefectsTotal is 0", () => {
+    const allDefects: MinimalDefect[] = [
+      { checklistItemId: "item-1", riskLevel: "HIGH" },
+      { checklistItemId: "item-2", riskLevel: "MEDIUM" },
+    ];
+    const result = computeProgressFiltered([], allDefects);
+    expect(result.directDefectsTotal).toBe(0);
+    expect(result.directDefectsHigh).toBe(0);
   });
 });

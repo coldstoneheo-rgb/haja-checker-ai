@@ -46,6 +46,16 @@ export async function setChecklistItemStatus(
   });
 }
 
+export async function setChecklistItemMemo(
+  itemId: string,
+  memo: string,
+): Promise<void> {
+  await getDB().checklistItems.update(itemId, {
+    userMemo: memo.trim() || undefined,
+    updatedAt: Date.now(),
+  });
+}
+
 export interface SessionProgress {
   total: number;
   done: number;
@@ -63,10 +73,11 @@ export async function computeSessionProgress(
   sessionId: string,
 ): Promise<SessionProgress> {
   const db = getDB();
-  const [items, directDefects] = await Promise.all([
+  const [items, allDefects] = await Promise.all([
     db.checklistItems.where("sessionId").equals(sessionId).toArray(),
     db.defects.where("sessionId").equals(sessionId).toArray(),
   ]);
+  const directDefects = allDefects.filter((d) => !d.checklistItemId);
 
   const total = items.length;
   let done = 0;

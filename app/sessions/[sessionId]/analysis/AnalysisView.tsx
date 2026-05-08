@@ -1,6 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
+import Link from "next/link";
 import { useCallback, useState } from "react";
 import { getDB } from "@/lib/db/db";
 import {
@@ -232,6 +233,20 @@ export default function AnalysisView({ sessionId }: Props) {
             );
           })}
         </section>
+      )}
+
+      {/* Report link — shown once at least one analysis exists */}
+      {(data.checklist.some((i) => i.analysis) || data.direct.some((d) => d.analysis)) && (
+        <Link
+          href={`/sessions/${sessionId}/report`}
+          className="flex items-center justify-between rounded-2xl bg-emerald-50 px-5 py-4 ring-1 ring-emerald-100"
+        >
+          <div className="flex flex-col gap-0.5">
+            <p className="text-sm font-semibold text-emerald-900">분석 완료</p>
+            <p className="text-xs text-emerald-700">보고서에서 결과를 확인하고 출력하세요.</p>
+          </div>
+          <span className="text-sm font-semibold text-emerald-800">보고서로 이동 →</span>
+        </Link>
       )}
 
       {/* Direct defects */}

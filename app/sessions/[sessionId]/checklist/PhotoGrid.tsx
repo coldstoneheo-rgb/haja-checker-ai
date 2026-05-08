@@ -5,7 +5,6 @@ import { useState } from "react";
 import { listPhotosForItem } from "@/lib/repo/photoRepo";
 import type { EvidencePhoto } from "@/lib/domain/types";
 import PhotoGuide from "@/components/PhotoGuide";
-import PhotoEditorDialog from "./PhotoEditorDialog";
 import PhotoThumbnail from "./PhotoThumbnail";
 import PhotoViewer from "./PhotoViewer";
 
@@ -23,7 +22,6 @@ export default function PhotoGrid({
     [checklistItemId],
     [] as EvidencePhoto[],
   );
-  const [editing, setEditing] = useState<EvidencePhoto | null>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
   if (!photos || photos.length === 0) {
@@ -65,13 +63,6 @@ export default function PhotoGrid({
           </p>
         )}
       </div>
-      {editing && (
-        <PhotoEditorDialog
-          key={editing.id}
-          photo={photos.find((p) => p.id === editing.id) ?? editing}
-          onClose={() => setEditing(null)}
-        />
-      )}
       {viewerIndex !== null && (
         <PhotoViewer
           photos={photos}

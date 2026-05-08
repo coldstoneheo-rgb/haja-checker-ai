@@ -5,7 +5,9 @@ import { addPhoto } from "@/lib/repo/photoRepo";
 
 interface Props {
   sessionId: string;
-  checklistItemId: string;
+  /** Use checklistItemId for checklist-linked photos, defectCandidateId for direct defect photos. */
+  checklistItemId?: string;
+  defectCandidateId?: string;
   areaName: string;
   detailLocation?: string;
 }
@@ -28,6 +30,7 @@ function classifyError(err: unknown): string {
 export default function PhotoCaptureButton({
   sessionId,
   checklistItemId,
+  defectCandidateId,
   areaName,
   detailLocation,
 }: Props) {
@@ -43,7 +46,7 @@ export default function PhotoCaptureButton({
     let count = 0;
     try {
       for (const file of Array.from(files)) {
-        await addPhoto({ sessionId, checklistItemId, areaName, detailLocation, source: file });
+        await addPhoto({ sessionId, checklistItemId, defectCandidateId, areaName, detailLocation, source: file });
         count += 1;
         setSaved(count);
       }

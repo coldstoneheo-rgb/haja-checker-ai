@@ -2,7 +2,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { getDB } from "@/lib/db/db";
 import { deleteDefect } from "@/lib/repo/defectRepo";
@@ -15,6 +15,7 @@ import {
 
 export default function DefectsList() {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const router = useRouter();
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const defects = useLiveQuery(
@@ -23,7 +24,11 @@ export default function DefectsList() {
         .defects.where("sessionId")
         .equals(sessionId)
         .toArray()
-        .then((arr) => arr.sort((a, b) => a.createdAt - b.createdAt)),
+        .then((arr) =>
+          arr
+            .filter((d) => !d.checklistItemId)
+            .sort((a, b) => a.createdAt - b.createdAt),
+        ),
     [sessionId],
   );
 
@@ -62,7 +67,11 @@ export default function DefectsList() {
           key={defect.id}
           className="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200"
         >
-          <div className="flex items-start justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => router.push(`/sessions/${sessionId}/defects/${defect.id}`)}
+            className="flex items-start justify-between gap-2 text-left"
+          >
             <div className="flex flex-col gap-0.5">
               <span className="text-xs font-mono font-medium text-slate-400">
                 {defect.displayId}
@@ -76,7 +85,7 @@ export default function DefectsList() {
             >
               {RISK_LEVEL_LABELS[defect.riskLevel]}
             </span>
-          </div>
+          </button>
 
           <div className="flex gap-1.5 text-xs text-slate-500">
             <span>{defect.areaName}</span>
