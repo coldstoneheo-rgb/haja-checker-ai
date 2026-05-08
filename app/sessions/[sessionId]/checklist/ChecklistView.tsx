@@ -1,7 +1,7 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   listAreasWithItems,
@@ -36,6 +36,7 @@ const PRIORITY_BADGE: Record<ChecklistPriority, { label: string; cls: string }> 
 export default function ChecklistView() {
   const params = useParams<{ sessionId: string }>();
   const sessionId = params.sessionId;
+  const router = useRouter();
   const [activeAreaId, setActiveAreaId] = useState<string | null>(null);
 
   const areas = useLiveQuery(
@@ -59,9 +60,23 @@ export default function ChecklistView() {
 
   const currentAreaId = activeAreaId ?? areasWithItems[0].area.id;
   const current = areasWithItems.find((a) => a.area.id === currentAreaId);
+  const currentIndex = areasWithItems.findIndex((a) => a.area.id === currentAreaId);
+  const nextArea = areasWithItems[currentIndex + 1];
+  const isLastArea = currentIndex === areasWithItems.length - 1;
+
+  // 현재 영역의 점검 완료 여부
+  const currentAreaDone =
+    current?.items.every(
+      (i) => i.status !== "NOT_STARTED" && i.status !== "PHOTO_REQUIRED",
+    ) ?? false;
+
+  // 전체 영역 중 의심/하자 항목 수
+  const suspectedCount = areasWithItems
+    .flatMap((a) => a.items)
+    .filter((i) => i.status === "SUSPECTED" || i.status === "DEFECT").length;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 pb-24">
       <nav className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
         {areasWithItems.map(({ area, items }) => {
           const done = items.filter(
@@ -103,6 +118,53 @@ export default function ChecklistView() {
           />
         ))}
       </ul>
+
+      {/* Sticky bottom CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-slate-200 bg-white/95 px-5 py-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm">
+        <div className="mx-auto flex w-full max-w-2xl items-center gap-2">
+          {isLastArea ? (
+            // 마지막 영역 → AI 분석으로 바로 이동
+            <button
+              type="button"
+              onClick={() => router.push(`/sessions/${sessionId}/analysis`)}
+              className={`flex-1 rounded-xl py-3 text-sm font-semibold transition ${
+                suspectedCount > 0
+                  ? "bg-slate-900 text-white"
+                  : "bg-slate-100 text-slate-500"
+              }`}
+            >
+              {suspectedCount > 0
+                ? `AI 분석 시작 → (의심·하자 ${suspectedCount}건)`
+                : "AI 분석으로 이동 →"}
+            </button>
+          ) : (
+            <>
+              {nextArea && (
+                <button
+                  type="button"
+                  onClick={() => setActiveAreaId(nextArea.area.id)}
+                  className={`flex-1 rounded-xl py-3 text-sm font-semibold ring-1 transition ${
+                    currentAreaDone
+                      ? "bg-slate-900 text-white ring-slate-900"
+                      : "bg-white text-slate-700 ring-slate-200"
+                  }`}
+                >
+                  다음: {nextArea.area.name} →
+                </button>
+              )}
+              {suspectedCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/sessions/${sessionId}/analysis`)}
+                  className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-white"
+                >
+                  AI 분석 ({suspectedCount})
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

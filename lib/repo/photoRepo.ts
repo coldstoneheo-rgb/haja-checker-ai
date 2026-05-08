@@ -38,10 +38,9 @@ export async function addPhoto(
     mimeType: "image/jpeg",
     quality: 0.85,
   });
-  const [thumbnail, qualityScore] = await Promise.all([
-    generateThumbnail(downscaled.blob, 256),
-    assessPhotoQuality(downscaled.blob),
-  ]);
+  // 순차 실행 — 동시 Canvas 디코드 시 iOS Safari 메모리 초과 방지
+  const thumbnail = await generateThumbnail(downscaled.blob, 256);
+  const qualityScore = await assessPhotoQuality(downscaled.blob);
 
   const db = getDB();
   const now = Date.now();

@@ -27,17 +27,9 @@ export default function AnalysisView({ sessionId }: Props) {
   const [states, setStates] = useState<Map<string, AnalyzingState>>(new Map());
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [batchRunning, setBatchRunning] = useState(false);
-  const [batchProgress, setBatchProgress] = useState<{
-    done: number;
-    total: number;
-  } | null>(null);
+  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
 
-  const data = useLiveQuery(
-    () => loadAnalysisPageData(sessionId),
-    [sessionId],
-  );
-
-  // Re-query defects for current analysis (needed for result card after live updates)
+  const data = useLiveQuery(() => loadAnalysisPageData(sessionId), [sessionId]);
   const allDefects = useLiveQuery(
     () => getDB().defects.where("sessionId").equals(sessionId).toArray(),
     [sessionId],
@@ -48,8 +40,7 @@ export default function AnalysisView({ sessionId }: Props) {
   function toggleExpand(id: string) {
     setExpandedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   }
@@ -58,8 +49,7 @@ export default function AnalysisView({ sessionId }: Props) {
     (id: string, s: AnalyzingState | null) =>
       setStates((prev) => {
         const next = new Map(prev);
-        if (s === null) next.delete(id);
-        else next.set(id, s);
+        if (s === null) next.delete(id); else next.set(id, s);
         return next;
       }),
     [],
@@ -94,18 +84,13 @@ export default function AnalysisView({ sessionId }: Props) {
 
   async function analyzeAll() {
     if (!data) return;
-    const pendingChecklist = data.checklist.filter(
-      (i) => !i.analysis && i.photoCount > 0,
-    );
-    const pendingDirect = data.direct.filter(
-      (d) => !d.analysis && d.photoCount > 0,
-    );
+    const pendingChecklist = data.checklist.filter((i) => !i.analysis && i.photoCount > 0);
+    const pendingDirect = data.direct.filter((d) => !d.analysis && d.photoCount > 0);
     const total = pendingChecklist.length + pendingDirect.length;
     if (total === 0) return;
 
     setBatchRunning(true);
     setBatchProgress({ done: 0, total });
-
     let done = 0;
     for (const item of pendingChecklist) {
       await runChecklistAnalysis(item);
@@ -117,18 +102,13 @@ export default function AnalysisView({ sessionId }: Props) {
       done += 1;
       setBatchProgress({ done, total });
     }
-
     setBatchRunning(false);
     setBatchProgress(null);
   }
 
-  if (!data) {
-    return <p className="text-sm text-slate-500">불러오는 중…</p>;
-  }
+  if (!data) return <p className="text-sm text-slate-500">불러오는 중…</p>;
 
-  const defectMap = new Map(
-    (allDefects ?? []).map((d) => [d.id, d]),
-  );
+  const defectMap = new Map((allDefects ?? []).map((d) => [d.id, d]));
 
   const pendingCount =
     data.checklist.filter((i) => !i.analysis && i.photoCount > 0).length +
@@ -143,8 +123,7 @@ export default function AnalysisView({ sessionId }: Props) {
           체크리스트에서 <strong>의심/하자</strong> 상태로 표시한 항목이 없습니다.
         </p>
         <p className="mt-1 text-xs text-slate-400">
-          체크리스트 화면에서 의심 또는 하자 버튼을 누른 항목이 여기에
-          나타납니다.
+          체크리스트 화면에서 의심 또는 하자 버튼을 누른 항목이 여기에 나타납니다.
         </p>
       </div>
     );
@@ -156,13 +135,9 @@ export default function AnalysisView({ sessionId }: Props) {
       {pendingCount > 0 && (
         <div className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
           <div className="flex flex-col">
-            <p className="text-sm font-semibold text-slate-900">
-              분석 대기 {pendingCount}건
-            </p>
+            <p className="text-sm font-semibold text-slate-900">분석 대기 {pendingCount}건</p>
             {batchProgress && (
-              <p className="text-xs text-slate-500">
-                {batchProgress.done} / {batchProgress.total} 완료
-              </p>
+              <p className="text-xs text-slate-500">{batchProgress.done} / {batchProgress.total} 완료</p>
             )}
           </div>
           <button
@@ -176,42 +151,37 @@ export default function AnalysisView({ sessionId }: Props) {
         </div>
       )}
 
-      {/* Checklist items section */}
+      {/* Checklist items */}
       {data.checklist.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-            체크리스트 항목
-          </h2>
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">체크리스트 항목</h2>
           {data.checklist.map((item) => {
             const st = stateOf(item.itemId);
             const expanded = expandedIds.has(item.itemId);
-            const currentDefect = item.defect
-              ? (defectMap.get(item.defect.id) ?? item.defect)
-              : undefined;
+            const currentDefect = item.defect ? (defectMap.get(item.defect.id) ?? item.defect) : undefined;
+            const isAnalyzing = st?.status === "analyzing";
 
             return (
               <div
                 key={item.itemId}
-                className="flex flex-col rounded-2xl bg-white shadow-sm ring-1 ring-slate-200"
+                className={`flex flex-col rounded-2xl bg-white shadow-sm ring-1 ${isAnalyzing ? "ring-blue-200" : "ring-slate-200"}`}
               >
-                <button
-                  type="button"
-                  onClick={() => item.analysis && toggleExpand(item.itemId)}
-                  className="flex items-start gap-3 p-4 text-left"
-                >
-                  <div className="flex flex-1 flex-col gap-0.5">
+                {/* Header row — div, not button, to allow inner buttons */}
+                <div className="flex items-start gap-3 p-4">
+                  <div
+                    className="flex flex-1 flex-col gap-0.5 cursor-pointer"
+                    onClick={() => item.analysis && toggleExpand(item.itemId)}
+                    role={item.analysis ? "button" : undefined}
+                    aria-expanded={item.analysis ? expanded : undefined}
+                  >
                     <p className="text-xs text-slate-400">{item.areaName}</p>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {item.title}
-                    </p>
+                    <p className="text-sm font-semibold text-slate-900">{item.title}</p>
                     <p className="text-xs text-slate-500">
                       사진 {item.photoCount}장
                       {item.analysis && currentDefect && (
                         <>
                           {" · "}
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${RISK_LEVEL_COLORS[currentDefect.riskLevel]}`}
-                          >
+                          <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${RISK_LEVEL_COLORS[currentDefect.riskLevel]}`}>
                             {RISK_LEVEL_LABELS[currentDefect.riskLevel]}
                           </span>
                           {" · "}
@@ -223,24 +193,39 @@ export default function AnalysisView({ sessionId }: Props) {
                   <ItemAction
                     hasPhotos={item.photoCount > 0}
                     hasAnalysis={!!item.analysis}
-                    analyzing={st?.status === "analyzing"}
+                    analyzing={isAnalyzing}
                     expanded={expanded}
                     onAnalyze={() => runChecklistAnalysis(item)}
+                    onToggle={() => toggleExpand(item.itemId)}
                   />
-                </button>
+                </div>
+
+                {isAnalyzing && (
+                  <div className="px-4 pb-3">
+                    <div className="h-1 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full w-1/2 animate-pulse rounded-full bg-blue-400" />
+                    </div>
+                    <p className="mt-1 text-xs text-blue-600">Gemini가 사진을 분석하고 있습니다…</p>
+                  </div>
+                )}
 
                 {st?.status === "error" && (
-                  <p className="px-4 pb-3 text-xs text-rose-600">
-                    오류: {st.error}
-                  </p>
+                  <div className="mx-4 mb-3 rounded-lg bg-rose-50 px-3 py-2">
+                    <p className="text-xs font-semibold text-rose-700">분석 실패</p>
+                    <p className="mt-0.5 text-xs text-rose-600">{st.error}</p>
+                    <button
+                      type="button"
+                      onClick={() => runChecklistAnalysis(item)}
+                      className="mt-1.5 rounded-md bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700"
+                    >
+                      재시도
+                    </button>
+                  </div>
                 )}
 
                 {expanded && item.analysis && currentDefect && (
                   <div className="px-4 pb-4">
-                    <AnalysisResultCard
-                      defect={currentDefect}
-                      analysis={item.analysis}
-                    />
+                    <AnalysisResultCard defect={currentDefect} analysis={item.analysis} />
                   </div>
                 )}
               </div>
@@ -249,47 +234,39 @@ export default function AnalysisView({ sessionId }: Props) {
         </section>
       )}
 
-      {/* Direct defects section */}
+      {/* Direct defects */}
       {data.direct.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-            직접 추가 하자
-          </h2>
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">직접 추가 하자</h2>
           {data.direct.map((entry) => {
             const id = entry.defect.id;
             const st = stateOf(id);
             const expanded = expandedIds.has(id);
             const currentDefect = defectMap.get(id) ?? entry.defect;
+            const isAnalyzing = st?.status === "analyzing";
 
             return (
               <div
                 key={id}
-                className="flex flex-col rounded-2xl bg-white shadow-sm ring-1 ring-slate-200"
+                className={`flex flex-col rounded-2xl bg-white shadow-sm ring-1 ${isAnalyzing ? "ring-blue-200" : "ring-slate-200"}`}
               >
-                <button
-                  type="button"
-                  onClick={() => entry.analysis && toggleExpand(id)}
-                  className="flex items-start gap-3 p-4 text-left"
-                >
-                  <div className="flex flex-1 flex-col gap-0.5">
-                    <p className="text-xs font-mono text-slate-400">
-                      {entry.defect.displayId}
-                    </p>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {DEFECT_TYPE_LABELS[currentDefect.defectType]}
-                    </p>
+                <div className="flex items-start gap-3 p-4">
+                  <div
+                    className="flex flex-1 flex-col gap-0.5 cursor-pointer"
+                    onClick={() => entry.analysis && toggleExpand(id)}
+                    role={entry.analysis ? "button" : undefined}
+                    aria-expanded={entry.analysis ? expanded : undefined}
+                  >
+                    <p className="text-xs font-mono text-slate-400">{entry.defect.displayId}</p>
+                    <p className="text-sm font-semibold text-slate-900">{DEFECT_TYPE_LABELS[currentDefect.defectType]}</p>
                     <p className="text-xs text-slate-500">
                       {currentDefect.areaName}
-                      {currentDefect.detailLocation
-                        ? ` · ${currentDefect.detailLocation}`
-                        : ""}
+                      {currentDefect.detailLocation ? ` · ${currentDefect.detailLocation}` : ""}
                       {" · "}사진 {entry.photoCount}장
                       {entry.analysis && (
                         <>
                           {" · "}
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${RISK_LEVEL_COLORS[currentDefect.riskLevel]}`}
-                          >
+                          <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${RISK_LEVEL_COLORS[currentDefect.riskLevel]}`}>
                             {RISK_LEVEL_LABELS[currentDefect.riskLevel]}
                           </span>
                         </>
@@ -299,24 +276,39 @@ export default function AnalysisView({ sessionId }: Props) {
                   <ItemAction
                     hasPhotos={entry.photoCount > 0}
                     hasAnalysis={!!entry.analysis}
-                    analyzing={st?.status === "analyzing"}
+                    analyzing={isAnalyzing}
                     expanded={expanded}
                     onAnalyze={() => runDirectAnalysis(entry)}
+                    onToggle={() => toggleExpand(id)}
                   />
-                </button>
+                </div>
+
+                {isAnalyzing && (
+                  <div className="px-4 pb-3">
+                    <div className="h-1 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full w-1/2 animate-pulse rounded-full bg-blue-400" />
+                    </div>
+                    <p className="mt-1 text-xs text-blue-600">Gemini가 사진을 분석하고 있습니다…</p>
+                  </div>
+                )}
 
                 {st?.status === "error" && (
-                  <p className="px-4 pb-3 text-xs text-rose-600">
-                    오류: {st.error}
-                  </p>
+                  <div className="mx-4 mb-3 rounded-lg bg-rose-50 px-3 py-2">
+                    <p className="text-xs font-semibold text-rose-700">분석 실패</p>
+                    <p className="mt-0.5 text-xs text-rose-600">{st.error}</p>
+                    <button
+                      type="button"
+                      onClick={() => runDirectAnalysis(entry)}
+                      className="mt-1.5 rounded-md bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700"
+                    >
+                      재시도
+                    </button>
+                  </div>
                 )}
 
                 {expanded && entry.analysis && (
                   <div className="px-4 pb-4">
-                    <AnalysisResultCard
-                      defect={currentDefect}
-                      analysis={entry.analysis}
-                    />
+                    <AnalysisResultCard defect={currentDefect} analysis={entry.analysis} />
                   </div>
                 )}
               </div>
@@ -334,12 +326,14 @@ function ItemAction({
   analyzing,
   expanded,
   onAnalyze,
+  onToggle,
 }: {
   hasPhotos: boolean;
   hasAnalysis: boolean;
   analyzing: boolean;
   expanded: boolean;
   onAnalyze: () => void;
+  onToggle: () => void;
 }) {
   if (!hasPhotos) {
     return (
@@ -348,7 +342,6 @@ function ItemAction({
       </span>
     );
   }
-
   if (analyzing) {
     return (
       <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600">
@@ -356,23 +349,22 @@ function ItemAction({
       </span>
     );
   }
-
   if (hasAnalysis) {
     return (
-      <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700"
+      >
         {expanded ? "접기 ↑" : "결과 보기 ↓"}
-      </span>
+      </button>
     );
   }
-
   return (
     <button
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onAnalyze();
-      }}
-      className="shrink-0 rounded-full bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white"
+      onClick={onAnalyze}
+      className="shrink-0 rounded-full bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white active:bg-slate-700"
     >
       AI 분석
     </button>
