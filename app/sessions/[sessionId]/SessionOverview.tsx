@@ -101,36 +101,44 @@ export default function SessionOverview() {
           </Link>
         )}
 
-        <div className="flex gap-2 pt-1">
+        <div className="flex flex-col gap-2 pt-1">
           <Link
             href={`/sessions/${sessionId}/checklist`}
-            className="flex-1 rounded-xl bg-slate-900 px-3 py-2.5 text-center text-sm font-semibold text-white"
+            className="rounded-xl bg-slate-900 px-3 py-2.5 text-center text-sm font-semibold text-white"
           >
             체크리스트 진행
           </Link>
-          <Link
-            href={`/sessions/${sessionId}/defects`}
-            className="rounded-xl bg-slate-100 px-3 py-2.5 text-sm font-semibold text-slate-700"
-          >
-            하자 추가
-          </Link>
-          <Link
-            href={`/sessions/${sessionId}/analysis`}
-            className="rounded-xl bg-slate-100 px-3 py-2.5 text-sm font-semibold text-slate-700"
-          >
-            AI 분석
-          </Link>
+          <div className="flex gap-2">
+            <Link
+              href={`/sessions/${sessionId}/defects`}
+              className="flex-1 rounded-xl bg-slate-100 px-3 py-2.5 text-center text-sm font-semibold text-slate-700"
+            >
+              하자 추가
+            </Link>
+            <Link
+              href={`/sessions/${sessionId}/analysis`}
+              className="flex-1 rounded-xl bg-slate-100 px-3 py-2.5 text-center text-sm font-semibold text-slate-700"
+            >
+              AI 분석
+            </Link>
+            <Link
+              href={`/sessions/${sessionId}/report`}
+              className="flex-1 rounded-xl bg-slate-100 px-3 py-2.5 text-center text-sm font-semibold text-slate-700"
+            >
+              보고서
+            </Link>
+          </div>
         </div>
       </section>
 
       <section className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="text-base font-semibold">사전 준비물</h2>
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm text-slate-700">
+        <ul className="columns-2 gap-x-4 text-sm text-slate-700">
           {PREP_ITEMS.map((item) => (
-            <li key={item.name} className="flex flex-col">
-              <span className="font-medium">· {item.name}</span>
+            <li key={item.name} className="mb-1.5 break-inside-avoid flex flex-col">
+              <span className="font-medium break-keep">· {item.name}</span>
               {item.note && (
-                <span className="ml-3 text-xs text-slate-500">{item.note}</span>
+                <span className="ml-3 text-xs text-slate-500 break-keep">{item.note}</span>
               )}
             </li>
           ))}
@@ -139,17 +147,7 @@ export default function SessionOverview() {
 
       <section className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="text-base font-semibold">추천 동선</h2>
-        <ol className="flex flex-wrap gap-2 text-sm">
-          {RECOMMENDED_ROUTE.map((step, idx) => (
-            <li
-              key={step}
-              className="flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700"
-            >
-              <span className="text-xs text-slate-400">{idx + 1}.</span>
-              {step}
-            </li>
-          ))}
-        </ol>
+        <RouteMap route={RECOMMENDED_ROUTE} />
         <p className="text-xs text-slate-500">
           각 공간 내부에서는 천장 → 벽 → 창호 → 문 → 수납 → 바닥 → 설비 → 전기
           순서로 점검하면 빠짐이 적습니다.
@@ -187,6 +185,84 @@ function Stat({
     <div className={`flex flex-col rounded-xl px-2 py-2 ${toneClass}`}>
       <span className="text-lg font-bold">{value}</span>
       <span className="text-[11px] font-medium opacity-80">{label}</span>
+    </div>
+  );
+}
+
+const ROUTE_COLS = 4;
+
+function RouteMap({ route }: { route: string[] }) {
+  const chunks: { step: string; idx: number }[][] = [];
+  for (let i = 0; i < route.length; i += ROUTE_COLS) {
+    chunks.push(
+      route.slice(i, i + ROUTE_COLS).map((step, j) => ({ step, idx: i + j })),
+    );
+  }
+
+  return (
+    <div className="select-none py-1">
+      {chunks.map((chunk, rowIdx) => {
+        const isRTL = rowIdx % 2 === 1;
+        const items = isRTL ? [...chunk].reverse() : chunk;
+        const isLastRow = rowIdx === chunks.length - 1;
+
+        return (
+          <div key={rowIdx}>
+            <div className="flex items-start">
+              {items.map((item, colIdx) => (
+                <RouteStation
+                  key={item.idx}
+                  label={item.step}
+                  number={item.idx + 1}
+                  showLeftLine={colIdx > 0}
+                  showRightLine={colIdx < items.length - 1}
+                />
+              ))}
+            </div>
+            {!isLastRow && (
+              <div className="relative h-5">
+                <div
+                  className="absolute top-0 h-full w-1 -translate-x-1/2 rounded-full bg-orange-400"
+                  style={{
+                    left: isRTL
+                      ? `${(1 / (ROUTE_COLS * 2)) * 100}%`
+                      : `${((ROUTE_COLS * 2 - 1) / (ROUTE_COLS * 2)) * 100}%`,
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function RouteStation({
+  label,
+  number,
+  showLeftLine,
+  showRightLine,
+}: {
+  label: string;
+  number: number;
+  showLeftLine: boolean;
+  showRightLine: boolean;
+}) {
+  return (
+    <div className="relative flex flex-1 flex-col items-center">
+      {showLeftLine && (
+        <div className="absolute left-0 right-1/2 top-[13px] h-1 bg-orange-400" />
+      )}
+      {showRightLine && (
+        <div className="absolute left-1/2 right-0 top-[13px] h-1 bg-orange-400" />
+      )}
+      <div className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-400 text-xs font-bold text-white shadow-sm">
+        {number}
+      </div>
+      <span className="mt-1 w-full px-0.5 text-center text-[10px] leading-tight break-keep text-slate-700">
+        {label}
+      </span>
     </div>
   );
 }

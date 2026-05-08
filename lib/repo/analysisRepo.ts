@@ -1,7 +1,7 @@
 "use client";
 
 import { getDB } from "@/lib/db/db";
-import { newId, newDefectDisplayId } from "@/lib/db/id";
+import { newId, newDefectDisplayId, computeNextDefectSequence } from "@/lib/db/id";
 import type { AiAnalysisPayload } from "@/lib/ai/types";
 import type { AiAnalysisResult, DefectCandidate } from "@/lib/domain/types";
 
@@ -44,33 +44,6 @@ async function callAnalyzeApi(
   return data;
 }
 
-async function saveAnalysisResult(
-  defectId: string,
-  payload: AiAnalysisPayload,
-): Promise<AiAnalysisResult> {
-  const db = getDB();
-  const now = Date.now();
-  const analysis: AiAnalysisResult = {
-    id: newId(),
-    defectCandidateId: defectId,
-    isSuspectedDefect: payload.isSuspectedDefect,
-    defectType: payload.defectType,
-    evidenceSummary: payload.evidenceSummary,
-    suspectedCause: payload.suspectedCause,
-    riskScore: payload.riskScore,
-    riskLevel: payload.riskLevel,
-    repairDifficultyScore: payload.repairDifficultyScore,
-    repairDifficulty: payload.repairDifficulty,
-    confidence: payload.confidence,
-    additionalCheckRequired: payload.additionalCheckRequired,
-    recommendedAdditionalPhotos: payload.recommendedAdditionalPhotos,
-    contractorRequestText: payload.contractorRequestText,
-    caution: payload.caution,
-    createdAt: now,
-  };
-  await db.analyses.add(analysis);
-  return analysis;
-}
 
 /** Analyze a checklist item (SUSPECTED/DEFECT). Creates or updates a linked DefectCandidate. */
 export async function analyzeChecklistItem(
@@ -109,62 +82,92 @@ export async function analyzeChecklistItem(
     signal,
   );
 
-  const now = Date.now();
+  let defect!: DefectCandidate;
+  let analysis!: AiAnalysisResult;
 
-  // Find existing linked defect or create one
-  const existingDefects = await db.defects
-    .where("sessionId")
-    .equals(item.sessionId)
-    .toArray();
-  let defect = existingDefects.find((d) => d.checklistItemId === itemId);
+  await db.transaction("rw", [db.defects, db.analyses], async () => {
+    const now = Date.now();
 
-  if (!defect) {
-    const count = await db.defects
+    // Find existing linked defect or create one
+    const existingDefects = await db.defects
       .where("sessionId")
       .equals(item.sessionId)
-      .count();
-    defect = {
-      id: newId(),
-      displayId: newDefectDisplayId(count + 1),
-      sessionId: item.sessionId,
-      checklistItemId: itemId,
-      areaName,
-      defectType: payload.defectType,
-      userMemo: item.userMemo,
-      aiSummary: payload.evidenceSummary,
-      suspectedCause: payload.suspectedCause,
-      riskLevel: payload.riskLevel,
-      riskScore: payload.riskScore,
-      repairDifficulty: payload.repairDifficulty,
-      repairDifficultyScore: payload.repairDifficultyScore,
-      confidence: payload.confidence,
-      requestedAction: payload.contractorRequestText,
-      additionalCheckRequired: payload.additionalCheckRequired,
-      status: "ANALYZED",
-      createdAt: now,
-      updatedAt: now,
-    };
-    await db.defects.add(defect);
-  } else {
-    const patch: Partial<DefectCandidate> = {
-      defectType: payload.defectType,
-      aiSummary: payload.evidenceSummary,
-      suspectedCause: payload.suspectedCause,
-      riskLevel: payload.riskLevel,
-      riskScore: payload.riskScore,
-      repairDifficulty: payload.repairDifficulty,
-      repairDifficultyScore: payload.repairDifficultyScore,
-      confidence: payload.confidence,
-      requestedAction: payload.contractorRequestText,
-      additionalCheckRequired: payload.additionalCheckRequired,
-      status: "ANALYZED",
-      updatedAt: now,
-    };
-    await db.defects.update(defect.id, patch);
-    defect = { ...defect, ...patch };
-  }
+      .toArray();
+    let linked = existingDefects.find((d) => d.checklistItemId === itemId);
 
-  const analysis = await saveAnalysisResult(defect.id, payload);
+    if (!linked) {
+      const sequence = computeNextDefectSequence(existingDefects.map((d) => d.displayId));
+      linked = {
+        id: newId(),
+        displayId: newDefectDisplayId(sequence),
+        sessionId: item.sessionId,
+        checklistItemId: itemId,
+        areaName,
+        defectType: payload.defectType,
+        userMemo: item.userMemo,
+        aiSummary: payload.evidenceSummary,
+        suspectedCause: payload.suspectedCause,
+        riskLevel: payload.riskLevel,
+        riskScore: payload.riskScore,
+        repairDifficulty: payload.repairDifficulty,
+        repairDifficultyScore: payload.repairDifficultyScore,
+        confidence: payload.confidence,
+        requestedAction: payload.contractorRequestText,
+        additionalCheckRequired: payload.additionalCheckRequired,
+        status: "ANALYZED",
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.defects.add(linked);
+    } else {
+      const patch: Partial<DefectCandidate> = {
+        defectType: payload.defectType,
+        aiSummary: payload.evidenceSummary,
+        suspectedCause: payload.suspectedCause,
+        riskLevel: payload.riskLevel,
+        riskScore: payload.riskScore,
+        repairDifficulty: payload.repairDifficulty,
+        repairDifficultyScore: payload.repairDifficultyScore,
+        confidence: payload.confidence,
+        requestedAction: payload.contractorRequestText,
+        additionalCheckRequired: payload.additionalCheckRequired,
+        status: "ANALYZED",
+        updatedAt: now,
+      };
+      await db.defects.update(linked.id, patch);
+      linked = { ...linked, ...patch };
+    }
+
+    defect = linked;
+
+    // 1 defect = 1 analysis policy: delete existing analyses before inserting new
+    await db.analyses
+      .where("defectCandidateId")
+      .equals(defect.id)
+      .delete();
+
+    const analysisRecord: AiAnalysisResult = {
+      id: newId(),
+      defectCandidateId: defect.id,
+      isSuspectedDefect: payload.isSuspectedDefect,
+      defectType: payload.defectType,
+      evidenceSummary: payload.evidenceSummary,
+      suspectedCause: payload.suspectedCause,
+      riskScore: payload.riskScore,
+      riskLevel: payload.riskLevel,
+      repairDifficultyScore: payload.repairDifficultyScore,
+      repairDifficulty: payload.repairDifficulty,
+      confidence: payload.confidence,
+      additionalCheckRequired: payload.additionalCheckRequired,
+      recommendedAdditionalPhotos: payload.recommendedAdditionalPhotos,
+      contractorRequestText: payload.contractorRequestText,
+      caution: payload.caution,
+      createdAt: now,
+    };
+    await db.analyses.add(analysisRecord);
+    analysis = analysisRecord;
+  });
+
   return { defect, analysis };
 }
 
@@ -203,24 +206,55 @@ export async function analyzeDirectDefect(
     signal,
   );
 
-  const now = Date.now();
-  const patch: Partial<DefectCandidate> = {
-    defectType: payload.defectType,
-    aiSummary: payload.evidenceSummary,
-    suspectedCause: payload.suspectedCause,
-    riskLevel: payload.riskLevel,
-    riskScore: payload.riskScore,
-    repairDifficulty: payload.repairDifficulty,
-    repairDifficultyScore: payload.repairDifficultyScore,
-    confidence: payload.confidence,
-    requestedAction: payload.contractorRequestText,
-    additionalCheckRequired: payload.additionalCheckRequired,
-    status: "ANALYZED",
-    updatedAt: now,
-  };
-  await db.defects.update(defectId, patch);
+  let analysis!: AiAnalysisResult;
 
-  return saveAnalysisResult(defectId, payload);
+  await db.transaction("rw", [db.defects, db.analyses], async () => {
+    const now = Date.now();
+    const patch: Partial<DefectCandidate> = {
+      defectType: payload.defectType,
+      aiSummary: payload.evidenceSummary,
+      suspectedCause: payload.suspectedCause,
+      riskLevel: payload.riskLevel,
+      riskScore: payload.riskScore,
+      repairDifficulty: payload.repairDifficulty,
+      repairDifficultyScore: payload.repairDifficultyScore,
+      confidence: payload.confidence,
+      requestedAction: payload.contractorRequestText,
+      additionalCheckRequired: payload.additionalCheckRequired,
+      status: "ANALYZED",
+      updatedAt: now,
+    };
+    await db.defects.update(defectId, patch);
+
+    // 1 defect = 1 analysis policy: delete existing analyses before inserting new
+    await db.analyses
+      .where("defectCandidateId")
+      .equals(defectId)
+      .delete();
+
+    const analysisRecord: AiAnalysisResult = {
+      id: newId(),
+      defectCandidateId: defectId,
+      isSuspectedDefect: payload.isSuspectedDefect,
+      defectType: payload.defectType,
+      evidenceSummary: payload.evidenceSummary,
+      suspectedCause: payload.suspectedCause,
+      riskScore: payload.riskScore,
+      riskLevel: payload.riskLevel,
+      repairDifficultyScore: payload.repairDifficultyScore,
+      repairDifficulty: payload.repairDifficulty,
+      confidence: payload.confidence,
+      additionalCheckRequired: payload.additionalCheckRequired,
+      recommendedAdditionalPhotos: payload.recommendedAdditionalPhotos,
+      contractorRequestText: payload.contractorRequestText,
+      caution: payload.caution,
+      createdAt: now,
+    };
+    await db.analyses.add(analysisRecord);
+    analysis = analysisRecord;
+  });
+
+  return analysis;
 }
 
 export interface ChecklistAnalyzable {

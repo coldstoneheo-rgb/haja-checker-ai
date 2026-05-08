@@ -49,7 +49,7 @@ export default function NewDefectForm({ sessionId }: Props) {
     if (!validate()) return;
     setBusy(true);
     try {
-      await addDefect({
+      const defect = await addDefect({
         sessionId,
         areaName: useCustomArea ? customArea.trim() : areaName,
         detailLocation: detailLocation.trim() || undefined,
@@ -58,7 +58,7 @@ export default function NewDefectForm({ sessionId }: Props) {
         repairDifficulty,
         userMemo: userMemo.trim() || undefined,
       });
-      router.push(`/sessions/${sessionId}/defects`);
+      router.push(`/sessions/${sessionId}/defects/${defect.id}`);
     } finally {
       setBusy(false);
     }

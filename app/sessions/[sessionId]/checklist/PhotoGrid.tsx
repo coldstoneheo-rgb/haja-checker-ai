@@ -5,8 +5,8 @@ import { useState } from "react";
 import { listPhotosForItem } from "@/lib/repo/photoRepo";
 import type { EvidencePhoto } from "@/lib/domain/types";
 import PhotoGuide from "@/components/PhotoGuide";
-import PhotoEditorDialog from "./PhotoEditorDialog";
 import PhotoThumbnail from "./PhotoThumbnail";
+import PhotoViewer from "./PhotoViewer";
 
 interface Props {
   checklistItemId: string;
@@ -22,7 +22,7 @@ export default function PhotoGrid({
     [checklistItemId],
     [] as EvidencePhoto[],
   );
-  const [editing, setEditing] = useState<EvidencePhoto | null>(null);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
   if (!photos || photos.length === 0) {
     return <PhotoGuide />;
@@ -34,11 +34,11 @@ export default function PhotoGrid({
     <>
       <div className="flex flex-col gap-1.5">
         <div className="grid grid-cols-4 gap-2">
-          {photos.map((photo) => (
+          {photos.map((photo, idx) => (
             <PhotoThumbnail
               key={photo.id}
               photo={photo}
-              onClick={() => setEditing(photo)}
+              onClick={() => setViewerIndex(idx)}
             />
           ))}
         </div>
@@ -63,12 +63,11 @@ export default function PhotoGrid({
           </p>
         )}
       </div>
-      {editing && (
-        <PhotoEditorDialog
-          // 같은 photo id 라도 객체가 갱신되면 재렌더되도록 key 고정
-          key={editing.id}
-          photo={photos.find((p) => p.id === editing.id) ?? editing}
-          onClose={() => setEditing(null)}
+      {viewerIndex !== null && (
+        <PhotoViewer
+          photos={photos}
+          initialIndex={viewerIndex}
+          onClose={() => setViewerIndex(null)}
         />
       )}
     </>

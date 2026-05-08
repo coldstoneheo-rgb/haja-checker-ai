@@ -1,5 +1,5 @@
 import { getDB } from "@/lib/db/db";
-import { newDefectDisplayId, newId } from "@/lib/db/id";
+import { computeNextDefectSequence, newDefectDisplayId, newId } from "@/lib/db/id";
 import type {
   DefectCandidate,
   DefectStatus,
@@ -21,28 +21,31 @@ export interface AddDefectInput {
 export async function addDefect(input: AddDefectInput): Promise<DefectCandidate> {
   const db = getDB();
   const now = Date.now();
+  let defect!: DefectCandidate;
 
-  const existingCount = await db.defects
-    .where("sessionId")
-    .equals(input.sessionId)
-    .count();
+  await db.transaction("rw", [db.defects], async () => {
+    const existing = await db.defects
+      .where("sessionId")
+      .equals(input.sessionId)
+      .toArray();
+    const sequence = computeNextDefectSequence(existing.map((d) => d.displayId));
+    defect = {
+      id: newId(),
+      displayId: newDefectDisplayId(sequence),
+      sessionId: input.sessionId,
+      areaName: input.areaName,
+      detailLocation: input.detailLocation,
+      defectType: input.defectType,
+      userMemo: input.userMemo,
+      riskLevel: input.riskLevel,
+      repairDifficulty: input.repairDifficulty,
+      status: "DRAFT",
+      createdAt: now,
+      updatedAt: now,
+    };
+    await db.defects.add(defect);
+  });
 
-  const defect: DefectCandidate = {
-    id: newId(),
-    displayId: newDefectDisplayId(existingCount + 1),
-    sessionId: input.sessionId,
-    areaName: input.areaName,
-    detailLocation: input.detailLocation,
-    defectType: input.defectType,
-    userMemo: input.userMemo,
-    riskLevel: input.riskLevel,
-    repairDifficulty: input.repairDifficulty,
-    status: "DRAFT",
-    createdAt: now,
-    updatedAt: now,
-  };
-
-  await db.defects.add(defect);
   return defect;
 }
 

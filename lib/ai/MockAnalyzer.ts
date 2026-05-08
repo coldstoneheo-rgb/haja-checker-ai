@@ -57,9 +57,9 @@ export class MockAnalyzer implements AiAnalyzer {
         (defectType === "LEAK" || defectType === "ELECTRICAL_ISSUE" ? 4 : 0),
     );
     const riskLevel =
-      riskScore >= 14
+      riskScore >= 12
         ? "URGENT"
-        : riskScore >= 9
+        : riskScore >= 8
           ? "HIGH"
           : riskScore >= 5
             ? "MEDIUM"

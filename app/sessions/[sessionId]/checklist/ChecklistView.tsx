@@ -1,10 +1,11 @@
 "use client";
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   listAreasWithItems,
+  setChecklistItemMemo,
   setChecklistItemStatus,
 } from "@/lib/repo/checklistRepo";
 import type {
@@ -36,6 +37,7 @@ const PRIORITY_BADGE: Record<ChecklistPriority, { label: string; cls: string }> 
 export default function ChecklistView() {
   const params = useParams<{ sessionId: string }>();
   const sessionId = params.sessionId;
+  const router = useRouter();
   const [activeAreaId, setActiveAreaId] = useState<string | null>(null);
 
   const areas = useLiveQuery(
@@ -59,9 +61,23 @@ export default function ChecklistView() {
 
   const currentAreaId = activeAreaId ?? areasWithItems[0].area.id;
   const current = areasWithItems.find((a) => a.area.id === currentAreaId);
+  const currentIndex = areasWithItems.findIndex((a) => a.area.id === currentAreaId);
+  const nextArea = areasWithItems[currentIndex + 1];
+  const isLastArea = currentIndex === areasWithItems.length - 1;
+
+  // 현재 영역의 점검 완료 여부
+  const currentAreaDone =
+    current?.items.every(
+      (i) => i.status !== "NOT_STARTED" && i.status !== "PHOTO_REQUIRED",
+    ) ?? false;
+
+  // 전체 영역 중 의심/하자 항목 수
+  const suspectedCount = areasWithItems
+    .flatMap((a) => a.items)
+    .filter((i) => i.status === "SUSPECTED" || i.status === "DEFECT").length;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 pb-24">
       <nav className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
         {areasWithItems.map(({ area, items }) => {
           const done = items.filter(
@@ -103,6 +119,53 @@ export default function ChecklistView() {
           />
         ))}
       </ul>
+
+      {/* Sticky bottom CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-slate-200 bg-white/95 px-5 py-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm">
+        <div className="mx-auto flex w-full max-w-2xl items-center gap-2">
+          {isLastArea ? (
+            // 마지막 영역 → AI 분석으로 바로 이동
+            <button
+              type="button"
+              onClick={() => router.push(`/sessions/${sessionId}/analysis`)}
+              className={`flex-1 rounded-xl py-3 text-sm font-semibold transition ${
+                suspectedCount > 0
+                  ? "bg-slate-900 text-white"
+                  : "bg-slate-100 text-slate-500"
+              }`}
+            >
+              {suspectedCount > 0
+                ? `AI 분석 시작 → (의심·하자 ${suspectedCount}건)`
+                : "AI 분석으로 이동 →"}
+            </button>
+          ) : (
+            <>
+              {nextArea && (
+                <button
+                  type="button"
+                  onClick={() => setActiveAreaId(nextArea.area.id)}
+                  className={`flex-1 rounded-xl py-3 text-sm font-semibold ring-1 transition ${
+                    currentAreaDone
+                      ? "bg-slate-900 text-white ring-slate-900"
+                      : "bg-white text-slate-700 ring-slate-200"
+                  }`}
+                >
+                  다음: {nextArea.area.name} →
+                </button>
+              )}
+              {suspectedCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/sessions/${sessionId}/analysis`)}
+                  className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-white"
+                >
+                  AI 분석 ({suspectedCount})
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -117,6 +180,9 @@ function ChecklistRow({
   areaName: string;
 }) {
   const [pending, setPending] = useState<ChecklistItemStatus | null>(null);
+  const [memoOpen, setMemoOpen] = useState(false);
+  const [memoText, setMemoText] = useState(item.userMemo ?? "");
+  const [memoSaving, setMemoSaving] = useState(false);
 
   async function onStatus(status: ChecklistItemStatus) {
     setPending(status);
@@ -124,6 +190,16 @@ function ChecklistRow({
       await setChecklistItemStatus(item.id, status);
     } finally {
       setPending(null);
+    }
+  }
+
+  async function onMemoBlur() {
+    if (memoText === (item.userMemo ?? "")) return;
+    setMemoSaving(true);
+    try {
+      await setChecklistItemMemo(item.id, memoText);
+    } finally {
+      setMemoSaving(false);
     }
   }
 
@@ -178,6 +254,46 @@ function ChecklistRow({
           );
         })}
       </div>
+
+      {/* Memo section */}
+      {memoOpen ? (
+        <div className="flex flex-col gap-1.5">
+          <textarea
+            value={memoText}
+            onChange={(e) => setMemoText(e.target.value)}
+            onBlur={onMemoBlur}
+            placeholder="현장 메모 (점검 중 발견한 특이사항, 사진 촬영 맥락 등)"
+            rows={3}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+            autoFocus
+          />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onMemoBlur}
+              disabled={memoSaving}
+              className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+            >
+              {memoSaving ? "저장 중…" : "저장"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMemoText(item.userMemo ?? ""); setMemoOpen(false); }}
+              className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setMemoOpen(true)}
+          className="self-start rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-500 ring-1 ring-slate-200"
+        >
+          {item.userMemo ? `메모 편집: ${item.userMemo.slice(0, 30)}${item.userMemo.length > 30 ? "…" : ""}` : "메모 추가"}
+        </button>
+      )}
     </li>
   );
 }
