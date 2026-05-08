@@ -98,6 +98,17 @@ export async function listPhotosForItem(
   return photos.sort((a, b) => a.createdAt - b.createdAt);
 }
 
+export async function listPhotosForDefect(
+  defectCandidateId: string,
+): Promise<EvidencePhoto[]> {
+  const db = getDB();
+  const photos = await db.photos
+    .where("defectCandidateId")
+    .equals(defectCandidateId)
+    .toArray();
+  return photos.sort((a, b) => a.createdAt - b.createdAt);
+}
+
 export interface UpdatePhotoInput {
   userMemo?: string;
   quickTags?: string[];
@@ -126,5 +137,25 @@ export async function updatePhoto(
 }
 
 export async function deletePhoto(photoId: string): Promise<void> {
-  await getDB().photos.delete(photoId);
+  const db = getDB();
+  await db.transaction("rw", [db.photos, db.checklistItems], async () => {
+    const photo = await db.photos.get(photoId);
+    await db.photos.delete(photoId);
+
+    if (photo?.checklistItemId) {
+      const remaining = await db.photos
+        .where("checklistItemId")
+        .equals(photo.checklistItemId)
+        .count();
+      if (remaining === 0) {
+        const item = await db.checklistItems.get(photo.checklistItemId);
+        if (item && item.status === "PHOTO_DONE") {
+          await db.checklistItems.update(photo.checklistItemId, {
+            status: "PHOTO_REQUIRED" as ChecklistItemStatus,
+            updatedAt: Date.now(),
+          });
+        }
+      }
+    }
+  });
 }

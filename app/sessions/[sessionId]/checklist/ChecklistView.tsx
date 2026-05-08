@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   listAreasWithItems,
+  setChecklistItemMemo,
   setChecklistItemStatus,
 } from "@/lib/repo/checklistRepo";
 import type {
@@ -179,6 +180,9 @@ function ChecklistRow({
   areaName: string;
 }) {
   const [pending, setPending] = useState<ChecklistItemStatus | null>(null);
+  const [memoOpen, setMemoOpen] = useState(false);
+  const [memoText, setMemoText] = useState(item.userMemo ?? "");
+  const [memoSaving, setMemoSaving] = useState(false);
 
   async function onStatus(status: ChecklistItemStatus) {
     setPending(status);
@@ -186,6 +190,16 @@ function ChecklistRow({
       await setChecklistItemStatus(item.id, status);
     } finally {
       setPending(null);
+    }
+  }
+
+  async function onMemoBlur() {
+    if (memoText === (item.userMemo ?? "")) return;
+    setMemoSaving(true);
+    try {
+      await setChecklistItemMemo(item.id, memoText);
+    } finally {
+      setMemoSaving(false);
     }
   }
 
@@ -240,6 +254,46 @@ function ChecklistRow({
           );
         })}
       </div>
+
+      {/* Memo section */}
+      {memoOpen ? (
+        <div className="flex flex-col gap-1.5">
+          <textarea
+            value={memoText}
+            onChange={(e) => setMemoText(e.target.value)}
+            onBlur={onMemoBlur}
+            placeholder="현장 메모 (점검 중 발견한 특이사항, 사진 촬영 맥락 등)"
+            rows={3}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+            autoFocus
+          />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onMemoBlur}
+              disabled={memoSaving}
+              className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+            >
+              {memoSaving ? "저장 중…" : "저장"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMemoText(item.userMemo ?? ""); setMemoOpen(false); }}
+              className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setMemoOpen(true)}
+          className="self-start rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-500 ring-1 ring-slate-200"
+        >
+          {item.userMemo ? `메모 편집: ${item.userMemo.slice(0, 30)}${item.userMemo.length > 30 ? "…" : ""}` : "메모 추가"}
+        </button>
+      )}
     </li>
   );
 }
