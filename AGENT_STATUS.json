@@ -1,0 +1,19 @@
+{
+  "project": "haja-checker-ai",
+  "as_of": "2026-10-17T00:40+09:00",
+  "state": "working",
+  "head": "main a320218(#3) · 작업 브랜치 chore/harness-pr0(PR-0 하네스, 코드 0)",
+  "working_on": "HO-2026-1017-haja-spike-S0-S1-01 조건 0(하네스 PR-0) → 조건 1(S0 되살리기)",
+  "waiting_on": "사용자: 이 창에 «effort 설정 PR 진행, 게이트 PASS 뒤 머지까지» 한 줄(.claude/settings.json·.claude/agents/critic.md) · LC: PR-0 게이트 · S1 착수 «가»",
+  "next_actions": [
+    "PR-0 critic(high) → LC 게이트 → 스쿼시 머지 → 브랜치 정리",
+    "S0: npm ci·build·test·typecheck 실측 + 로컬 stale 브랜치 처분(SHA 기록)",
+    "LC «가» 뒤 S1 스파이크 12항목 → 비교표 → REPORT"
+  ],
+  "recent": [
+    {
+      "at": "2026-10-17",
+      "what": "LC 협업 첫 창 개설 · git fetch: origin/main a320218 · 로컬 claude/review-…(0c8ea94)·master(0f45988) 모두 main에 포함 · 하네스 PR-0 브랜치 chore/harness-pr0"
+    }
+  ]
+}
