@@ -4,7 +4,7 @@
   "state": "working",
   "head": "main a320218(#3) · 작업 브랜치 chore/harness-pr0(PR-0 하네스, 코드 0)",
   "working_on": "HO-2026-1017-haja-spike-S0-S1-01 조건 0(하네스 PR-0) → 조건 1(S0 되살리기)",
-  "waiting_on": "사용자: 이 창에 «effort 설정 PR 진행, 게이트 PASS 뒤 머지까지» 한 줄(.claude/settings.json·.claude/agents/critic.md) · LC: PR-0 게이트 · S1 착수 «가»",
+  "waiting_on": "LC: PR-0 게이트 · S1 착수 «가»",
   "next_actions": [
     "PR-0 critic(high) → LC 게이트 → 스쿼시 머지 → 브랜치 정리",
     "S0: npm ci·build·test·typecheck 실측 + 로컬 stale 브랜치 처분(SHA 기록)",
