@@ -8,7 +8,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## 핵심 규칙 (절대 위반 금지)
 
-1. **브랜치**: 작업마다 `origin/main`에서 기능 브랜치(`feat/…`·`fix/…`·`chore/…`·`docs/…`)를 따서 PR → 스쿼시 머지 → main. `main`에 직접 푸시 금지. 머지 뒤 원격·로컬 브랜치는 바로 정리한다(머지 조건은 CLAUDE.md «LC 협업 규약»). 옛 `claude/review-inspection-app-plan-RbozI`는 2026-05 MVP 브랜치로 main에 전부 머지됐다(#1~#3).
+1. **브랜치**: 작업마다 `origin/main`에서 기능 브랜치(`feat/…`·`fix/…`·`chore/…`·`docs/…`)를 따서 PR → 스쿼시 머지 → main. `main`에 직접 푸시 금지. 머지 뒤 원격·로컬 브랜치는 바로 정리한다(머지 조건은 CLAUDE.md «LC 협업 규약»). 옛 `claude/review-inspection-app-plan-RbozI`는 2026-04~05 MVP 브랜치로 main에 전부 머지됐다(#1~#3).
 2. **API 키 노출 금지**: `GEMINI_API_KEY`는 `app/api/` 서버 라우트 내부에서만 사용. 클라이언트 번들 포함 금지.
 3. **IndexedDB는 브라우저 전용**: `lib/db/db.ts`의 `getDB()`는 `"use client"` 컴포넌트 또는 클라이언트 사이드 함수에서만 호출.
 4. **테스트 통과 유지**: 코드 변경 후 반드시 `npm test && npm run typecheck` 실행. 실패 시 수정 후 커밋.
