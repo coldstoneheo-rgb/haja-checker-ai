@@ -17,6 +17,17 @@ describe("CHECKLIST_SEED", () => {
     expect(CHECKLIST_SEED.length).toBeGreaterThan(0);
   });
 
+  it("has exactly 28 items (PRD 기본 항목 수)", () => {
+    expect(CHECKLIST_SEED.length).toBe(28);
+  });
+
+  it("every default area has at least one item", () => {
+    const covered = new Set(CHECKLIST_SEED.map((item) => item.area));
+    for (const area of DEFAULT_AREAS) {
+      expect(covered.has(area), `no seed item for area "${area}"`).toBe(true);
+    }
+  });
+
   it("every item belongs to a known area", () => {
     const areaSet = new Set(DEFAULT_AREAS);
     for (const item of CHECKLIST_SEED) {
