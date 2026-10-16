@@ -2,7 +2,7 @@
 
 ## 근거와 표기 규칙
 
-- **[SDK]** = `C:\Users\colds\AI\claude\face-fate\node_modules\@apps-in-toss\web-framework\dist\index.d.ts`(3.4.0, 2,652줄)를 직접 읽음. `[SDK cfg]` = 같은 폴더의 `config.d.ts`(57줄). `[CLI]` = `node_modules/@apps-in-toss/cli/dist/index.js`(3.4.0). 숫자는 줄 번호.
+- **[SDK]** = `~/AI\claude\face-fate\node_modules\@apps-in-toss\web-framework\dist\index.d.ts`(3.4.0, 2,652줄)를 직접 읽음. `[SDK cfg]` = 같은 폴더의 `config.d.ts`(57줄). `[CLI]` = `node_modules/@apps-in-toss/cli/dist/index.js`(3.4.0). 숫자는 줄 번호.
 - **[DOC]** = 2026-10-17에 `curl -sL https://developers-apps-in-toss.toss.im/<경로>.md`로 받은 원문. 줄 번호는 그 curl 출력 기준(1행은 `> For the complete documentation index…` 머리글). `llms-full.txt`는 3쪽으로 나뉜다(`/llms-full.txt`, `/1`, `/2`).
 - 판정: **됨 / 안 됨 / 조건부**. 기기에서 직접 확인해야 하는 부분은 «실기기 대기». 문서와 타입 어디에도 없으면 «문서 없음». 근거 없이 짐작한 부분은 «추정».
 - **버전 주의:** 문서는 SDK **3.7.0**(2026-10-01 릴리즈 노트)까지 반영돼 있다. 선례 레포의 설치본은 **3.4.0**이다. 그래서 문서에는 있는데 3.4.0 타입에는 없는 API가 있다(예: `NavigationBar.setOptions`는 3.5.0부터, 아래 ⑨).

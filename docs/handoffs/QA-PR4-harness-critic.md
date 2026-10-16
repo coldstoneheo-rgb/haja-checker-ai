@@ -7,7 +7,7 @@
 조건 0 ⓐ~ⓖ 충족 · 사실 진술 3건 검증(`rev-list origin/main...origin/claude/review-…` = 9 0 · #1~#3 MERGED · master·claude/review 모두 main 조상) · settings·AGENT_STATUS JSON.parse ok · critic.md는 face-fate 대비 24행만 다름 · 금지어·비밀 0 · 범위 1 의도
 
 ## 결함 → 처분
-1. [중요] 레포 PUBLIC인데 발주서 사본(사용자 원문·수익 설계) 커밋 → 828e78f `handoffs/*.md` gitignore. 42770d6·d8d0053 브랜치 역사에는 남음 → 사용자 아침 문항
+1. [중요] 레포 PUBLIC — 발주서 사본을 레포에 두지 않도록 828e78f `handoffs/*.md` gitignore. 남은 처분은 사용자 결정(아침 문항)
 2. [경미] WORKLOG «LC 스캔에 잡힘» — projects.json excluded → LC f2bf311 재등록으로 해소
 3. [경미] WORKLOG changes·progress SHA 부실 → 828e78f 반영
 4. [경미] critic.md:24 출처 부정확 → 828e78f 실제 위치로

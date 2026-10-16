@@ -1,8 +1,8 @@
 # S1 스파이크 ③ — 하자체크 세션 목록 화면 Vite+React 이식 실측
 
 - 대상: `app/sessions/page.tsx`(34줄) + `app/sessions/SessionsList.tsx`(118줄)
-- 레포: `C:\Users\colds\haja-checker-ai` (읽기만, 수정·커밋·브랜치 0. 끝난 뒤 `git status`는 시작 때와 같음)
-- 스파이크: `C:\Users\colds\haja-spikes\vite-port\`
+- 레포: `~/haja-checker-ai` (읽기만, 수정·커밋·브랜치 0. 끝난 뒤 `git status`는 시작 때와 같음)
+- 스파이크: `~/haja-spikes\vite-port\`
 - 시작 01:57:48 / 끝 02:09 경 → **총 약 11분**(상한 2시간의 1/10 미만)
 
 ## 판정: **됨** (조건 1개: `/api/analyze` 서버 라우트는 전체 앱 이식 때 따로 처리해야 함. 이번 화면과는 관계없음)

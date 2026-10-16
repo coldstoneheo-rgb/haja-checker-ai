@@ -16,7 +16,7 @@ monetization: 광고 전면·리워드 SDK 문서상 됨(사전 로드 필수, �
 learning_need: 토스 WebView에서 window.print·Blob 다운로드·history 백버튼 실동작(문서 없음)
 ---
 ## 의미
-두 코드 기반 모두 토스 번들(정적, SSR 금지)에 들어간다는 것을 실측으로 확인해, 결정 축이 «되느냐»에서 «유지 비용»으로 좁혀졌다. S2의 큰 공수(API 분리·CORS·인쇄 대체·저장 구조)는 두 안이 같아서, 기반 선택이 일정에 주는 차이는 0.5일 대 1~1.5일(추정)이다. iOS 7일 삭제는 어느 쪽을 골라도 풀어야 하는 새 위험이다.
+두 코드 기반 모두 토스 번들(정적, SSR 금지)에 들어간다는 것을 실측으로 확인해, 결정 축이 «되느냐»에서 «유지 비용»으로 좁혀졌다. S2의 큰 공수(API 분리·CORS·인쇄 대체·저장 구조·실기기 QA)는 두 안이 같아서, 기반 고유 공수 차이는 1~3시간 대 3~6시간(추정)이다. 정정: 앞 블록 blockers의 «projects.json excluded»는 LC f2bf311 재등록으로 해소. iOS 7일 삭제는 어느 쪽을 골라도 풀어야 하는 새 위험이다.
 
 ---
 date: 2026-10-17
@@ -27,10 +27,10 @@ status: on_track
 progress: "HO-2026-1017-haja-spike-S0-S1-01 조건 0 게이트 단계 (근거: #4 42770d6·d8d0053 · critic 8/10 PASS · npm test 72/72 · typecheck exit 0)"
 changes: ["https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/4 chore(harness) PR-0(코드 0)"]
 next: PR-0 LC 게이트 → 스쿼시 머지, 이어 S0 되살리기(시드 28 PR)
-blockers: 레포 PUBLIC — 발주서 사본은 gitignore로 로컬 전용, 공개 범위는 사용자 결정 대기
+blockers: 레포 PUBLIC — 발주서 사본은 gitignore로 로컬 전용, 공개 범위는 사용자 결정 대기 · LC projects.json에서 haja가 excluded(«휴면·claude/review 브랜치» 사유는 낡음)
 ---
 ## 의미
-haja는 5월 MVP 뒤 손이 끊겨 LC 발주·게이트를 거친 적이 없다. 하네스로 상태·흔적·머지 규칙을 다른 워커와 같은 꼴로 맞춰, S1 스파이크(Next 유지 vs Vite 재작성) 결과를 LC 스캔이 바로 읽게 한다(LC f2bf311 재등록).
+haja는 5월 MVP 뒤 손이 끊겨 LC 발주·게이트를 거친 적이 없다. 하네스로 상태·흔적·머지 규칙을 다른 워커와 같은 꼴로 맞춰, S1 스파이크(Next 유지 vs Vite 재작성) 결과를 LC 스캔이 읽을 수 있게 한다(projects.json excluded 해제 뒤).
 
 ## 체크리스트 — HO-2026-1017-haja-spike-S0-S1-01
 - [x] 0 하네스(#4 35319b5 · critic 8/10 · LC PASS · 브랜치 정리): ⓐ settings.json ⓑ critic.md(사용자 한 줄 10-17 수신) ⓒ AGENT_STATUS ⓓ WORKLOG ⓔ handoffs 폴더 ⓕ CLAUDE.md 규약 ⓖ AGENTS.md 브랜치 ⓗ PR-0 critic→LC→머지
