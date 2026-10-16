@@ -1,16 +1,20 @@
 {
   "project": "haja-checker-ai",
-  "as_of": "2026-10-17T03:10+09:00",
+  "as_of": "2026-10-17T09:00+09:00",
   "state": "idle",
-  "head": "main 35319b5(#4) · PR #5 fix/seed-28 20f88ef LC PASS · PR #6 docs/s1-spike-report LC PASS — 둘 다 머지 대기",
-  "working_on": "없음 — [IDLE] 마감(HO-2026-1017 조건 0~4 끝, 머지 대기)",
-  "waiting_on": "사용자 한 줄: «PR #5·#6 머지 진행» · Next/Vite 결정 · 저장 구조(iOS IndexedDB 7일) · 실기기 QR 일정 · 레포 공개 범위 · 원격 추적 ref prune(origin/claude/review-…·origin/chore/harness-pr0)",
+  "head": "main b39639d(#6) · 264733e(#5) · 35319b5(#4) · PR docs/claude-md-guard 게이트 대기",
+  "working_on": "CLAUDE.md 커밋 가드·경로 정리 PR",
+  "waiting_on": "critic·LC 게이트(가드 PR) · Next/Vite 결정 · 저장 구조(iOS IndexedDB 7일) · 실기기 QR 일정 · 레포 공개 범위 · 원격 추적 ref prune(origin/claude/review-…·origin/chore/harness-pr0)",
   "next_actions": [
-    "사용자 한 줄 뒤 PR #5·#6 스쿼시 머지 + 브랜치 정리",
-    "다음 문서 PR: CLAUDE.md 로컬 절대 경로 → ~ 치환",
-    "결정 뒤 S2 전환 발주 · 스파이크 폴더 ~/haja-spikes 정리"
+    "가드 PR critic → LC 게이트 → 머지(사용자 위임 10-17 아침)",
+    "결정 뒤 S2 전환 발주",
+    "~/haja-spikes·spike/next-export 정리(사용자 결정 뒤)"
   ],
   "recent": [
+    {
+      "at": "2026-10-17",
+      "what": "#5 264733e·#6 b39639d 스쿼시 머지(사용자 위임 10-17 아침) · 원격 fix/seed-28·docs/s1-spike-report 삭제(원격 = main만) · 워크트리 제거 중 node_modules junction 사고 → npm ci 복구 · test 74/74 · typecheck 0"
+    },
     {
       "at": "2026-10-17",
       "what": "PR #6 S1 REPORT critic 7/10 → 반영 13건 ef84fc2 · LC 게이트 PASS · #5 LC PASS — 머지는 사용자 한 줄 대기"
