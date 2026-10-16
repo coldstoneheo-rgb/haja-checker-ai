@@ -1,14 +1,14 @@
 {
   "project": "haja-checker-ai",
   "as_of": "2026-10-17T09:00+09:00",
-  "state": "idle",
-  "head": "main b39639d(#6) · 264733e(#5) · 35319b5(#4) · PR docs/claude-md-guard 게이트 대기",
+  "state": "waiting_gate",
+  "head": "main b39639d(#6) · 264733e(#5) · 35319b5(#4) · PR #7 docs/claude-md-guard — LC 조건부 PASS·critic 7/10 PASS, 반영 뒤 머지",
   "working_on": "CLAUDE.md 커밋 가드·경로 정리 PR",
-  "waiting_on": "critic(가드 PR) · Next/Vite 결정 · 저장 구조(iOS IndexedDB 7일) · 실기기 QR 일정 · 레포 공개 범위",
+  "waiting_on": "Next/Vite 결정 · 저장 구조(iOS IndexedDB 7일) · 실기기 QR 일정 · 레포 공개 범위",
   "next_actions": [
     "가드 PR critic → 머지(LC 조건부 PASS) → 브랜치 정리 → git fetch --prune(원격 = main만, 로컬 추적 ref 정리는 워커 손)",
     "결정 뒤 S2 전환 발주",
-    "~/haja-spikes·spike/next-export 정리(사용자 결정 뒤)"
+    "~/haja-spikes·spike/next-export 정리(사용자 결정 뒤, node_modules junction 먼저 해제 — CLAUDE.md 커밋 가드)"
   ],
   "recent": [
     {

@@ -9,10 +9,9 @@ agent: claude-code
 summary: PR #5·#6 스쿼시 머지 + 브랜치 정리 + CLAUDE.md 커밋 가드·경로 정리 PR
 status: on_track
 progress: "HO-2026-1017 조건 4 끝 (근거: #5 264733e · #6 b39639d · 원격 브랜치 main만 · npm test 74/74 · typecheck exit 0)"
-changes: ["https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/5 시드 28 머지", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/6 S1 REPORT 머지", "docs/claude-md-guard 커밋 가드·경로 PR"]
+changes: ["https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/5 시드 28 머지", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/6 S1 REPORT 머지", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/7 커밋 가드·경로"]
 next: 사용자 코드 기반 결정(A Next export / B Vite) → S2 전환 발주
 blockers: 사용자 결정 대기 — 코드 기반 · 저장 구조(iOS IndexedDB 7일) · 실기기 QR 일정 · 레포 공개 범위
-monetization: 변화 없음
 learning_need: Windows에서 git worktree remove가 junction 대상까지 지우는 동작
 ---
 ## 의미
