@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# LC 발주서 사본은 로컬에만(레포 PUBLIC — 사용자 원문·수익 설계 포함)
+/handoffs/*.md
