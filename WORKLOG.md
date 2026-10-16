@@ -14,10 +14,9 @@ next: 사용자 코드 기반 결정(A Next export / B Vite) → S2 전환 발�
 blockers: iOS WebView IndexedDB 7일 미사용 삭제(문서) — Dexie 전량 로컬 저장 설계와 충돌, 저장 구조 결정 필요
 monetization: 광고 전면·리워드 SDK 문서상 됨(사전 로드 필수, 샌드박스 불가 → QR 검증) · 식별키는 토스 로그인 없이 발급
 learning_need: 토스 WebView에서 window.print·Blob 다운로드·history 백버튼 실동작(문서 없음)
-incident: 빈 인덱스 커밋 c52a736(파일 95 삭제가 PR #6 브랜치에 push) — 원인 미상, `git read-tree ef84fc2`로 복구 f53d174, force push 0 · 다음부터 커밋 전 `git ls-files | wc -l` 가드
 ---
 ## 의미
-두 코드 기반 모두 토스 번들(정적, SSR 금지)에 들어간다는 것을 실측으로 확인해, 결정 축이 «되느냐»에서 «유지 비용»으로 좁혀졌다. S2의 큰 공수(API 분리·CORS·인쇄 대체·저장 구조·실기기 QA)는 두 안이 같아서, 기반 고유 공수 차이는 1~3시간 대 3~6시간(추정)이다. 정정: 앞 블록 blockers의 «projects.json excluded»는 LC f2bf311 재등록으로 해소. iOS 7일 삭제는 어느 쪽을 골라도 풀어야 하는 새 위험이다.
+두 코드 기반 모두 토스 번들(정적, SSR 금지)에 들어간다는 것을 실측으로 확인해, 결정 축이 «되느냐»에서 «유지 비용»으로 좁혀졌다. S2의 큰 공수(API 분리·CORS·인쇄 대체·저장 구조·실기기 QA)는 두 안이 같아서, 기반 고유 공수 차이는 1~3시간 대 3~6시간(추정)이다. 정정: 앞 블록 blockers의 «projects.json excluded»는 LC f2bf311 재등록으로 해소. iOS 7일 삭제는 어느 쪽을 골라도 풀어야 하는 새 위험이다. 사고 1건: 마감 커밋 c52a736이 빈 인덱스에서 만들어져 파일 95개 삭제로 PR #6 브랜치에 올라갔다 — 원인 미상, `git read-tree ef84fc2`로 복구(f53d174), force push 0. 다음부터 커밋 전 `git ls-files | wc -l`을 확인한다.
 
 ---
 date: 2026-10-17
