@@ -1,16 +1,28 @@
 {
   "project": "haja-checker-ai",
-  "as_of": "2026-10-17T00:55+09:00",
+  "as_of": "2026-10-17T02:40+09:00",
   "state": "working",
-  "head": "main a320218(#3) · 작업 브랜치 chore/harness-pr0(PR-0 하네스, 코드 0)",
-  "working_on": "HO-2026-1017-haja-spike-S0-S1-01 조건 0(하네스 PR-0) → 조건 1(S0 되살리기)",
-  "waiting_on": "LC: PR-0 #4 게이트 · projects.json excluded 해제 · S1 착수 «가» / 사용자: 레포 PUBLIC 공개 범위(private 전환 여부)",
+  "head": "main 35319b5(#4) · PR #5 fix/seed-28 20f88ef(LC PASS, 사용자 한 줄 대기) · docs/s1-spike-report(REPORT)",
+  "working_on": "HO-2026-1017 조건 4 — S1 REPORT PR critic → LC 게이트",
+  "waiting_on": "LC: REPORT PR 게이트 / 사용자(아침): Next·Vite 결정 · 저장 구조(iOS 7일) · 실기기 QR · 레포 공개 범위 · PR #5 머지 위임 · origin/claude/review 추적 ref 정리",
   "next_actions": [
-    "PR-0 critic(high) → LC 게이트 → 스쿼시 머지 → 브랜치 정리",
-    "S0: npm ci·build·test·typecheck 실측 + 로컬 stale 브랜치 처분(SHA 기록)",
-    "LC «가» 뒤 S1 스파이크 12항목 → 비교표 → REPORT"
+    "REPORT PR critic(high) → LC 게이트 (머지는 사용자 한 줄)",
+    "PR #5 머지(사용자 한 줄 뒤)",
+    "사용자 결정 뒤 S2 전환 발주"
   ],
   "recent": [
+    {
+      "at": "2026-10-17",
+      "what": "S1 스파이크 12항목: 됨 ②③④⑧⑪ · 조건부 ①⑤⑥⑦⑨⑩⑫ · 안 됨 0 — Next export 쿼리 라우팅 변환 Chrome 실측 · ait build 로컬 exit 0(504KB) · Vite 1화면 11분 · iOS IndexedDB 7일 삭제(문서) · 비교표"
+    },
+    {
+      "at": "2026-10-17",
+      "what": "원격 claude/review-inspection-app-plan-RbozI 부재 확인 01:0x(gh api branches) — 삭제 주체 미상(LC 아님), 로컬 추적 ref 정리는 아침 문항 · PR #5 LC 게이트 PASS"
+    },
+    {
+      "at": "2026-10-17",
+      "what": "#4 스쿼시 머지 35319b5(critic 8/10 · LC PASS · 사용자 «effort 설정 PR 진행, 게이트 PASS 뒤 머지까지») · 원격·로컬 chore/harness-pr0 삭제 · 로컬 master·claude/review 삭제 · build exit 0 · PR #5 critic 8.5 PASS"
+    },
     {
       "at": "2026-10-17",
       "what": "PR #4 42770d6·d8d0053(effort medium·critic high, 사용자 한 줄) · critic 8/10 PASS · 레포 PUBLIC 발견 → 발주서 사본 gitignore · npm ci 0 · test 72/72 · typecheck 0"

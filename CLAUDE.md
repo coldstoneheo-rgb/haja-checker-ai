@@ -18,7 +18,7 @@ Life Coordinator(LC, `C:\Users\colds\AI\claude\life-coordinator`)가 발주서(`
 ```bash
 npm ci           # 의존성 설치
 npm run dev      # 개발 서버 (http://localhost:3000)
-npm test         # 단위 테스트 (Vitest, 45 tests)
+npm test         # 단위 테스트 (Vitest — 개수는 실행 결과로 확인, 2026-10-17 main 72)
 npm run typecheck # TypeScript 타입 검사
 npm run build    # 프로덕션 빌드
 ```
