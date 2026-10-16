@@ -271,4 +271,14 @@ export const CHECKLIST_SEED: ChecklistSeedItem[] = [
     requiredPhotoCount: 2,
     priority: "MEDIUM",
   },
+  {
+    area: "기타",
+    category: "마감",
+    title: "천장·벽 누수 흔적과 결로",
+    description:
+      "천장·벽 모서리·창 주변에 물자국, 얼룩, 곰팡이, 들뜬 도배가 없는지 세대 전체를 한 번 더 확인한다.",
+    captureGuide: "의심 부위 근접 1장 + 위치를 알 수 있는 원경 1장.",
+    requiredPhotoCount: 2,
+    priority: "HIGH",
+  },
 ];
