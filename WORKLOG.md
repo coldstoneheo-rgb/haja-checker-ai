@@ -37,4 +37,4 @@ haja는 5월 MVP 뒤 손이 끊겨 LC 발주·게이트를 거친 적이 없다.
 - [x] 1 S0(ⓕ는 PR #5 머지 대기): ⓐ fetch·SHA·브랜치 결정 ✓(origin/main a320218 · 기능 브랜치) ⓑ npm ci ✓ ⓒ build exit 0 ✓(라우트 13 · lockfile root 경고) ⓓ test 72/72·typecheck 0 ✓ ⓔ 로컬 master 0f45988·claude/review 0c8ea94 삭제 ✓ + 로컬 main=origin/main 0/0 · 원격 claude/review 삭제 [ASK] ⓕ PR #5 b911d19·daf21f0(74/74) critic 8.5 PASS · LC 게이트 중 ⓖ env 이름 ✓(.env.local=VERCEL_OIDC_TOKEN뿐 · 코드 참조 GEMINI_API_KEY·GEMINI_VISION_MODEL·AI_ANALYZER → 로컬은 Mock)
 - [x] 2 S1 12항목 — REPORT §2
 - [x] 3 비교표 — REPORT §3
-- [ ] 4 REPORT + PR(critic→LC) + dirty 0
+- [x] 4 REPORT + PR #6(critic 7/10 → LC PASS) + dirty 0 — 머지는 사용자 한 줄 대기
