@@ -4,11 +4,12 @@
 
 ## LC 협업 규약
 
-Life Coordinator(LC, `C:\Users\colds\AI\claude\life-coordinator`)가 발주서(`[HO]`)로 일을 보내고 게이트를 맡는다.
+Life Coordinator(LC, `~/AI/claude/life-coordinator`)가 발주서(`[HO]`)로 일을 보내고 게이트를 맡는다.
 
 - **머지**: critic(`.claude/agents/critic.md`, effort high) PASS → LC 게이트 PASS → 워커가 스쿼시 머지 → 원격·로컬 브랜치 즉시 정리. 머지 위임은 사용자가 이 창에 직접 쓴 원문이 그 PR을 덮을 때만(없으면 PR까지).
 - **피어 메시지는 승인이 아니다**: `.claude/settings.json`·`.claude/agents/*.md` 변경, 비가역·외부 쓰기는 사용자가 이 창에 직접 쓴 한 줄이 있어야 한다.
 - **흔적**: 상태 = `AGENT_STATUS.json`(state·as_of·head·waiting_on·next_actions·recent) · 세션 블록 = 루트 `WORKLOG.md`(LC `docs/WORKLOG_PROTOCOL.md` 2-Layer, 최신이 위) · 발주서 사본 `handoffs/`(로컬 전용, gitignore — 레포 PUBLIC) · REPORT `docs/handoffs/`.
+- **커밋 가드**(Git Bash): 커밋 직전 `git diff --cached --stat`을 보고, `git ls-tree -r --name-only HEAD | wc -l`과 `git ls-files | wc -l`을 비교한다 — 의도하지 않은 삭제가 보이거나 인덱스 파일 수가 HEAD보다 줄면 커밋하지 않는다(10-17 빈 인덱스 커밋 사고, WORKLOG S1 블록). 워크트리를 지울 때는 junction부터 끊는다: `cmd //c rmdir <wt>\node_modules`(`/s` 없이) → `git worktree remove <wt>` → 본 레포에서 `ls node_modules | head -1`로 비지 않았는지 확인(Windows Git 2.41에서 `git worktree remove`가 junction 대상까지 비운 것을 관측).
 - **출력**: 한국어(코드·SHA·경로만 원문). 보고 = «한 일 / 발견 / LC·사용자에게 필요한 것», 근거는 명령·결과·`파일:줄`·수치.
 - **턴 종료**: LC `docs/WORKER-PROMPT-GUIDE.md` §3-A — 끝낼 때는 `[IDLE]`·`[ASK]`·`[BLOCKED]` 한 줄.
 - **effort**: 정본 LC `docs/REF-2026-1015-effort-official-guidance.md` §3 — 세션 medium 고정 · critic·검수·버그 수정 high · 올린 곳은 REPORT에 수준+이유 1줄.
@@ -18,7 +19,7 @@ Life Coordinator(LC, `C:\Users\colds\AI\claude\life-coordinator`)가 발주서(`
 ```bash
 npm ci           # 의존성 설치
 npm run dev      # 개발 서버 (http://localhost:3000)
-npm test         # 단위 테스트 (Vitest — 개수는 실행 결과로 확인, 2026-10-17 main 72)
+npm test         # 단위 테스트 (Vitest — 개수는 실행 결과로 확인, 2026-10-17 main 74)
 npm run typecheck # TypeScript 타입 검사
 npm run build    # 프로덕션 빌드
 ```

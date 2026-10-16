@@ -6,6 +6,21 @@
 date: 2026-10-17
 project: haja-checker-ai
 agent: claude-code
+summary: PR #5·#6 스쿼시 머지 + 브랜치 정리 + CLAUDE.md 커밋 가드·경로 정리 PR
+status: on_track
+progress: "HO-2026-1017 조건 4 끝 (근거: #5 264733e · #6 b39639d · 원격 브랜치 main만 · npm test 74/74 · typecheck exit 0)"
+changes: ["https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/5 시드 28 머지", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/6 S1 REPORT 머지", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/7 커밋 가드·경로"]
+next: 사용자 코드 기반 결정(A Next export / B Vite) → S2 전환 발주
+blockers: 사용자 결정 대기 — 코드 기반 · 저장 구조(iOS IndexedDB 7일) · 실기기 QR 일정 · 레포 공개 범위
+learning_need: Windows에서 git worktree remove가 junction 대상까지 지우는 동작
+---
+## 의미
+사용자 한 줄(«PR #5·#6 머지 진행, CLAUDE.md 가드·경로 정리 PR 포함»)로 S0·S1 산출물이 main에 들어갔다. 정리 중 사고 1건: 워크트리 `haja-wt-s0`를 `git worktree remove`로 지우자 junction으로 연결한 본 레포 `node_modules`까지 비워졌다 — 설치물만 영향, `npm ci`로 복구(test 74/74). 이 교훈과 빈 인덱스 커밋 가드를 CLAUDE.md «커밋 가드»에 한 줄로 넣었다.
+
+---
+date: 2026-10-17
+project: haja-checker-ai
+agent: claude-code
 summary: S0 되살리기 + S1 스파이크 12항목 + Next 유지 vs Vite 재작성 비교표 REPORT
 status: on_track
 progress: "HO-2026-1017 조건 0·1·2·3 끝, 4 게이트 단계 (근거: #4 35319b5 · #5 20f88ef 74/74 · next export build exit 0 · ait build exit 0 · vite build exit 0 · docs/handoffs/HO-2026-1017-haja-spike-S0-S1-REPORT.md)"
