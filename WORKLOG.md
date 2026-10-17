@@ -15,7 +15,7 @@ blockers: 사용자 결정 대기 — 코드 기반 · 저장 구조(iOS Indexed
 learning_need: Windows에서 git worktree remove가 junction 대상까지 지우는 동작
 ---
 ## 의미
-사용자 한 줄(«PR #5·#6 머지 진행, CLAUDE.md 가드·경로 정리 PR 포함»)로 S0·S1 산출물이 main에 들어갔다. 정리 중 사고 1건: 워크트리 `haja-wt-s0`를 `git worktree remove`로 지우자 junction으로 연결한 본 레포 `node_modules`까지 비워졌다 — 설치물만 영향, `npm ci`로 복구(test 74/74). 이 교훈과 빈 인덱스 커밋 가드를 CLAUDE.md «커밋 가드»에 한 줄로 넣었다.
+사용자 한 줄(«PR #5·#6 머지 진행, CLAUDE.md 가드·경로 정리 PR 포함»)로 S0·S1 산출물이 main에 들어갔다. 정리 중 사고 1건: 워크트리 `haja-wt-s0`를 `git worktree remove`로 지우자 junction으로 연결한 본 레포 `node_modules`까지 비워졌다 — 설치물만 영향, `npm ci`로 복구(test 74/74). 이 교훈과 빈 인덱스 커밋 가드를 CLAUDE.md «커밋 가드»에 한 줄로 넣었다. 가드 PR은 #7 bfa4cd2로 머지(critic 7/10 반영 · LC PASS), 사용자 지시로 이 창 마감 — 재개 10-18 밤.
 
 ---
 date: 2026-10-17
