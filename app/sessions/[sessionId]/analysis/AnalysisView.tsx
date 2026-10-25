@@ -13,6 +13,7 @@ import {
 } from "@/lib/repo/analysisRepo";
 import { DEFECT_TYPE_LABELS, RISK_LEVEL_COLORS, RISK_LEVEL_LABELS } from "@/lib/util/labels";
 import AnalysisResultCard from "./AnalysisResultCard";
+import { useAiNoticeGate } from "@/components/useAiNoticeGate";
 import { isAiEnabled, sessionMode } from "@/lib/seed/modes";
 
 interface Props {
@@ -58,30 +59,40 @@ export default function AnalysisView({ sessionId }: Props) {
     [],
   );
 
-  async function runChecklistAnalysis(item: ChecklistAnalyzable) {
-    if (item.photoCount === 0) return;
+  // 첫 AI 분석 직전 1회 고지 — 확인 전에는 사진을 서버로 보내지 않는다
+  const { guarded, dialog: aiNoticeDialog } = useAiNoticeGate();
+
+  /** 상한(429)에 걸리면 true — 일괄 분석이 남은 항목을 계속 보내지 않게 한다. */
+  const isLimited = (err: unknown) => (err as { status?: number })?.status === 429;
+
+  async function runChecklistAnalysis(item: ChecklistAnalyzable): Promise<boolean> {
+    if (item.photoCount === 0) return false;
     setItemState(item.itemId, { id: item.itemId, status: "analyzing" });
     try {
       await analyzeChecklistItem(item.itemId);
       setItemState(item.itemId, null);
       setExpandedIds((prev) => new Set([...prev, item.itemId]));
+      return false;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setItemState(item.itemId, { id: item.itemId, status: "error", error: msg });
+      return isLimited(err);
     }
   }
 
-  async function runDirectAnalysis(entry: DirectAnalyzable) {
-    if (entry.photoCount === 0) return;
+  async function runDirectAnalysis(entry: DirectAnalyzable): Promise<boolean> {
+    if (entry.photoCount === 0) return false;
     const id = entry.defect.id;
     setItemState(id, { id, status: "analyzing" });
     try {
       await analyzeDirectDefect(id);
       setItemState(id, null);
       setExpandedIds((prev) => new Set([...prev, id]));
+      return false;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setItemState(id, { id, status: "error", error: msg });
+      return isLimited(err);
     }
   }
 
@@ -95,15 +106,18 @@ export default function AnalysisView({ sessionId }: Props) {
     setBatchRunning(true);
     setBatchProgress({ done: 0, total });
     let done = 0;
+    let limited = false;
     for (const item of pendingChecklist) {
-      await runChecklistAnalysis(item);
+      limited = await runChecklistAnalysis(item);
       done += 1;
       setBatchProgress({ done, total });
+      if (limited) break;
     }
-    for (const entry of pendingDirect) {
-      await runDirectAnalysis(entry);
+    for (const entry of limited ? [] : pendingDirect) {
+      limited = await runDirectAnalysis(entry);
       done += 1;
       setBatchProgress({ done, total });
+      if (limited) break;
     }
     setBatchRunning(false);
     setBatchProgress(null);
@@ -143,6 +157,7 @@ export default function AnalysisView({ sessionId }: Props) {
 
   return (
     <div className="flex flex-col gap-5">
+      {aiNoticeDialog}
       {/* Batch control */}
       {pendingCount > 0 && (
         <div className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
@@ -154,7 +169,7 @@ export default function AnalysisView({ sessionId }: Props) {
           </div>
           <button
             type="button"
-            onClick={analyzeAll}
+            onClick={() => guarded(analyzeAll)}
             disabled={batchRunning}
             className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
           >
@@ -207,7 +222,7 @@ export default function AnalysisView({ sessionId }: Props) {
                     hasAnalysis={!!item.analysis}
                     analyzing={isAnalyzing}
                     expanded={expanded}
-                    onAnalyze={() => runChecklistAnalysis(item)}
+                    onAnalyze={() => guarded(() => runChecklistAnalysis(item))}
                     onToggle={() => toggleExpand(item.itemId)}
                   />
                 </div>
@@ -227,7 +242,7 @@ export default function AnalysisView({ sessionId }: Props) {
                     <p className="mt-0.5 text-xs text-rose-600">{st.error}</p>
                     <button
                       type="button"
-                      onClick={() => runChecklistAnalysis(item)}
+                      onClick={() => guarded(() => runChecklistAnalysis(item))}
                       className="mt-1.5 rounded-md bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700"
                     >
                       재시도
@@ -304,7 +319,7 @@ export default function AnalysisView({ sessionId }: Props) {
                     hasAnalysis={!!entry.analysis}
                     analyzing={isAnalyzing}
                     expanded={expanded}
-                    onAnalyze={() => runDirectAnalysis(entry)}
+                    onAnalyze={() => guarded(() => runDirectAnalysis(entry))}
                     onToggle={() => toggleExpand(id)}
                   />
                 </div>
@@ -324,7 +339,7 @@ export default function AnalysisView({ sessionId }: Props) {
                     <p className="mt-0.5 text-xs text-rose-600">{st.error}</p>
                     <button
                       type="button"
-                      onClick={() => runDirectAnalysis(entry)}
+                      onClick={() => guarded(() => runDirectAnalysis(entry))}
                       className="mt-1.5 rounded-md bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700"
                     >
                       재시도
