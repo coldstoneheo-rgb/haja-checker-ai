@@ -7,7 +7,8 @@ export const DEFAULT_PATH = "/sessions";
 
 export function pathFromSearch(search: string): string {
   const p = new URLSearchParams(search).get("p");
-  if (!p || !p.startsWith("/") || p === "/") return DEFAULT_PATH;
+  // 앱 안 경로만: 프로토콜 상대(//host)와 슬래시 뒤 역슬래시로 시작하는 경로는 버린다
+  if (!p || !p.startsWith("/") || p === "/" || p.startsWith("//") || p.startsWith("/\\")) return DEFAULT_PATH;
   return p;
 }
 

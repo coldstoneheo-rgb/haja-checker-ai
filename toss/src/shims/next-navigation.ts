@@ -17,9 +17,14 @@ export function usePathname(): string {
 }
 
 export function useParams<T extends Record<string, string>>(): T {
-  const m = usePath().match(/^\/sessions\/([^/]+)(?:\/defects\/([^/]+))?/);
+  return paramsFromPath(usePath()) as T;
+}
+
+export function paramsFromPath(path: string): Record<string, string> {
+  const m = path.match(/^\/sessions\/([^/]+)(?:\/defects\/([^/]+))?/);
   const out: Record<string, string> = {};
-  if (m?.[1] && m[1] !== "new") out.sessionId = decodeURIComponent(m[1]);
-  if (m?.[2]) out.defectId = decodeURIComponent(m[2]);
-  return out as T;
+  // 경로는 URLSearchParams가 이미 디코딩했다 — 다시 decode하면 %zz 같은 입력에서 URIError로 앱이 죽는다
+  if (m?.[1] && m[1] !== "new") out.sessionId = m[1];
+  if (m?.[2] && m[2] !== "new") out.defectId = m[2];
+  return out;
 }
