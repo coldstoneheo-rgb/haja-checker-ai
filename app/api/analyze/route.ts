@@ -4,8 +4,21 @@ import {
   validateAnalyzeInput,
   validateAnalysisPayload,
 } from "@/lib/ai/validation";
+import { MemoryUsageStore, consumeAnalysis } from "@/lib/ai/usageLimit";
 
 export const maxDuration = 60;
+
+// 상한 카운터: 지금은 함수 인스턴스 메모리(인스턴스마다 따로 셈 — 느슨한 상한). KV 어댑터는 S3.
+const usageStore = new MemoryUsageStore();
+const costPerCallUsd = Number(process.env.AI_COST_PER_CALL_USD) || undefined;
+
+/** 토스 식별키(익명 키)가 붙기 전에는 접속 주소로 센다. */
+function userKeyOf(request: NextRequest): string {
+  const anon = request.headers.get("x-haja-user");
+  if (anon && /^[A-Za-z0-9_-]{8,128}$/.test(anon)) return "anon:" + anon;
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return "ip:" + (ip || "unknown");
+}
 
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -20,6 +33,22 @@ export async function POST(request: NextRequest) {
     return Response.json(
       { error: inputError.message, field: inputError.field },
       { status: 400 },
+    );
+  }
+
+  const decision = await consumeAnalysis({
+    store: usageStore,
+    userKey: userKeyOf(request),
+    costPerCallUsd,
+  });
+  if (!decision.allowed) {
+    const message =
+      decision.reason === "MONTHLY_BUDGET"
+        ? "이번 달 AI 분석 제공량이 모두 소진되었습니다. 다음 달에 다시 이용해 주세요."
+        : "오늘 AI 분석 횟수를 모두 사용했습니다.";
+    return Response.json(
+      { error: message, reason: decision.reason, canReward: decision.canReward },
+      { status: 429 },
     );
   }
 

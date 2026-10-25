@@ -9,6 +9,7 @@ import {
   RISK_LEVEL_COLORS,
   RISK_LEVEL_LABELS,
 } from "@/lib/util/labels";
+import { AI_RESULT_LABEL } from "@/lib/ai/notice";
 
 const DEFECT_TYPES = Object.keys(DEFECT_TYPE_LABELS) as DefectType[];
 const REPAIR_DIFFICULTIES = Object.keys(REPAIR_DIFFICULTY_LABELS) as RepairDifficulty[];
@@ -57,6 +58,10 @@ export default function AnalysisResultCard({ defect, analysis }: Props) {
     <div className="flex flex-col gap-3 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
       {/* Header row: defect type + risk level + confidence */}
       <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-full bg-indigo-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+          {AI_RESULT_LABEL}
+        </span>
+
         {editing ? (
           <select
             value={defectType}

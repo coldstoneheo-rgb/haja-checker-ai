@@ -11,6 +11,7 @@ import {
   RISK_LEVEL_COLORS,
   RISK_LEVEL_LABELS,
 } from "@/lib/util/labels";
+import { REPORT_AI_FIXED_TEXT } from "@/lib/ai/notice";
 import type { DefectCandidate, RiskLevel } from "@/lib/domain/types";
 
 interface Props {
@@ -334,6 +335,7 @@ export default function ReportView({ sessionId }: Props) {
         <section className="flex flex-col gap-3 rounded-2xl bg-slate-50 p-6 shadow-sm ring-1 ring-slate-200 print:rounded-none print:shadow-none print:ring-0 print:break-before-page print:pt-10">
           <SectionTitle num={7} title="AI 분석 주의사항 및 면책 고지" />
           <div className="flex flex-col gap-2 text-xs text-slate-600 leading-relaxed">
+            <p className="text-sm font-semibold text-slate-900">{REPORT_AI_FIXED_TEXT}</p>
             <p>
               본 보고서는 사진 기반 AI 보조 분석 결과를 포함하고 있습니다.
               AI 분석 결과는 참고 자료이며, 실제 하자 여부 및 보수 방법은

@@ -13,6 +13,16 @@ import {
 } from "@/lib/repo/analysisRepo";
 import { DEFECT_TYPE_LABELS, RISK_LEVEL_COLORS, RISK_LEVEL_LABELS } from "@/lib/util/labels";
 import AnalysisResultCard from "./AnalysisResultCard";
+import AiNoticeDialog from "@/components/AiNoticeDialog";
+import { ackAiNotice, needsAiNotice } from "@/lib/ai/notice";
+
+function browserStorage(): Storage | null {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
 
 interface Props {
   sessionId: string;
@@ -55,6 +65,13 @@ export default function AnalysisView({ sessionId }: Props) {
       }),
     [],
   );
+
+  // 첫 AI 분석 직전 1회 고지 — 확인 전에는 사진을 서버로 보내지 않는다
+  const [pendingRun, setPendingRun] = useState<(() => void) | null>(null);
+  function guarded(run: () => void) {
+    if (needsAiNotice(browserStorage())) setPendingRun(() => run);
+    else run();
+  }
 
   async function runChecklistAnalysis(item: ChecklistAnalyzable) {
     if (item.photoCount === 0) return;
@@ -132,6 +149,17 @@ export default function AnalysisView({ sessionId }: Props) {
 
   return (
     <div className="flex flex-col gap-5">
+      {pendingRun && (
+        <AiNoticeDialog
+          onCancel={() => setPendingRun(null)}
+          onConfirm={() => {
+            ackAiNotice(browserStorage());
+            const run = pendingRun;
+            setPendingRun(null);
+            run();
+          }}
+        />
+      )}
       {/* Batch control */}
       {pendingCount > 0 && (
         <div className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
@@ -143,7 +171,7 @@ export default function AnalysisView({ sessionId }: Props) {
           </div>
           <button
             type="button"
-            onClick={analyzeAll}
+            onClick={() => guarded(analyzeAll)}
             disabled={batchRunning}
             className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
           >
@@ -216,7 +244,7 @@ export default function AnalysisView({ sessionId }: Props) {
                     <p className="mt-0.5 text-xs text-rose-600">{st.error}</p>
                     <button
                       type="button"
-                      onClick={() => runChecklistAnalysis(item)}
+                      onClick={() => guarded(() => runChecklistAnalysis(item))}
                       className="mt-1.5 rounded-md bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700"
                     >
                       재시도
@@ -313,7 +341,7 @@ export default function AnalysisView({ sessionId }: Props) {
                     <p className="mt-0.5 text-xs text-rose-600">{st.error}</p>
                     <button
                       type="button"
-                      onClick={() => runDirectAnalysis(entry)}
+                      onClick={() => guarded(() => runDirectAnalysis(entry))}
                       className="mt-1.5 rounded-md bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700"
                     >
                       재시도
