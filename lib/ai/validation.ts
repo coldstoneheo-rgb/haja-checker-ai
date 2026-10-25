@@ -131,6 +131,17 @@ export function validateAnalyzeInput(body: unknown): ValidationError | null {
     return { field: "takenAtIso", message: "촬영 시각(takenAtIso)이 필요합니다." };
   }
 
+  // mode — 선택. 입주·퇴거(v1)는 AI off라 서버에서도 거부한다(클라이언트 가드 2중 + 서버 1).
+  // 없으면 통과(구버전 클라이언트) — 비용은 상한 카운터가 막는다.
+  if (b.mode !== undefined) {
+    if (b.mode !== "NEW_BUILD" && b.mode !== "MOVE_IN" && b.mode !== "MOVE_OUT") {
+      return { field: "mode", message: "점검 모드 값이 올바르지 않습니다." };
+    }
+    if (b.mode !== "NEW_BUILD") {
+      return { field: "mode", message: "이 점검 모드에서는 AI 분석을 사용하지 않습니다." };
+    }
+  }
+
   return null;
 }
 

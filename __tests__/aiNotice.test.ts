@@ -60,7 +60,11 @@ describe("AI 분석 진입점은 모두 고지 게이트를 거친다(정적 검
         return statSync(p).isDirectory() ? walk(p) : /\.tsx$/.test(n) ? [p] : [];
       });
     const root = join(__dirname, "..");
-    const callers = [...walk(join(root, "app")), ...walk(join(root, "components"))].filter((f) =>
+    const callers = [
+      ...walk(join(root, "app")),
+      ...walk(join(root, "components")),
+      ...walk(join(root, "toss", "src")),
+    ].filter((f) =>
       /\b(analyzeChecklistItem|analyzeDirectDefect)\(/.test(readFileSync(f, "utf8")),
     );
     expect(callers.length).toBeGreaterThanOrEqual(2);
