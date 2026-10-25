@@ -46,7 +46,8 @@ async function callAnalyzeApi(
 }
 
 
-/** 입주·퇴거 모드(v1)는 AI 분석을 끈다 — 화면이 버튼을 숨겨도 저장소에서 한 번 더 막는다. */
+/** 입주·퇴거 모드(v1)는 AI 분석을 끈다 — 화면(분석·하자 상세)이 버튼을 숨기고, 저장소에서 한 번 더 막는다.
+ * 세션을 못 찾으면 통과시킨다(기존 흐름 유지) — 서버 비용은 /api/analyze 상한 카운터가 막는다. */
 async function assertAiEnabled(sessionId: string): Promise<void> {
   const session = await getDB().sessions.get(sessionId);
   if (session && !isAiEnabled(sessionMode(session))) {

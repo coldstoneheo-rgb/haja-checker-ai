@@ -1,4 +1,4 @@
-import type { InspectionMode, InspectionSession } from "@/lib/domain/types";
+import type { ChecklistItem, InspectionArea, InspectionMode, InspectionSession } from "@/lib/domain/types";
 import { CHECKLIST_SEED, DEFAULT_AREAS, type ChecklistSeedItem } from "@/lib/seed/checklist";
 import { RENTAL_AREAS, RENTAL_CHECKLIST_SEED } from "@/lib/seed/rentalChecklist";
 
@@ -24,4 +24,38 @@ export function sessionMode(session: Pick<InspectionSession, "mode">): Inspectio
 
 export function isAiEnabled(mode: InspectionMode): boolean {
   return MODE_CONFIG[mode].aiEnabled;
+}
+
+/** 세션 생성 시 넣을 공간·항목(순수 함수 — sessionRepo가 트랜잭션으로 저장한다). */
+export function buildSessionSeed(
+  sessionId: string,
+  mode: InspectionMode,
+  now: number,
+  newId: () => string,
+): { areas: InspectionArea[]; items: ChecklistItem[] } {
+  const { areas, seed } = MODE_CONFIG[mode];
+  const areaByName = new Map<string, InspectionArea>();
+  areas.forEach((name, index) => {
+    areaByName.set(name, { id: newId(), sessionId, name, order: index, status: "NOT_STARTED" });
+  });
+  const items: ChecklistItem[] = seed.map((s, index) => {
+    const area = areaByName.get(s.area);
+    if (!area) throw new Error(`Checklist seed references unknown area: ${s.area}`);
+    return {
+      id: newId(),
+      sessionId,
+      areaId: area.id,
+      category: s.category,
+      title: s.title,
+      description: s.description,
+      captureGuide: s.captureGuide,
+      requiredPhotoCount: s.requiredPhotoCount,
+      priority: s.priority,
+      status: "NOT_STARTED",
+      isUserAdded: false,
+      order: index,
+      updatedAt: now,
+    };
+  });
+  return { areas: Array.from(areaByName.values()), items };
 }

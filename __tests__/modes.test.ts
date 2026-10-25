@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { MODE_CONFIG, isAiEnabled, sessionMode } from "@/lib/seed/modes";
+import { MODE_CONFIG, buildSessionSeed, isAiEnabled, sessionMode } from "@/lib/seed/modes";
 import { CHECKLIST_SEED } from "@/lib/seed/checklist";
 import { RENTAL_AREAS, RENTAL_CHECKLIST_SEED } from "@/lib/seed/rentalChecklist";
 import { INSPECTION_MODE_LABELS, RECIPIENT_TYPE_LABELS } from "@/lib/util/labels";
@@ -80,5 +80,32 @@ describe("모드·수신처 라벨", () => {
   it("모든 값에 한국어 라벨", () => {
     for (const m of MODES) expect(INSPECTION_MODE_LABELS[m]).toBeTruthy();
     for (const r of RECIPIENTS) expect(RECIPIENT_TYPE_LABELS[r]).toBeTruthy();
+  });
+});
+
+describe("buildSessionSeed — 세션 생성 시 실제로 넣는 공간·항목", () => {
+  let n = 0;
+  const id = () => `id-${++n}`;
+
+  it.each([
+    ["NEW_BUILD", 12, 28],
+    ["MOVE_IN", 9, 20],
+    ["MOVE_OUT", 9, 20],
+  ] as const)("%s: 공간 %i · 항목 %i, 모든 항목이 그 세션의 공간을 가리킨다", (mode, areaCount, itemCount) => {
+    const { areas, items } = buildSessionSeed("s1", mode, 1000, id);
+    expect(areas).toHaveLength(areaCount);
+    expect(items).toHaveLength(itemCount);
+    const areaIds = new Set(areas.map((a) => a.id));
+    for (const it of items) {
+      expect(areaIds.has(it.areaId)).toBe(true);
+      expect(it.sessionId).toBe("s1");
+      expect(it.status).toBe("NOT_STARTED");
+    }
+  });
+
+  it("임대 모드 세션 항목은 임대 시드 제목이다(신축 시드로 새지 않는다)", () => {
+    const { items } = buildSessionSeed("s2", "MOVE_OUT", 1000, id);
+    expect(items.some((i) => i.title === "열쇠·카드키·리모컨 수량")).toBe(true);
+    expect(items.some((i) => i.title === "공용욕실 바닥 구배 및 배수")).toBe(false);
   });
 });

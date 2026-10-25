@@ -9,7 +9,9 @@ import {
   REPAIR_DIFFICULTY_LABELS,
   RISK_LEVEL_LABELS,
 } from "@/lib/util/labels";
-import { DEFAULT_AREAS } from "@/lib/seed/checklist";
+import { useLiveQuery } from "dexie-react-hooks";
+import { getDB } from "@/lib/db/db";
+import { MODE_CONFIG, sessionMode } from "@/lib/seed/modes";
 
 const DEFECT_TYPES = Object.keys(DEFECT_TYPE_LABELS) as DefectType[];
 const RISK_LEVELS = Object.keys(RISK_LEVEL_LABELS) as RiskLevel[];
@@ -26,7 +28,10 @@ export default function NewDefectForm({ sessionId }: Props) {
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [areaName, setAreaName] = useState(DEFAULT_AREAS[0]);
+  const session = useLiveQuery(() => getDB().sessions.get(sessionId), [sessionId]);
+  // 공간 목록은 세션 모드의 시드 공간(임대: 욕실·침실·전기·설비 …)
+  const areas = MODE_CONFIG[session ? sessionMode(session) : "NEW_BUILD"].areas;
+  const [areaName, setAreaName] = useState(areas[0]);
   const [customArea, setCustomArea] = useState("");
   const [useCustomArea, setUseCustomArea] = useState(false);
   const [detailLocation, setDetailLocation] = useState("");
@@ -78,7 +83,7 @@ export default function NewDefectForm({ sessionId }: Props) {
               onChange={(e) => setAreaName(e.target.value)}
               className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
             >
-              {DEFAULT_AREAS.map((a) => (
+              {areas.map((a) => (
                 <option key={a} value={a}>
                   {a}
                 </option>

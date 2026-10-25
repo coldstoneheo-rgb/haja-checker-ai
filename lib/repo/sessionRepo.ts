@@ -1,13 +1,11 @@
 import { getDB } from "@/lib/db/db";
 import { newId } from "@/lib/db/id";
 import type {
-  ChecklistItem,
-  InspectionArea,
   InspectionMode,
   InspectionSession,
   RecipientType,
 } from "@/lib/domain/types";
-import { MODE_CONFIG } from "@/lib/seed/modes";
+import { buildSessionSeed } from "@/lib/seed/modes";
 
 export interface CreateSessionInput {
   complexName: string;
@@ -36,7 +34,6 @@ export async function createSessionWithSeed(
   const now = Date.now();
   const sessionId = newId();
   const mode = input.mode ?? "NEW_BUILD";
-  const { areas, seed: modeSeed } = MODE_CONFIG[mode];
 
   const session: InspectionSession = {
     id: sessionId,
@@ -56,40 +53,7 @@ export async function createSessionWithSeed(
     updatedAt: now,
   };
 
-  const areaByName = new Map<string, InspectionArea>();
-  areas.forEach((name, index) => {
-    areaByName.set(name, {
-      id: newId(),
-      sessionId,
-      name,
-      order: index,
-      status: "NOT_STARTED",
-    });
-  });
-
-  const items: ChecklistItem[] = modeSeed.map((seed, index) => {
-    const area = areaByName.get(seed.area);
-    if (!area) {
-      throw new Error(
-        `Checklist seed references unknown area: ${seed.area}`,
-      );
-    }
-    return {
-      id: newId(),
-      sessionId,
-      areaId: area.id,
-      category: seed.category,
-      title: seed.title,
-      description: seed.description,
-      captureGuide: seed.captureGuide,
-      requiredPhotoCount: seed.requiredPhotoCount,
-      priority: seed.priority,
-      status: "NOT_STARTED",
-      isUserAdded: false,
-      order: index,
-      updatedAt: now,
-    };
-  });
+  const { areas, items } = buildSessionSeed(sessionId, mode, now, newId);
 
   await db.transaction(
     "rw",
@@ -98,7 +62,7 @@ export async function createSessionWithSeed(
     db.checklistItems,
     async () => {
       await db.sessions.add(session);
-      await db.areas.bulkAdd(Array.from(areaByName.values()));
+      await db.areas.bulkAdd(areas);
       await db.checklistItems.bulkAdd(items);
     },
   );
