@@ -1,11 +1,11 @@
 import { getDB } from "@/lib/db/db";
 import { newId } from "@/lib/db/id";
 import type {
-  ChecklistItem,
-  InspectionArea,
+  InspectionMode,
   InspectionSession,
+  RecipientType,
 } from "@/lib/domain/types";
-import { CHECKLIST_SEED, DEFAULT_AREAS } from "@/lib/seed/checklist";
+import { buildSessionSeed } from "@/lib/seed/modes";
 
 export interface CreateSessionInput {
   complexName: string;
@@ -17,11 +17,14 @@ export interface CreateSessionInput {
   inspectionDate: string;
   moveInDate?: string;
   builderName?: string;
+  /** 없으면 NEW_BUILD */
+  mode?: InspectionMode;
+  recipientType?: RecipientType;
 }
 
 /**
  * 새 점검 세션 + 기본 areas + 체크리스트 항목까지 트랜잭션으로 한 번에 만든다.
- * areas 는 DEFAULT_AREAS 기준이며, CHECKLIST_SEED 에 등록된 공간만 실제
+ * areas·항목은 모드별 MODE_CONFIG(신축 28 / 입주·퇴거 20) 기준이며, 시드에 등록된 공간만 실제
  * 항목을 갖는다.
  */
 export async function createSessionWithSeed(
@@ -30,9 +33,12 @@ export async function createSessionWithSeed(
   const db = getDB();
   const now = Date.now();
   const sessionId = newId();
+  const mode = input.mode ?? "NEW_BUILD";
 
   const session: InspectionSession = {
     id: sessionId,
+    mode,
+    recipientType: input.recipientType,
     complexName: input.complexName.trim(),
     buildingNo: input.buildingNo.trim(),
     unitNo: input.unitNo.trim(),
@@ -47,40 +53,7 @@ export async function createSessionWithSeed(
     updatedAt: now,
   };
 
-  const areaByName = new Map<string, InspectionArea>();
-  DEFAULT_AREAS.forEach((name, index) => {
-    areaByName.set(name, {
-      id: newId(),
-      sessionId,
-      name,
-      order: index,
-      status: "NOT_STARTED",
-    });
-  });
-
-  const items: ChecklistItem[] = CHECKLIST_SEED.map((seed, index) => {
-    const area = areaByName.get(seed.area);
-    if (!area) {
-      throw new Error(
-        `Checklist seed references unknown area: ${seed.area}`,
-      );
-    }
-    return {
-      id: newId(),
-      sessionId,
-      areaId: area.id,
-      category: seed.category,
-      title: seed.title,
-      description: seed.description,
-      captureGuide: seed.captureGuide,
-      requiredPhotoCount: seed.requiredPhotoCount,
-      priority: seed.priority,
-      status: "NOT_STARTED",
-      isUserAdded: false,
-      order: index,
-      updatedAt: now,
-    };
-  });
+  const { areas, items } = buildSessionSeed(sessionId, mode, now, newId);
 
   await db.transaction(
     "rw",
@@ -89,7 +62,7 @@ export async function createSessionWithSeed(
     db.checklistItems,
     async () => {
       await db.sessions.add(session);
-      await db.areas.bulkAdd(Array.from(areaByName.values()));
+      await db.areas.bulkAdd(areas);
       await db.checklistItems.bulkAdd(items);
     },
   );

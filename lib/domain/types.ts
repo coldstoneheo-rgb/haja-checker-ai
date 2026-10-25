@@ -59,8 +59,17 @@ export type DefectStatus =
   | "REPAIRED"
   | "REJECTED";
 
+/** 점검 모드: 신축 사전점검(AI on) · 입주 상태 기록 · 퇴거 상태 기록(v1은 AI off). */
+export type InspectionMode = "NEW_BUILD" | "MOVE_IN" | "MOVE_OUT";
+
+/** 보고서 수신처(화면 문구 «수신처»). */
+export type RecipientType = "BUILDER" | "MANAGEMENT_OFFICE" | "HOUSE_OWNER";
+
 export interface InspectionSession {
   id: string;
+  /** v2부터. 없으면 NEW_BUILD(v1 세션). */
+  mode?: InspectionMode;
+  recipientType?: RecipientType;
   complexName: string;
   buildingNo: string;
   unitNo: string;

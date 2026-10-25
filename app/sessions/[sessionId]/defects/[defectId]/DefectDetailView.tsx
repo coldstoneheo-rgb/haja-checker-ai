@@ -17,6 +17,7 @@ import PhotoCaptureButton from "../../checklist/PhotoCaptureButton";
 import PhotoThumbnail from "../../checklist/PhotoThumbnail";
 import PhotoViewer from "../../checklist/PhotoViewer";
 import AnalysisResultCard from "../../analysis/AnalysisResultCard";
+import { isAiEnabled, sessionMode } from "@/lib/seed/modes";
 
 interface Props {
   sessionId: string;
@@ -28,6 +29,9 @@ export default function DefectDetailView({ sessionId, defectId }: Props) {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
+  const session = useLiveQuery(() => getDB().sessions.get(sessionId), [sessionId]);
+  // 세션을 읽기 전에는 버튼을 숨겨 둔다(임대 모드에서 깜빡이며 보이지 않게)
+  const aiOn = session ? isAiEnabled(sessionMode(session)) : false;
   const defect = useLiveQuery(
     () => getDB().defects.get(defectId),
     [defectId],
@@ -189,7 +193,7 @@ export default function DefectDetailView({ sessionId, defectId }: Props) {
           </div>
         )}
 
-        {!analyzing && (
+        {!analyzing && aiOn && (
           <button
             type="button"
             onClick={runAnalysis}

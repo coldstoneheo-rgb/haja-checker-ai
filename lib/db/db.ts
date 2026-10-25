@@ -31,6 +31,17 @@ export class HajaCheckerDB extends Dexie {
       analyses: "id, defectCandidateId, createdAt",
       reports: "id, sessionId, createdAt",
     });
+    // v2: 세션 mode(신축·입주·퇴거) 인덱스 — 기존 세션은 신축으로 채운다.
+    this.version(2)
+      .stores({ sessions: "id, status, mode, createdAt, updatedAt" })
+      .upgrade((tx) =>
+        tx
+          .table("sessions")
+          .toCollection()
+          .modify((s: InspectionSession) => {
+            if (!s.mode) s.mode = "NEW_BUILD";
+          }),
+      );
   }
 }
 
