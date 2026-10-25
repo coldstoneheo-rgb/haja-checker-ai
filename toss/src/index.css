@@ -1,0 +1,13 @@
+@import "tailwindcss";
+/* 전환기: 레포 원본 화면(app/·components/)을 그대로 import하므로 그쪽 클래스도 스캔 */
+@source "../../app";
+@source "../../components";
+
+html,
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  font-family: "Pretendard", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
