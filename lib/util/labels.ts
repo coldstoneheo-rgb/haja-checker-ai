@@ -2,9 +2,23 @@ import type {
   ChecklistItemStatus,
   DefectType,
   DefectStatus,
+  InspectionMode,
+  RecipientType,
   RepairDifficulty,
   RiskLevel,
 } from "@/lib/domain/types";
+
+export const INSPECTION_MODE_LABELS: Record<InspectionMode, string> = {
+  NEW_BUILD: "신축 사전점검",
+  MOVE_IN: "입주 상태 기록",
+  MOVE_OUT: "퇴거 상태 기록",
+};
+
+export const RECIPIENT_TYPE_LABELS: Record<RecipientType, string> = {
+  BUILDER: "시공사",
+  MANAGEMENT_OFFICE: "관리사무소",
+  HOUSE_OWNER: "집주인",
+};
 
 export const DEFECT_TYPE_LABELS: Record<DefectType, string> = {
   CRACK: "균열",

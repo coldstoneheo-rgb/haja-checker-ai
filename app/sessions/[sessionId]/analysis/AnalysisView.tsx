@@ -14,6 +14,7 @@ import {
 import { DEFECT_TYPE_LABELS, RISK_LEVEL_COLORS, RISK_LEVEL_LABELS } from "@/lib/util/labels";
 import AnalysisResultCard from "./AnalysisResultCard";
 import { useAiNoticeGate } from "@/components/useAiNoticeGate";
+import { isAiEnabled, sessionMode } from "@/lib/seed/modes";
 
 interface Props {
   sessionId: string;
@@ -32,6 +33,7 @@ export default function AnalysisView({ sessionId }: Props) {
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
 
   const data = useLiveQuery(() => loadAnalysisPageData(sessionId), [sessionId]);
+  const session = useLiveQuery(() => getDB().sessions.get(sessionId), [sessionId]);
   const allDefects = useLiveQuery(
     () => getDB().defects.where("sessionId").equals(sessionId).toArray(),
     [sessionId],
@@ -122,6 +124,15 @@ export default function AnalysisView({ sessionId }: Props) {
   }
 
   if (!data) return <p className="text-sm text-slate-500">불러오는 중…</p>;
+
+  if (session && !isAiEnabled(sessionMode(session))) {
+    return (
+      <div className="rounded-2xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200">
+        <p className="text-sm text-slate-500">이 점검 종류는 AI 분석을 쓰지 않아요.</p>
+        <p className="mt-1 text-xs text-slate-400">사진과 체크리스트 기록은 그대로 보고서에 담겨요.</p>
+      </div>
+    );
+  }
 
   const defectMap = new Map((allDefects ?? []).map((d) => [d.id, d]));
 

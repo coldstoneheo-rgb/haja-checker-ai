@@ -3,8 +3,20 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { createSessionWithSeed } from "@/lib/repo/sessionRepo";
+import type { InspectionMode, RecipientType } from "@/lib/domain/types";
+import { INSPECTION_MODE_LABELS, RECIPIENT_TYPE_LABELS } from "@/lib/util/labels";
+
+const MODES = Object.keys(INSPECTION_MODE_LABELS) as InspectionMode[];
+const RECIPIENTS = Object.keys(RECIPIENT_TYPE_LABELS) as RecipientType[];
+const DEFAULT_RECIPIENT: Record<InspectionMode, RecipientType> = {
+  NEW_BUILD: "BUILDER",
+  MOVE_IN: "HOUSE_OWNER",
+  MOVE_OUT: "HOUSE_OWNER",
+};
 
 interface FormState {
+  mode: InspectionMode;
+  recipientType: RecipientType;
   complexName: string;
   buildingNo: string;
   unitNo: string;
@@ -17,6 +29,8 @@ interface FormState {
 }
 
 const INITIAL: FormState = {
+  mode: "NEW_BUILD",
+  recipientType: "BUILDER",
   complexName: "",
   buildingNo: "",
   unitNo: "",
@@ -68,6 +82,43 @@ export default function NewSessionForm() {
 
   return (
     <form className="flex flex-col gap-5" onSubmit={onSubmit}>
+      <fieldset className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <legend className="text-sm font-semibold text-slate-900">점검 종류</legend>
+        <div className="grid grid-cols-3 gap-2">
+          {MODES.map((m) => (
+            <button
+              key={m}
+              type="button"
+              aria-pressed={state.mode === m}
+              onClick={() =>
+                setState((prev) => ({ ...prev, mode: m, recipientType: DEFAULT_RECIPIENT[m] }))
+              }
+              className={`rounded-xl px-2 py-2.5 text-sm font-semibold ring-1 ${
+                state.mode === m
+                  ? "bg-slate-900 text-white ring-slate-900"
+                  : "bg-white text-slate-700 ring-slate-200"
+              }`}
+            >
+              {INSPECTION_MODE_LABELS[m]}
+            </button>
+          ))}
+        </div>
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="font-medium text-slate-700">수신처</span>
+          <select
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 focus:border-slate-900 focus:outline-none"
+            value={state.recipientType}
+            onChange={(e) => update("recipientType", e.target.value as RecipientType)}
+          >
+            {RECIPIENTS.map((r) => (
+              <option key={r} value={r}>
+                {RECIPIENT_TYPE_LABELS[r]}
+              </option>
+            ))}
+          </select>
+        </label>
+      </fieldset>
+
       <fieldset className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <legend className="text-sm font-semibold text-slate-900">세대 정보</legend>
         <Field

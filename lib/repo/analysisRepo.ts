@@ -4,6 +4,7 @@ import { getDB } from "@/lib/db/db";
 import { newId, newDefectDisplayId, computeNextDefectSequence } from "@/lib/db/id";
 import type { AiAnalysisPayload } from "@/lib/ai/types";
 import type { AiAnalysisResult, DefectCandidate } from "@/lib/domain/types";
+import { isAiEnabled, sessionMode } from "@/lib/seed/modes";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -47,6 +48,15 @@ async function callAnalyzeApi(
 }
 
 
+/** 입주·퇴거 모드(v1)는 AI 분석을 끈다 — 화면(분석·하자 상세)이 버튼을 숨기고, 저장소에서 한 번 더 막는다.
+ * 세션을 못 찾으면 통과시킨다(기존 흐름 유지) — 서버 비용은 /api/analyze 상한 카운터가 막는다. */
+async function assertAiEnabled(sessionId: string): Promise<void> {
+  const session = await getDB().sessions.get(sessionId);
+  if (session && !isAiEnabled(sessionMode(session))) {
+    throw new Error("이 점검 모드에서는 AI 분석을 사용하지 않습니다.");
+  }
+}
+
 /** Analyze a checklist item (SUSPECTED/DEFECT). Creates or updates a linked DefectCandidate. */
 export async function analyzeChecklistItem(
   itemId: string,
@@ -59,6 +69,7 @@ export async function analyzeChecklistItem(
     db.photos.where("checklistItemId").equals(itemId).toArray(),
   ]);
   if (!item) throw new Error(`체크리스트 항목을 찾을 수 없습니다 (${itemId})`);
+  await assertAiEnabled(item.sessionId);
   if (photos.length === 0)
     throw new Error("사진이 없습니다. 먼저 사진을 촬영해 주세요.");
 
@@ -185,6 +196,7 @@ export async function analyzeDirectDefect(
     db.photos.where("defectCandidateId").equals(defectId).toArray(),
   ]);
   if (!defect) throw new Error(`하자를 찾을 수 없습니다 (${defectId})`);
+  await assertAiEnabled(defect.sessionId);
 
   // Direct defects may have no photos — still try with text-only context
   const photoInputs = await Promise.all(
