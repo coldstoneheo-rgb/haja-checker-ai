@@ -67,9 +67,9 @@ describe("AI 분석 진입점은 모두 고지 게이트를 거친다(정적 검
     for (const f of callers) {
       const src = readFileSync(f, "utf8");
       expect(src.includes("useAiNoticeGate()"), f).toBe(true);
-      // 버튼에서 run*을 직접 부르지 않는다
-      expect(/on(Click|Analyze)=\{\(\) => run\w+\(/.test(src), f).toBe(false);
-      expect(/onClick=\{run\w+\}/.test(src), f).toBe(false);
+      // 버튼에서 run*·analyzeAll을 guarded 없이 부르지 않는다
+      expect(/on(Click|Analyze)=\{\(\) => (run\w+|analyzeAll)\(/.test(src), f).toBe(false);
+      expect(/on(Click|Analyze)=\{(run\w+|analyzeAll)\}/.test(src), f).toBe(false);
     }
   });
 });
