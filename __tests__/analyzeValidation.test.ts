@@ -162,3 +162,13 @@ describe("validateAnalysisPayload", () => {
     expect(validateAnalysisPayload("string")).not.toBeNull();
   });
 });
+
+describe("validateAnalyzeInput — 점검 모드 서버 가드", () => {
+  it("신축·mode 없음은 통과, 입주·퇴거는 거부, 잘못된 값은 거부", () => {
+    expect(validateAnalyzeInput({ ...validInput, mode: "NEW_BUILD" })).toBeNull();
+    expect(validateAnalyzeInput(validInput)).toBeNull();
+    expect(validateAnalyzeInput({ ...validInput, mode: "MOVE_IN" })?.field).toBe("mode");
+    expect(validateAnalyzeInput({ ...validInput, mode: "MOVE_OUT" })?.field).toBe("mode");
+    expect(validateAnalyzeInput({ ...validInput, mode: "RENT" })?.field).toBe("mode");
+  });
+});
