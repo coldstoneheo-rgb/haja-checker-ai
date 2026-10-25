@@ -3,9 +3,11 @@ import { newId } from "@/lib/db/id";
 import type {
   ChecklistItem,
   InspectionArea,
+  InspectionMode,
   InspectionSession,
+  RecipientType,
 } from "@/lib/domain/types";
-import { CHECKLIST_SEED, DEFAULT_AREAS } from "@/lib/seed/checklist";
+import { MODE_CONFIG } from "@/lib/seed/modes";
 
 export interface CreateSessionInput {
   complexName: string;
@@ -17,11 +19,14 @@ export interface CreateSessionInput {
   inspectionDate: string;
   moveInDate?: string;
   builderName?: string;
+  /** 없으면 NEW_BUILD */
+  mode?: InspectionMode;
+  recipientType?: RecipientType;
 }
 
 /**
  * 새 점검 세션 + 기본 areas + 체크리스트 항목까지 트랜잭션으로 한 번에 만든다.
- * areas 는 DEFAULT_AREAS 기준이며, CHECKLIST_SEED 에 등록된 공간만 실제
+ * areas·항목은 모드별 MODE_CONFIG(신축 28 / 입주·퇴거 20) 기준이며, 시드에 등록된 공간만 실제
  * 항목을 갖는다.
  */
 export async function createSessionWithSeed(
@@ -30,9 +35,13 @@ export async function createSessionWithSeed(
   const db = getDB();
   const now = Date.now();
   const sessionId = newId();
+  const mode = input.mode ?? "NEW_BUILD";
+  const { areas, seed: modeSeed } = MODE_CONFIG[mode];
 
   const session: InspectionSession = {
     id: sessionId,
+    mode,
+    recipientType: input.recipientType,
     complexName: input.complexName.trim(),
     buildingNo: input.buildingNo.trim(),
     unitNo: input.unitNo.trim(),
@@ -48,7 +57,7 @@ export async function createSessionWithSeed(
   };
 
   const areaByName = new Map<string, InspectionArea>();
-  DEFAULT_AREAS.forEach((name, index) => {
+  areas.forEach((name, index) => {
     areaByName.set(name, {
       id: newId(),
       sessionId,
@@ -58,7 +67,7 @@ export async function createSessionWithSeed(
     });
   });
 
-  const items: ChecklistItem[] = CHECKLIST_SEED.map((seed, index) => {
+  const items: ChecklistItem[] = modeSeed.map((seed, index) => {
     const area = areaByName.get(seed.area);
     if (!area) {
       throw new Error(
