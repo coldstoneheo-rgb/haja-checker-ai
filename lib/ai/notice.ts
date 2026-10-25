@@ -13,7 +13,7 @@ export const AI_FIRST_USE_NOTICE = {
   lines: [
     "사진을 AI가 분석해 하자 의심 여부를 알려 드려요.",
     "결과는 AI 참고 의견이며 확정 판정이 아닙니다.",
-    "분석할 때만 사진이 서버를 거치고, 서버에 저장하지 않아요.",
+    "분석할 때만 사진이 Google Gemini로 전송되고, 하자체크 서버에는 저장하지 않아요.",
   ],
   confirm: "확인했어요",
 } as const;

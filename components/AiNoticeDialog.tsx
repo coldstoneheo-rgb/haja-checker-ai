@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { AI_FIRST_USE_NOTICE } from "@/lib/ai/notice";
 
 /** 첫 AI 분석 직전 1회 고지(생성형 AI 사전 고지). 확인해야 분석을 진행한다. */
@@ -10,6 +11,15 @@ export default function AiNoticeDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  // Esc = 취소(분석하지 않음)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onCancel]);
+
   return (
     <div
       role="dialog"
@@ -39,6 +49,7 @@ export default function AiNoticeDialog({
           </button>
           <button
             type="button"
+            autoFocus
             onClick={onConfirm}
             className="flex-1 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white"
           >

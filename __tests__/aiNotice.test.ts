@@ -49,3 +49,27 @@ describe("고지·라벨 문구", () => {
     expect(AI_FIRST_USE_NOTICE.lines.join(" ")).toContain("확정 판정이 아닙니다");
   });
 });
+
+describe("AI 분석 진입점은 모두 고지 게이트를 거친다(정적 검사)", () => {
+  it("analyzeChecklistItem·analyzeDirectDefect를 부르는 화면은 useAiNoticeGate를 쓴다", async () => {
+    const { readdirSync, readFileSync, statSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const walk = (d: string): string[] =>
+      readdirSync(d).flatMap((n) => {
+        const p = join(d, n);
+        return statSync(p).isDirectory() ? walk(p) : /\.tsx$/.test(n) ? [p] : [];
+      });
+    const root = join(__dirname, "..");
+    const callers = [...walk(join(root, "app")), ...walk(join(root, "components"))].filter((f) =>
+      /\b(analyzeChecklistItem|analyzeDirectDefect)\(/.test(readFileSync(f, "utf8")),
+    );
+    expect(callers.length).toBeGreaterThanOrEqual(2);
+    for (const f of callers) {
+      const src = readFileSync(f, "utf8");
+      expect(src.includes("useAiNoticeGate()"), f).toBe(true);
+      // 버튼에서 run*을 직접 부르지 않는다
+      expect(/on(Click|Analyze)=\{\(\) => run\w+\(/.test(src), f).toBe(false);
+      expect(/onClick=\{run\w+\}/.test(src), f).toBe(false);
+    }
+  });
+});

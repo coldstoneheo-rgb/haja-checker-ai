@@ -39,7 +39,9 @@ async function callAnalyzeApi(
     error?: string;
   };
   if (!response.ok) {
-    throw new Error((data as { error?: string }).error ?? `HTTP ${response.status}`);
+    throw Object.assign(new Error((data as { error?: string }).error ?? `HTTP ${response.status}`), {
+      status: response.status,
+    });
   }
   return data;
 }

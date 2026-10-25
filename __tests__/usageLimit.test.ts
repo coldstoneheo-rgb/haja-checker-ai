@@ -7,6 +7,8 @@ import {
   dailyLimit,
   grantReward,
   kstDay,
+  parseCostPerCall,
+  usageKeys,
 } from "@/lib/ai/usageLimit";
 
 const NOW = new Date("2026-10-26T03:00:00Z"); // KST 12:00
@@ -85,5 +87,48 @@ describe("월 예산 $30", () => {
     expect((await consumeAnalysis({ store, userKey: "x", now: NOW, costPerCallUsd: 1 })).allowed).toBe(false);
     const nextMonth = new Date("2026-10-31T15:00:00Z"); // KST 11-01 00:00
     expect((await consumeAnalysis({ store, userKey: "x", now: nextMonth, costPerCallUsd: 1 })).allowed).toBe(true);
+  });
+});
+
+describe("거절은 카운터를 늘리지 않는다 · 동시성 · 경계", () => {
+  it("하루 상한 거절 뒤 used·spend 그대로", async () => {
+    const store = new MemoryUsageStore();
+    await useN(store, 30);
+    const used = await store.get(usageKeys.used(user, NOW));
+    const spend = await store.get(usageKeys.spend(NOW));
+    await consumeAnalysis({ store, userKey: user, now: NOW });
+    expect(await store.get(usageKeys.used(user, NOW))).toBe(used);
+    expect(await store.get(usageKeys.spend(NOW))).toBe(spend);
+  });
+
+  it("월 예산 거절 뒤 spend 그대로", async () => {
+    const store = new MemoryUsageStore();
+    await consumeAnalysis({ store, userKey: "a", now: NOW, costPerCallUsd: 30 });
+    const spend = await store.get(usageKeys.spend(NOW));
+    await consumeAnalysis({ store, userKey: "b", now: NOW, costPerCallUsd: 1 });
+    expect(await store.get(usageKeys.spend(NOW))).toBe(spend);
+  });
+
+  it("used=29에서 동시 2건 → 1건만 허용", async () => {
+    const store = new MemoryUsageStore();
+    await useN(store, 29);
+    const r = await Promise.all([
+      consumeAnalysis({ store, userKey: user, now: NOW }),
+      consumeAnalysis({ store, userKey: user, now: NOW }),
+    ]);
+    expect(r.filter((d) => d.allowed)).toHaveLength(1);
+    expect(await store.get(usageKeys.used(user, NOW))).toBe(30);
+  });
+
+  it("KST 경계 반대쪽: 14:59:59Z는 아직 같은 날", () => {
+    expect(kstDay(new Date("2026-10-26T14:59:59Z"))).toBe("2026-10-26");
+  });
+
+  it("원가 env: 유한한 양수만", () => {
+    expect(parseCostPerCall("0.004")).toBe(0.004);
+    expect(parseCostPerCall("-0.01")).toBeUndefined();
+    expect(parseCostPerCall("0")).toBeUndefined();
+    expect(parseCostPerCall("abc")).toBeUndefined();
+    expect(parseCostPerCall(undefined)).toBeUndefined();
   });
 });

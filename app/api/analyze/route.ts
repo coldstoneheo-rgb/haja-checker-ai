@@ -4,18 +4,20 @@ import {
   validateAnalyzeInput,
   validateAnalysisPayload,
 } from "@/lib/ai/validation";
-import { MemoryUsageStore, consumeAnalysis } from "@/lib/ai/usageLimit";
+import { MemoryUsageStore, consumeAnalysis, parseCostPerCall } from "@/lib/ai/usageLimit";
 
 export const maxDuration = 60;
 
-// 상한 카운터: 지금은 함수 인스턴스 메모리(인스턴스마다 따로 셈 — 느슨한 상한). KV 어댑터는 S3.
+// 상한 카운터: 지금은 함수 인스턴스 메모리 — 한계는 lib/ai/usageLimit.ts 머리말(월 예산 미보장). KV 어댑터는 S3.
 const usageStore = new MemoryUsageStore();
-const costPerCallUsd = Number(process.env.AI_COST_PER_CALL_USD) || undefined;
+const costPerCallUsd = parseCostPerCall(process.env.AI_COST_PER_CALL_USD);
 
-/** 토스 식별키(익명 키)가 붙기 전에는 접속 주소로 센다. */
+/**
+ * 사용자 키 = 접속 주소. 클라이언트가 보내는 헤더(식별키 등)는 서버 검증 수단이 붙기 전까지 믿지 않는다.
+ * x-forwarded-for 첫 값은 Vercel이 덮어써서 믿을 만하다(Vercel 밖에 두면 위조 가능).
+ * 한계: 통신사 공유 IP(CGNAT)에서는 여러 사용자가 30회를 나눠 쓴다.
+ */
 function userKeyOf(request: NextRequest): string {
-  const anon = request.headers.get("x-haja-user");
-  if (anon && /^[A-Za-z0-9_-]{8,128}$/.test(anon)) return "anon:" + anon;
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   return "ip:" + (ip || "unknown");
 }

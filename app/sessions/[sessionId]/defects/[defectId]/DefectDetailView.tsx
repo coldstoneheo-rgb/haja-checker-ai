@@ -17,6 +17,7 @@ import PhotoCaptureButton from "../../checklist/PhotoCaptureButton";
 import PhotoThumbnail from "../../checklist/PhotoThumbnail";
 import PhotoViewer from "../../checklist/PhotoViewer";
 import AnalysisResultCard from "../../analysis/AnalysisResultCard";
+import { useAiNoticeGate } from "@/components/useAiNoticeGate";
 
 interface Props {
   sessionId: string;
@@ -27,6 +28,7 @@ export default function DefectDetailView({ sessionId, defectId }: Props) {
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const { guarded, dialog: aiNoticeDialog } = useAiNoticeGate();
 
   const defect = useLiveQuery(
     () => getDB().defects.get(defectId),
@@ -82,6 +84,7 @@ export default function DefectDetailView({ sessionId, defectId }: Props) {
 
   return (
     <div className="flex flex-col gap-5">
+      {aiNoticeDialog}
       {/* Defect summary */}
       <section className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <div className="flex items-start justify-between gap-2">
@@ -192,7 +195,7 @@ export default function DefectDetailView({ sessionId, defectId }: Props) {
         {!analyzing && (
           <button
             type="button"
-            onClick={runAnalysis}
+            onClick={() => guarded(runAnalysis)}
             disabled={!photos || photos.length === 0}
             className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
           >
