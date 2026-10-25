@@ -3,6 +3,22 @@
 규약: https://github.com/coldstoneheo-rgb/life-coordinator/blob/main/docs/WORKLOG_PROTOCOL.md (최신이 위, append-only)
 
 ---
+date: 2026-10-26
+project: haja-checker-ai
+agent: claude-code
+summary: S2 전환 착수 — Vite(toss/) 골격·모드 3종·AI 고지·상한 카운터·동의 문안 초안·비게임 자가 점검표
+status: on_track
+progress: "HO-2026-1026-haja-s2-start-01 조건 1~7 끝 (근거: #11 19e6cda · #12 57513ab · #13 6ac6a15 · #14 71ba72f · #15 b174dc0 · npm test 116/116 · typecheck 0 · next build 0 · build:toss(ait build) 0)"
+changes: ["https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/11 Vite 골격", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/12 모드 3종", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/13 고지·상한", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/14 동의·자가점검", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/15 서버 mode 가드"]
+next: toss 이식 9화면(Next 제거) → 실기기 전 스텁(카메라·공유·광고·식별키) → QR 10-29
+blockers: 문안 확정(사용자) · 월 $30 상한은 메모리 어댑터라 미보장 — KV(S3) 전 GCP 예산 한도 필요
+monetization: 광고(전면·리워드) 미배선 — 상한 카운터에 리워드 +10 자리만(grantReward, 라우트 미노출)
+learning_need: 토스 WebView에서 pushState 쿼리 라우팅과 백버튼 관계(실기기)
+---
+## 의미
+사용자 결정 3(B Vite · Dexie 유지+경고 · QR 10-29)을 받아 S2를 시작했다. Next를 지우지 않고 `toss/` Vite 번들을 옆에 세워 같은 lib·app 원본을 쓰게 했고, 경계 테스트로 두 빌드가 한 벌의 도메인·DB를 쓰는지 고정했다. critic이 PR3에서 «첫 이용 고지»를 우회하는 진입점 2곳을 잡아 공용 게이트 hook + 정적 진입점 테스트로 막았다. critic 권고(viewport 확대 허용)는 토스 가이드와 충돌해 되돌렸다 — 리뷰 권고도 1차 자료로 확인한다.
+
+---
 date: 2026-10-17
 project: haja-checker-ai
 agent: claude-code
