@@ -1,16 +1,21 @@
 {
   "project": "haja-checker-ai",
-  "as_of": "2026-10-17T09:00+09:00",
-  "state": "waiting_gate",
-  "head": "main b39639d(#6) · 264733e(#5) · 35319b5(#4) · PR #7 docs/claude-md-guard — LC 조건부 PASS·critic 7/10 PASS, 반영 뒤 머지",
-  "working_on": "CLAUDE.md 커밋 가드·경로 정리 PR",
-  "waiting_on": "Next/Vite 결정 · 저장 구조(iOS IndexedDB 7일) · 실기기 QR 일정 · 레포 공개 범위",
+  "as_of": "2026-10-26T03:30+09:00",
+  "state": "working",
+  "head": "main 72fe71e(#9 settings 템플릿 v3) · PR #8 docs/close-1017 열림(무관)",
+  "working_on": "HO-2026-1026-haja-s2-start-01 S2 전환 — PR0 정리·REPORT 초안",
+  "waiting_on": "없음(결정 3 수신: B Vite · Dexie 유지+경고 · QR 10-29 · PUBLIC 아니오)",
   "next_actions": [
-    "가드 PR critic → 머지(LC 조건부 PASS) → 브랜치 정리 → git fetch --prune(원격 = main만, 로컬 추적 ref 정리는 워커 손)",
-    "결정 뒤 S2 전환 발주",
-    "~/haja-spikes·spike/next-export 정리(사용자 결정 뒤, node_modules junction 먼저 해제 — CLAUDE.md 커밋 가드)"
+    "PR1 Vite 골격(toss/)·쿼리 라우팅·세션 목록 1화면",
+    "PR2 mode 3종·recipientType·임대 시드",
+    "PR3 고지·라벨·상한 카운터",
+    "PR4 동의 문안·자가 점검표"
   ],
   "recent": [
+    {
+      "at": "2026-10-26",
+      "what": "#9 72fe71e 머지(템플릿 v3 병합, critic 8/10·LC PASS) · spike worktree 정리(stash 보존·junction rmdir·remove --force 0) · spike/next-export -d · S2 REPORT 초안"
+    },
     {
       "at": "2026-10-17",
       "what": "#5 264733e·#6 b39639d 스쿼시 머지(사용자 위임 10-17 아침) · 원격 fix/seed-28·docs/s1-spike-report 삭제(원격 = main만) · 워크트리 제거 중 node_modules junction 사고 → npm ci 복구 · test 74/74 · typecheck 0"
