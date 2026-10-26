@@ -3,14 +3,14 @@
 ## 마감 상태(10-26 오후)
 
 - main `2a5d438` · #17 PR5 → `e7487be`, #18 PR6 → `2a5d438` 스쿼시 머지(사용자 위임 «critic+lc 게이트 pass면 알아서 머지해» · 각 critic(high) 8/10 PASS · LC PASS) · 가지 feat/s2-port-screens·feat/s2-mode-copy 원격·로컬 삭제
-- 열린 PR: **#19 PR7 Next 화면 제거 ⛔ 머지 금지**(base main, chore/s2-remove-next-pages `4a52bc3`, critic 8/10 조건부 PASS · LC 게이트 별도 코멘트 · 사용자 결정 10-28 복귀 뒤, 기본값 (b) sw.js 유지) · 이 인계 PR · #8(무관)
-- 완료 조건: 1~6 끝 · 7 = #19 열림(⛔ 머지 대기) · 8 = #17·#18 게이트 PASS, #19 게이트 요청 보냄(판정 대기) · 9 = 이 블록(#20)
+- 열린 PR: **#19 PR7 Next 화면 제거 ⛔ 머지 금지**(base main, chore/s2-remove-next-pages 코드 `4a52bc3` · HEAD `61dc719`(docs), critic 8/10 조건부 PASS · LC 게이트 PASS(issuecomment-6409033304, 차단 0·관찰 6) · 사용자 결정 10-28 복귀 뒤, 기본값 (b) sw.js 유지) · 이 인계 PR · #8(무관)
+- 완료 조건: 1~6 끝 · 7 = #19 열림(⛔ 머지 대기) · 8 = #17·#18·#19 LC 게이트 PASS · #20 critic 8/10 PASS → 게이트 요청 · 9 = 이 블록(#20)
 - 테스트 116 → 143(main) · 144(#19) · typecheck·next build·build:toss exit 0
 
 ## 한 일 / 발견 / LC·사용자에게 필요한 것
 
 - 한 일: toss 10화면·쿼리 라우팅·외부 href 가드·보고서 출력 어댑터(#17) · 모드 문구 표·임대 AI 잔여 숨김·recipientType 백필·areas[0](#18) · Next 화면 제거(#19, 열어 둠)
-- 발견: **Vercel 배포 한도** — #18·#19·#20 PR 프리뷰가 «Deployment rate limited — retry in 24 hours»로 실패(`gh api …/commits/4a52bc3/status` = failure). 한도 = Vercel 무료 «api-deployments-free-per-day» 100 초과(LC 확인). **prod 웹 = `2a5d438`(#18)** — GitHub Production deployment `2a5d438` 05:08Z · 커밋 상태 «Deployment has completed»(`e7487be` 04:07Z도 success), 한도 전에 끝났다. 재배포·#19 머지는 사용자 복귀 뒤·한도 해제 뒤 · Next 웹 의도된 변경 = #17 2건(팝업 차단 안내·빈 체크리스트 escape) + #18 목록·대시보드 모드 표시 · #19 머지 시 웹 UI 소멸·웹 IndexedDB 데이터 갇힘·SW 좀비(#19 본문) · 세션 삭제 `confirm()`의 WebView 동작 미확인
+- 발견: **Vercel 배포 한도**(무료 «api-deployments-free-per-day» 100, LC 확인)는 **간헐적** — 04:25Z~05:33Z 사이 성공·실패가 섞였다(프리뷰 11b6fd5·892012b·d7da36a success / 38351d0·cea7cbd·61dc719 failure «Deployment rate limited — retry in 24 hours»). **prod 웹 = `2a5d438`(#18)** — Production deployment 05:08Z success(38351d0 프리뷰 실패 04:37Z 뒤에도 성공), `e7487be` 04:07Z success. #19 머지 뒤에는 prod 배포 성공 여부를 반드시 확인(`gh api …/commits/<sha>/status`). 재배포·#19 머지는 사용자 복귀 뒤 · Next 웹 의도된 변경 = #17 2건(팝업 차단 안내·빈 체크리스트 escape) + #18 목록·대시보드 모드 표시 · #19 머지 시 웹 UI 소멸·웹 IndexedDB 데이터 갇힘·SW 좀비(#19 본문) · 세션 삭제 `confirm()`의 WebView 동작 미확인
 - 필요한 것: 사용자 — #19 머지 시점·SW (a)/(b) · 아래 «사용자 승인 뒤» 문서 수정 승인 / LC — #19 게이트 코멘트
 
 ## 다음 조각
@@ -20,7 +20,8 @@
 3. 문안 확정(동의 3줄·고지 3줄·보고서 면책 중복 · 홈 면책 1줄) + AiNoticeDialog focus trap — 사용자 ASK
 4. 상한 KV 어댑터(S3)
 5. LC #18 관찰: ① 임대 비렌더는 전부 정적 테스트 — QR 10-29에 임대 대시보드·체크리스트·보고서 눈 확인 1회 ② #19 전까지 Vercel 웹 임대 세션은 page.tsx 6곳 «하자» 혼재 ③ PR5 이전 임대+수신처 BUILDER 세션은 «수신처: 시공사» 표시 — `recipientLabel` 폴백 ④ `reportRepo.ts` 빈 체크리스트 제목 «사전점검» — 모드별 ⑤ toss `HomePage.tsx` 소개 문구 신축 중심 — 문안 ASK 때
-6. `next.config.ts` `largePageDataBytes`(페이지 0이라 무의미) 정리 · SW (a)를 고르면 sw.js 자폭 버전 PR
+6. LC #19 관찰: ③ 문서 잔재 `CLAUDE.md:35·50`(SwRegister)·`.claude/agents/critic.md:24`(고지 출처 `app/page.tsx`) — 아래 «사용자 승인 뒤» 표 ④ stale `.next/types`가 남은 트리에서는 `npm run typecheck`가 TS2307×10으로 깨짐 — `npx next build` 1회로 자가 치유(#19 머지 뒤 다른 창에서 typecheck 실패 시 이 원인)
+7. `next.config.ts` `largePageDataBytes`(페이지 0이라 무의미) 정리 · SW (a)를 고르면 sw.js 자폭 버전 PR
 
 ### 실기기 스텁 인터페이스 점검(10-26, `grep -rn "TODO(QR-1029)"`)
 

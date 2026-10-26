@@ -1,10 +1,10 @@
 {
   "project": "haja-checker-ai",
-  "as_of": "2026-10-26T16:30+09:00",
+  "as_of": "2026-10-26T14:40+09:00",
   "state": "handover",
   "head": "2a5d438",
   "working_on": null,
-  "waiting_on": "사용자: #19 머지 시점·SW (a)/(b)(기본 b)·Vercel 배포 한도 해제 뒤 · 승인 뒤 문서 표 · 문안 확정 · 실기기 QR 10-29 / LC: #19·#20 게이트",
+  "waiting_on": "사용자: #19 머지/보류·웹 세션 백업·SW a/b(LC 적재) · 승인 뒤 문서 표 · 문안 확정 · 실기기 QR 10-29 / LC: #20 게이트",
   "next_actions": [
     "실기기 스텁 QR 10-29: 카메라·광고·식별키 인터페이스(지금 없음) + 공유·저장·openURL 스텁 실측",
     "/api/analyze Vercel 함수 분리 + CORS(*.apps.tossmini.com) — 배포·env는 사용자",
@@ -13,7 +13,7 @@
   "recent": [
     {
       "at": "2026-10-26",
-      "what": "#18 PR6 스쿼시 머지 2a5d438(사용자 위임 · critic 8/10 · LC PASS 관찰 5) · feat/s2-mode-copy 삭제 · #19 PR7 rebase 4a52bc3(base main, 144/144, next build api만, critic 8/10 조건부 PASS, ⛔ 머지 금지) · 실기기 스텁 점검(공유·openURL 있음 / 카메라·광고·식별키 없음)"
+      "what": "#18 PR6 스쿼시 머지 2a5d438(사용자 위임 · critic 8/10 · LC PASS 관찰 5) · feat/s2-mode-copy 삭제 · #19 PR7 rebase 4a52bc3(+docs 61dc719)(base main, 144/144, next build api만, critic 8/10 조건부 PASS, LC PASS, ⛔ 머지 금지) · 실기기 스텁 점검(공유·openURL 있음 / 카메라·광고·식별키 없음)"
     },
     {
       "at": "2026-10-26",
@@ -33,7 +33,7 @@
     }
   ],
   "open_prs": [
-    "#19 PR7 Next 화면 제거 ⛔ 머지 금지(4a52bc3)",
+    "#19 PR7 Next 화면 제거 ⛔ 머지 금지(코드 4a52bc3 · HEAD 61dc719 · LC PASS)",
     "#20 인계 docs",
     "#8(무관)"
   ]
