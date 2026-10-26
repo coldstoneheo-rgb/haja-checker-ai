@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 // next/link 대체(전환기): 레포 원본 화면을 무수정으로 import하기 위한 shim. 내부 경로는 쿼리 라우터로 보낸다.
 // 외부 href(결정: 외부 링크 0): 개발 중에는 렌더 즉시 throw로 잡고, 빌드본에서는 openExternal(openURL 자리)로만 나간다.
 import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from "react";
@@ -24,15 +23,22 @@ export function assertInternalHref(href: string, dev: boolean): void {
   }
 }
 
+// vite/client 전역 타입을 끌어오지 않는다(이 파일은 테스트를 타고 Next typecheck에도 실린다)
+const DEV = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true;
+
 export default function Link({ href, prefetch: _p, replace, scroll = true, onClick, ...rest }: Props) {
-  assertInternalHref(href, import.meta.env.DEV);
+  assertInternalHref(href, DEV);
   const internal = isInternalHref(href);
   const handle = (e: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(e);
+    // ctrl·meta·shift 클릭도 앱 안 이동으로 처리한다(결정: 새 창 0 — 옛 shim은 브라우저 새 탭에 맡겼다)
     if (e.defaultPrevented) return;
     e.preventDefault();
     if (internal) navigate(href, replace, scroll);
     else openExternal(href);
   };
-  return <a href={internal ? hrefFor(href) : "#"} onClick={handle} {...rest} />;
+  // 휠 클릭(auxclick)의 새 탭도 막는다
+  return (
+    <a href={internal ? hrefFor(href) : "#"} onClick={handle} onAuxClick={(e) => e.preventDefault()} {...rest} />
+  );
 }

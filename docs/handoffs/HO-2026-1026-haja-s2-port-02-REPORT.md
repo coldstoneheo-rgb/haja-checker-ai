@@ -28,3 +28,13 @@
 - public/: toss 번들에 넣지 않는다(vite root=toss, `toss/public` 없음). 아이콘·이름은 콘솔 등록(S3), WebView라 manifest·sw.js 불필요. Next 쪽 `public/`은 `/api/analyze` 분리(6번)까지 유지.
 - 홈(`/home`): 첫 화면은 세션 목록 유지, 목록 헤더 «사용법»으로 진입. 기능 설명 3곳(PDF 인쇄·PWA)만 토스 동작에 맞춤, 하단 면책 1줄은 문안 ASK 때까지 원문.
 - 보고서 출력: `@/lib/platform/reportActions`를 vite alias·tsconfig paths로 `toss/src/platform/reportActions.ts`(스텁)로 바꿔 끼운다. 스텁은 «이 기능은 곧 지원됩니다.» 1줄을 화면에 띄운다.
+
+## PR5 critic(high) 8/10 PASS → 반영
+
+- 1 Next 웹 회귀 테스트가 정적 매칭뿐 → `buildBlankChecklistHtml` 순수 테스트(행 수·제목·점검일·escape) 추가
+- 2 의도된 Next 웹 변경 2건 공개: ① 팝업 차단 시 조용히 끝나던 것이 «팝업이 차단되어 새 창을 열 수 없습니다.» 1줄 표시 ② 빈 체크리스트 HTML에 escape(단지명 등의 `&<>"'`가 about:blank 창에 HTML로 들어가던 것을 막음)
+- 3 `sub in SESSION_SUB` 프로토타입 체인 → `Object.hasOwn`, toString·__proto__·constructor pending 테스트(`in`으로 되돌리는 변이로 실패 확인)
+- 4 modifier 키 분기 제거는 의도(새 창 0) 주석 + 휠 클릭(auxclick) 새 탭 차단
+- 5 왕복 테스트를 [출발 파일 → 대상] 쌍으로, 따옴표 경로 수집, 변수 href 0, popstate 구독 확인
+- 6 `vite/client` 전역 타입 → shim 안 좁은 `ImportMeta` 캐스트
+- 7 `/sessions/new/...` → pending(useParams shim과 일치)

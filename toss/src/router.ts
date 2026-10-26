@@ -63,9 +63,12 @@ export function matchRoute(path: string): Route {
   const parts = path.split("/").slice(1); // ["sessions", id, ...]
   if (parts[0] !== "sessions" || !parts[1] || parts.some((s) => s === "")) return { name: "pending", path };
   const sessionId = parts[1];
+  // "new"는 정적 세그먼트(새 세션) — 그 아래 경로는 없다(useParams shim도 sessionId로 보지 않는다)
+  if (sessionId === "new") return { name: "pending", path };
   if (parts.length === 2) return { name: "overview", sessionId };
   const sub = parts[2];
-  if (parts.length === 3 && sub in SESSION_SUB) {
+  // hasOwn: `in`은 프로토타입까지 봐서 toString·__proto__가 화면 이름이 된다
+  if (parts.length === 3 && Object.hasOwn(SESSION_SUB, sub)) {
     return { name: SESSION_SUB[sub as keyof typeof SESSION_SUB], sessionId };
   }
   if (parts.length === 4 && sub === "defects") {
