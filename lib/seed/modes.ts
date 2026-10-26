@@ -1,4 +1,10 @@
-import type { ChecklistItem, InspectionArea, InspectionMode, InspectionSession } from "@/lib/domain/types";
+import type {
+  ChecklistItem,
+  InspectionArea,
+  InspectionMode,
+  InspectionSession,
+  RecipientType,
+} from "@/lib/domain/types";
 import { CHECKLIST_SEED, DEFAULT_AREAS, type ChecklistSeedItem } from "@/lib/seed/checklist";
 import { RENTAL_AREAS, RENTAL_CHECKLIST_SEED } from "@/lib/seed/rentalChecklist";
 
@@ -20,6 +26,23 @@ export const MODE_CONFIG: Record<InspectionMode, ModeConfig> = {
 /** v1 세션(mode 없음)은 신축으로 본다. */
 export function sessionMode(session: Pick<InspectionSession, "mode">): InspectionMode {
   return session.mode ?? "NEW_BUILD";
+}
+
+/** 모드를 고를 때 수신처 기본값. */
+export const DEFAULT_RECIPIENT: Record<InspectionMode, RecipientType> = {
+  NEW_BUILD: "BUILDER",
+  MOVE_IN: "HOUSE_OWNER",
+  MOVE_OUT: "HOUSE_OWNER",
+};
+
+/** v1 세션(recipientType 없음) 백필: 모드 기본값 — v1은 mode도 없으니 신축 → "BUILDER". */
+export function sessionRecipient(session: Pick<InspectionSession, "mode" | "recipientType">): RecipientType {
+  return session.recipientType ?? DEFAULT_RECIPIENT[sessionMode(session)];
+}
+
+/** 공간 선택값: 고른 값이 현재 모드 공간 목록에 없으면(세션 로드 전 기본값 등) 첫 공간. */
+export function pickArea(areas: string[], chosen: string | null): string {
+  return chosen !== null && areas.includes(chosen) ? chosen : areas[0];
 }
 
 export function isAiEnabled(mode: InspectionMode): boolean {

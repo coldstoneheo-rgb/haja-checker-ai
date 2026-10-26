@@ -8,7 +8,6 @@ import { analyzeDirectDefect } from "@/lib/repo/analysisRepo";
 import { listPhotosForDefect } from "@/lib/repo/photoRepo";
 import type { EvidencePhoto } from "@/lib/domain/types";
 import {
-  DEFECT_TYPE_LABELS,
   REPAIR_DIFFICULTY_LABELS,
   RISK_LEVEL_COLORS,
   RISK_LEVEL_LABELS,
@@ -19,6 +18,7 @@ import PhotoViewer from "../../checklist/PhotoViewer";
 import AnalysisResultCard from "../../analysis/AnalysisResultCard";
 import { useAiNoticeGate } from "@/components/useAiNoticeGate";
 import { isAiEnabled, sessionMode } from "@/lib/seed/modes";
+import { MODE_COPY } from "@/lib/seed/modeCopy";
 
 interface Props {
   sessionId: string;
@@ -34,6 +34,7 @@ export default function DefectDetailView({ sessionId, defectId }: Props) {
   const session = useLiveQuery(() => getDB().sessions.get(sessionId), [sessionId]);
   // 세션을 읽기 전에는 버튼을 숨겨 둔다(임대 모드에서 깜빡이며 보이지 않게)
   const aiOn = session ? isAiEnabled(sessionMode(session)) : false;
+  const copy = MODE_COPY[session ? sessionMode(session) : "NEW_BUILD"];
   const defect = useLiveQuery(
     () => getDB().defects.get(defectId),
     [defectId],
@@ -55,14 +56,14 @@ export default function DefectDetailView({ sessionId, defectId }: Props) {
     [defectId],
   );
 
-  if (defect === undefined) {
+  if (defect === undefined || session === undefined) {
     return <p className="text-sm text-slate-500">불러오는 중…</p>;
   }
 
   if (!defect) {
     return (
       <div className="rounded-2xl bg-white p-6 text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">
-        <p>하자를 찾을 수 없습니다.</p>
+        <p>{copy.directNotFound}</p>
         <Link
           href={`/sessions/${sessionId}/defects`}
           className="mt-3 inline-flex rounded-xl bg-slate-100 px-3 py-2 font-semibold text-slate-700"
@@ -97,7 +98,7 @@ export default function DefectDetailView({ sessionId, defectId }: Props) {
               {defect.displayId}
             </span>
             <p className="text-base font-semibold text-slate-900">
-              {DEFECT_TYPE_LABELS[defect.defectType]}
+              {copy.defectTypeLabel(defect.defectType)}
             </p>
           </div>
           <span

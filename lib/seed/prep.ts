@@ -5,7 +5,7 @@ export const PREP_ITEMS: { name: string; note?: string }[] = [
   { name: "콘센트 테스터 또는 휴대폰 충전기" },
   { name: "물티슈" },
   { name: "장갑" },
-  { name: "포스트잇 또는 하자 표시 스티커" },
+  { name: "포스트잇 또는 표시 스티커" },
   { name: "네임펜" },
   { name: "작은 손전등" },
   { name: "마스킹 테이프" },

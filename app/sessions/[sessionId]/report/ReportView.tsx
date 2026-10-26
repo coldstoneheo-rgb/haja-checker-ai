@@ -13,13 +13,14 @@ import {
 import type { PlatformResult } from "@/lib/platform/types";
 import {
   CHECKLIST_STATUS_COLORS,
-  CHECKLIST_STATUS_LABELS,
-  DEFECT_TYPE_LABELS,
   REPAIR_DIFFICULTY_LABELS,
   RISK_LEVEL_COLORS,
   RISK_LEVEL_LABELS,
 } from "@/lib/util/labels";
-import { REPORT_AI_FIXED_TEXT } from "@/lib/ai/notice";
+import { isAiEnabled, sessionMode, sessionRecipient } from "@/lib/seed/modes";
+import { MODE_COPY, type ModeCopy } from "@/lib/seed/modeCopy";
+import ReportAiDisclaimer from "./ReportAiDisclaimer";
+import { SectionTitle } from "./reportParts";
 import type { DefectCandidate, RiskLevel } from "@/lib/domain/types";
 
 interface Props {
@@ -42,6 +43,9 @@ export default function ReportView({ sessionId }: Props) {
   );
   const analyzedDefects = allDefects.filter((d) => analysisMap.has(d.id));
 
+  const mode = sessionMode(session);
+  const copy = MODE_COPY[mode];
+  const aiOn = isAiEnabled(mode);
   const sessionTitle = `${session.complexName} ${session.buildingNo}동 ${session.unitNo}호`;
   const riskCounts: Record<RiskLevel, number> = { LOW: 0, MEDIUM: 0, HIGH: 0, URGENT: 0 };
   for (const d of allDefects) riskCounts[d.riskLevel] += 1;
@@ -61,7 +65,7 @@ export default function ReportView({ sessionId }: Props) {
   }
 
   function onPrintBlankChecklist() {
-    show(printBlankChecklist(buildBlankChecklistHtml(sessionTitle, session.inspectionDate, areasWithItems)));
+    show(printBlankChecklist(buildBlankChecklistHtml(sessionTitle, session.inspectionDate, areasWithItems, copy.statusLabel("DEFECT"))));
   }
 
   return (
@@ -110,7 +114,7 @@ export default function ReportView({ sessionId }: Props) {
               하자체크 AI
             </p>
             <h1 className="text-2xl font-bold text-slate-900">
-              사전점검 하자 보고서
+              {copy.reportTitle}
             </h1>
             <p className="text-sm text-slate-500">
               작성일: {new Date(data.generatedAt).toLocaleString("ko-KR")}
@@ -121,11 +125,13 @@ export default function ReportView({ sessionId }: Props) {
             <Detail label="단지명" value={session.complexName} />
             <Detail label="동/호수" value={`${session.buildingNo}동 ${session.unitNo}호`} />
             <Detail label="평형/타입" value={session.floorPlanType ?? "—"} />
-            <Detail label="시공사" value={session.builderName ?? "—"} />
+            <Detail label="점검 종류" value={copy.modeLabel} />
+            <Detail label="수신처" value={copy.recipientLabel(sessionRecipient(session))} />
+            {copy.builderLabel && <Detail label={copy.builderLabel} value={session.builderName ?? "—"} />}
             <Detail label="점검자" value={session.inspectorName ?? "—"} />
             <Detail label="연락처" value={session.phone ?? "—"} />
             <Detail label="점검일" value={session.inspectionDate} />
-            <Detail label="입주예정일" value={session.moveInDate ?? "—"} />
+            {copy.moveInDateLabel && <Detail label={copy.moveInDateLabel} value={session.moveInDate ?? "—"} />}
           </dl>
         </section>
 
@@ -149,8 +155,8 @@ export default function ReportView({ sessionId }: Props) {
           <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
             <StatBox label="총 체크 항목" value={progress.total} />
             <StatBox label="완료" value={progress.done} color="emerald" />
-            <StatBox label="의심/하자(체크리스트)" value={progress.suspected + progress.defects} color="amber" />
-            <StatBox label="직접 추가 하자" value={directDefects.length} color={directDefects.length > 0 ? "rose" : "slate"} />
+            <StatBox label={`${copy.flagged}(체크리스트)`} value={progress.suspected + progress.defects} color="amber" />
+            <StatBox label={copy.directTitle} value={directDefects.length} color={directDefects.length > 0 ? "rose" : "slate"} />
           </div>
 
           {allDefects.length > 0 && (
@@ -192,7 +198,7 @@ export default function ReportView({ sessionId }: Props) {
                   <tr key={d.id} className="border-b border-slate-100">
                     <Td className="font-mono">{d.displayId}</Td>
                     <Td>{d.areaName}{d.detailLocation ? ` · ${d.detailLocation}` : ""}</Td>
-                    <Td>{DEFECT_TYPE_LABELS[d.defectType]}</Td>
+                    <Td>{copy.defectTypeLabel(d.defectType)}</Td>
                     <Td>
                       <span className={`rounded-full px-2 py-0.5 font-semibold ${RISK_LEVEL_COLORS[d.riskLevel]}`}>
                         {RISK_LEVEL_LABELS[d.riskLevel]}
@@ -219,7 +225,7 @@ export default function ReportView({ sessionId }: Props) {
                       <tr key={item.id} className="border-b border-slate-100">
                         <Td className="w-1/2 py-1.5">{item.title}</Td>
                         <Td className={`font-semibold ${CHECKLIST_STATUS_COLORS[item.status]}`}>
-                          {CHECKLIST_STATUS_LABELS[item.status]}
+                          {copy.statusLabel(item.status)}
                         </Td>
                         <Td className="font-mono text-slate-400">
                           {linkedDefect?.displayId ?? ""}
@@ -236,7 +242,7 @@ export default function ReportView({ sessionId }: Props) {
         {/* ── SECTION 5: 직접 추가 하자 ── */}
         {directDefects.length > 0 && (
           <section className="flex flex-col gap-4 rounded-2xl p-6 shadow-sm ring-1 ring-slate-200 print:rounded-none print:shadow-none print:ring-0 print:break-before-page print:pt-10">
-            <SectionTitle num={4} title="직접 추가 하자 목록" />
+            <SectionTitle num={4} title={copy.reportDirectSection} />
             <table className="w-full text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-left text-slate-500">
@@ -252,7 +258,7 @@ export default function ReportView({ sessionId }: Props) {
                   <tr key={d.id} className="border-b border-slate-100">
                     <Td className="font-mono">{d.displayId}</Td>
                     <Td>{d.areaName}{d.detailLocation ? ` · ${d.detailLocation}` : ""}</Td>
-                    <Td>{DEFECT_TYPE_LABELS[d.defectType]}</Td>
+                    <Td>{copy.defectTypeLabel(d.defectType)}</Td>
                     <Td>
                       <span className={`rounded-full px-1.5 py-0.5 font-semibold ${RISK_LEVEL_COLORS[d.riskLevel]}`}>
                         {RISK_LEVEL_LABELS[d.riskLevel]}
@@ -283,7 +289,7 @@ export default function ReportView({ sessionId }: Props) {
             {analyzedDefects.map((defect) => {
               const analysis = analysisMap.get(defect.id)!;
               return (
-                <AnalysisBlock key={defect.id} defect={defect} analysis={analysis} />
+                <AnalysisBlock key={defect.id} defect={defect} analysis={analysis} copy={copy} />
               );
             })}
           </section>
@@ -292,9 +298,9 @@ export default function ReportView({ sessionId }: Props) {
         {/* ── SECTION 7: 시공자 요청 문구 ── */}
         {allDefects.some((d) => d.requestedAction) && (
           <section className="flex flex-col gap-4 rounded-2xl p-6 shadow-sm ring-1 ring-slate-200 print:rounded-none print:shadow-none print:ring-0 print:break-before-page print:pt-10">
-            <SectionTitle num={6} title="시공자 요청 문구 모음" />
+            <SectionTitle num={6} title={copy.reportRequestSection} />
             <p className="text-xs text-slate-500">
-              아래 문구를 시공사 하자 접수 시 그대로 사용하실 수 있습니다.
+              {copy.reportRequestIntro}
             </p>
             <ol className="flex flex-col gap-3 list-decimal pl-5 text-sm">
               {allDefects
@@ -309,31 +315,8 @@ export default function ReportView({ sessionId }: Props) {
           </section>
         )}
 
-        {/* ── SECTION 8: 면책 고지 ── */}
-        <section className="flex flex-col gap-3 rounded-2xl bg-slate-50 p-6 shadow-sm ring-1 ring-slate-200 print:rounded-none print:shadow-none print:ring-0 print:break-before-page print:pt-10">
-          <SectionTitle num={7} title="AI 분석 주의사항 및 면책 고지" />
-          <div className="flex flex-col gap-2 text-xs text-slate-600 leading-relaxed">
-            <p className="text-sm font-semibold text-slate-900">{REPORT_AI_FIXED_TEXT}</p>
-            <p>
-              본 보고서는 사진 기반 AI 보조 분석 결과를 포함하고 있습니다.
-              AI 분석 결과는 참고 자료이며, 실제 하자 여부 및 보수 방법은
-              반드시 시공자 또는 관련 분야 전문가(건축사, 설비기사 등)의
-              현장 확인을 통해 최종 판단하시기 바랍니다.
-            </p>
-            <p>
-              분석에 사용된 사진은 사용자 기기 내 IndexedDB에만 저장되며,
-              AI 분석 요청 시 사용자 동의 하에 압축본이 일시적으로 Gemini
-              Vision API로 전송됩니다.
-            </p>
-            <p>
-              하자체크 AI는 국토교통부 공동주택 하자 기준을 참고하여 설계되었으나,
-              법적 효력을 갖는 공식 점검 서비스가 아닙니다.
-            </p>
-            <p className="font-medium text-slate-700">
-              생성일시: {new Date(data.generatedAt).toLocaleString("ko-KR")} · {sessionTitle}
-            </p>
-          </div>
-        </section>
+        {/* ── SECTION 8: 면책 고지 — AI를 쓰는 모드(신축)만 ── */}
+        {aiOn && <ReportAiDisclaimer generatedAt={data.generatedAt} sessionTitle={sessionTitle} />}
       </div>
     </>
   );
@@ -341,16 +324,6 @@ export default function ReportView({ sessionId }: Props) {
 
 /* ── Helpers ── */
 
-function SectionTitle({ num, title }: { num: number; title: string }) {
-  return (
-    <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
-        {num}
-      </span>
-      <h2 className="text-base font-bold text-slate-900">{title}</h2>
-    </div>
-  );
-}
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
@@ -417,9 +390,11 @@ import type { AiAnalysisResult } from "@/lib/domain/types";
 function AnalysisBlock({
   defect,
   analysis,
+  copy,
 }: {
   defect: DefectCandidate;
   analysis: AiAnalysisResult;
+  copy: ModeCopy;
 }) {
   return (
     <div className="flex flex-col gap-2 rounded-xl bg-slate-50 p-4 ring-1 ring-slate-100 print:break-inside-avoid">
@@ -437,7 +412,7 @@ function AnalysisBlock({
         </span>
       </div>
       <p className="text-xs font-medium text-slate-600">
-        유형: {DEFECT_TYPE_LABELS[analysis.defectType]} ·{" "}
+        유형: {copy.defectTypeLabel(analysis.defectType)} ·{" "}
         보수: {REPAIR_DIFFICULTY_LABELS[analysis.repairDifficulty]} ({analysis.repairDifficultyScore}점)
       </p>
       <p className="text-sm text-slate-800">{analysis.evidenceSummary}</p>

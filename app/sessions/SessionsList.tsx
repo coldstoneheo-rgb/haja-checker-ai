@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { getDB } from "@/lib/db/db";
 import { deleteSession } from "@/lib/repo/sessionRepo";
+import { sessionMode } from "@/lib/seed/modes";
+import { MODE_COPY } from "@/lib/seed/modeCopy";
 import type { InspectionSession } from "@/lib/domain/types";
 
 const STATUS_LABEL: Record<InspectionSession["status"], string> = {
@@ -85,7 +87,7 @@ export default function SessionsList() {
                 {session.complexName} {session.buildingNo}동 {session.unitNo}호
               </p>
               <p className="text-xs text-slate-500">
-                점검일 {formatDate(session.inspectionDate)} · 갱신{" "}
+                {MODE_COPY[sessionMode(session)].modeLabel} · 점검일 {formatDate(session.inspectionDate)} · 갱신{" "}
                 {new Date(session.updatedAt).toLocaleString("ko-KR")}
               </p>
             </div>
