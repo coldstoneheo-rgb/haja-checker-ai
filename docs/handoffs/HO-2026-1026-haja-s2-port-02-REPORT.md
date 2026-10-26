@@ -2,8 +2,9 @@
 
 ## 마감 상태(10-26)
 
-- main `42863fe`(변경 없음) · 열린 PR: #17 PR5(feat/s2-port-screens `59c5583`, critic 8/10 PASS·LC 게이트 중) · WIP 가지 feat/s2-mode-copy(PR6 코드 `2f413b8` + 이 인계 커밋, PR 미개설 — critic(high) 검수가 마감 시점에 끝나지 않음)
-- 다음 세션 첫 작업: PR6 critic(high) 재실행(`git diff 59c5583..2f413b8`) → 반영 → PR 개설(base feat/s2-port-screens) → LC 게이트 → PR7(Next 화면 제거, 열어 두되 머지 금지)
+- (갱신 10-26 오후) #17 PR5 → main `e7487be` 스쿼시 머지(사용자 위임 «critic+lc 게이트 pass면 알아서 머지해» · critic 8/10 · LC PASS) · feat/s2-port-screens 원격·로컬 삭제
+- PR6 feat/s2-mode-copy: main 위로 rebase → 코드 `8790e37` · critic(high) 6/10 NEEDS_REVISION → 반영 `1e891cc` → critic 재검수 → PR 개설(base main) → LC 게이트
+- PR7(Next 화면 제거): 미착수. 머지 = 웹 UI 소멸이라 위임과 별개로 머지 전 사용자 확인
 
 ## 한 일 / 발견 / LC·사용자에게 필요한 것
 
@@ -20,11 +21,11 @@
 ## 완료 조건 체크리스트
 
 - [x] 1. 계획 REPLY(≤15분) — PR 3개 스택(PR5 이식 / PR6 문구·임대 / PR7 Next 화면 제거) · (가) · LC ACK + 보강 2건(PR7 머지 금지 · Next 웹 회귀 0 어댑터)
-- [x] 2. (PR #17 열림·LC 게이트 중) 9화면 이식 — `toss/src/pages/` 10화면 · 쿼리 라우팅 · 왕복 경로 테스트 · «뒤로» 제거 · `document.title` · public/ 방침 · `@source` (PR5)
-- [x] 3. (PR #17) Link shim 외부 href(개발 중 throw + 빌드본 openExternal 스텁) · scroll · next 전용 import 금지(변이 1회) (PR5)
-- [x] 4. (PR #17) 인쇄·새 창 4곳 대체 — 플랫폼 어댑터(Next 웹 = 기존 동작, toss = 스텁 TODO(QR-1029)) · toss 그래프 window.print/open 0 · Next 웹 회귀 0 테스트 (PR5)
-- [x] 5. (PR6 `2f413b8`, PR 미개설·critic 미완) findingNoun — `lib/seed/modeCopy.ts` · `app/sessions/new/NewSessionForm.tsx` · `app/sessions/SessionsList.tsx`·«하자/시공» 문구 일괄 · NewSessionForm 모드별 필드 · 목록·대시보드 mode 표시 (PR6)
-- [x] 6. (PR6 `2f413b8`, 동일) 임대 모드 잔여 — `app/sessions/[sessionId]/report/ReportView.tsx` `{aiOn && <ReportAiDisclaimer`· `lib/seed/modes.ts` `sessionRecipient`·`pickArea` · `__tests__/modeCopy.test.ts`(AI CTA·7절 면책 절 비렌더) · recipientType 백필 · areas[0] · 고지 게이트 toss 진입점 전수(PR5에서 테스트 선반영) (PR6)
+- [x] 2. (#17 머지 e7487be) 9화면 이식 — `toss/src/pages/` 10화면 · 쿼리 라우팅 · 왕복 경로 테스트 · «뒤로» 제거 · `document.title` · public/ 방침 · `@source` (PR5)
+- [x] 3. (#17 머지) Link shim 외부 href(개발 중 throw + 빌드본 openExternal 스텁) · scroll · next 전용 import 금지(변이 1회) (PR5)
+- [x] 4. (#17 머지) 인쇄·새 창 4곳 대체 — 플랫폼 어댑터(Next 웹 = 기존 동작, toss = 스텁 TODO(QR-1029)) · toss 그래프 window.print/open 0 · Next 웹 회귀 0 테스트 (PR5)
+- [x] 5. (PR6 `8790e37`+`1e891cc`) findingNoun — `lib/seed/modeCopy.ts` · `app/sessions/new/NewSessionForm.tsx` · `app/sessions/SessionsList.tsx`·«하자/시공» 문구 일괄 · NewSessionForm 모드별 필드 · 목록·대시보드 mode 표시 (PR6)
+- [x] 6. (PR6 동일) 임대 모드 잔여 — `app/sessions/[sessionId]/report/ReportView.tsx` `{copy.aiOn && <ReportAiDisclaimer` · `lib/seed/modes.ts` `analysisPath`· `lib/seed/modes.ts` `sessionRecipient`·`pickArea` · `__tests__/modeCopy.test.ts`(AI CTA·7절 면책 절 비렌더) · recipientType 백필 · areas[0] · 고지 게이트 toss 진입점 전수(PR5에서 테스트 선반영) (PR6)
 - [ ] 7. (미착수) Next 화면 제거 (가) — 대상: `app/**/page.tsx` 10개 + `app/layout.tsx`·`globals.css`·`components/SwRegister.tsx`·`PageStub.tsx` 검토, `app/api`·`public/` 유지 — PR7, **열어 두되 머지 금지**(머지 = Vercel 웹 UI 소멸)
 - [ ] 8. (PR5 끝 · PR6 critic 미완) PR마다 critic(high) → LC 게이트 → 열어 둠
 - [x] 9. 인계 블록(중간 마감)(REPORT 마감 · AGENT_STATUS · WORKLOG)
@@ -61,4 +62,8 @@
 - 렌더 테스트 대신(node 환경·useLiveQuery): 문구 표 임대 값 «하자»·«시공» 0 + toss 진입 그래프 .tsx 리터럴 0(브랜드 «하자체크», 신축 전용 AI 화면 2·면책 파일·홈 제외) + 라벨 맵 직접 사용 0.
 - recipientType 백필 `sessionRecipient()` = `recipientType ?? DEFAULT_RECIPIENT[mode]`(v1은 mode도 없어 «BUILDER»). 대시보드·보고서 표지에 «수신처»·«점검 종류» 표시, 목록에 모드 표시.
 - NewDefectForm 공간: `pickArea(areas, chosen)` — 세션 로드 전 고른 값 없음(null) → 로드 뒤 그 모드의 areas[0]. 로드 전에는 폼 대신 «불러오는 중…».
-- Next 웹에 실리는 변경(임대 세션만 문구가 바뀜, 신축은 0 — 테스트 «신축은 기존 문구 그대로»): 단, 준비물 «포스트잇 또는 하자 표시 스티커» → «포스트잇 또는 표시 스티커»는 전 모드 공통으로 바꿨다. Next `page.tsx` 헤더 문구는 PR7에서 화면째 빠지므로 손대지 않았다.
+- Next 웹(신축)에 실리는 변경 = 세션 목록 모드 표시 · 대시보드 모드 배지 2곳뿐(발주서 요구). 체크리스트 CTA «의심·하자»·보고서 표지·대시보드 행·준비물은 신축 원문 그대로(critic 1차 지적 1 반영, 테스트 «신축은 기존 문구 그대로»가 flaggedCta·showModeMeta·prepItems까지 고정).
+- **게이트 판단 항목(critic 지적 6)**: PR6 머지 뒤 PR7 전까지, Next 웹에서 임대 세션을 만들면 Next `page.tsx` 헤더 4곳(체크리스트 안내 «양호/의심/하자/확인불가», 하자 목록·신규·상세 제목)이 «하자»로 남고 본문은 «손상»·«기록»으로 섞인다. toss 번들은 0. Next 화면은 PR7에서 빠지므로 손대지 않았다.
+- recipientType 백필은 표시용(`sessionRecipient()`)만. DB 마이그레이션·JSON export에는 적용하지 않는다(v1 export는 원본 그대로 — 의도).
+- AI CTA 가드: `analysisPath(sessionId, mode)`가 AI 끈 모드에서 null → `href`·`router.push`에 null을 넘길 수 없어 극성 실수는 타입 오류(변이 `{!aiHref &&` → tsc error 1 + 테스트 실패 확인).
+- 리터럴 검사: typescript AST로 문자열·템플릿·JSX 텍스트만 본다(주석 정규식 제거). 임대 렌더 .ts 상수(공간·추천 동선·빠른 태그·임대 시드·위험도·보수·하자상태 라벨)도 검사.
