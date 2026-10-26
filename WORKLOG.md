@@ -6,6 +6,22 @@
 date: 2026-10-26
 project: haja-checker-ai
 agent: claude-code
+summary: S2 이식 조각 — toss 10화면·외부 href 가드·보고서 플랫폼 어댑터(#17) · 모드 문구·임대 잔여(PR6 WIP) · 사용자 지시로 중간 마감
+status: on_track
+progress: "HO-2026-1026-haja-s2-port-02 조건 1~4 끝(#17 59c5583, critic 8/10 PASS) · 5·6 코드 끝(feat/s2-mode-copy 2f413b8, critic 미완) · 7 미착수 (근거: npx vitest run 140/140 · typecheck 0 · next build 0 · build:toss 0)"
+changes: ["https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/17 PR5 이식", "feat/s2-mode-copy PR6 WIP(PR 미개설)"]
+next: PR6 critic → PR 개설 → PR7 Next 화면 제거(머지 금지, 10-28 사용자 판단)
+blockers: 없음(머지는 사용자 · 게이트는 LC)
+monetization: 변화 없음
+learning_need: 토스 WebView confirm() 대화상자·휠/롱프레스 새 탭 동작(실기기)
+---
+## 의미
+머지가 곧 Vercel 배포라, 공유 컴포넌트를 바꿀 때는 «toss에서만 다르게»를 빌드 타임 alias(플랫폼 어댑터)로 풀고 Next 웹 회귀 0을 테스트로 묶었다. node 환경에서 렌더 테스트가 어려운 «임대 모드에 하자 0»은 문구 표 + toss 진입 import 그래프 위 리터럴 정적 검사로 대신했고, 변이로 실제로 잡는지 확인했다.
+
+---
+date: 2026-10-26
+project: haja-checker-ai
+agent: claude-code
 summary: S2 전환 착수 — Vite(toss/) 골격·모드 3종·AI 고지·상한 카운터·동의 문안 초안·비게임 자가 점검표
 status: on_track
 progress: "HO-2026-1026-haja-s2-start-01 조건 1~7 끝 (근거: #11 19e6cda · #12 57513ab · #13 6ac6a15 · #14 71ba72f · #15 b174dc0 · npm test 116/116 · typecheck 0 · next build 0 · build:toss(ait build) 0)"

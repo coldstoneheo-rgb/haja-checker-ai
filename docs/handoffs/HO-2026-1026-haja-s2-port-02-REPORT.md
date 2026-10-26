@@ -1,18 +1,33 @@
-# HO-2026-1026-haja-s2-port-02 REPORT (초안 — 체크리스트 겸용)
+# HO-2026-1026-haja-s2-port-02 REPORT (중간 마감 — 사용자 지시 «모든 창 마감하고 새창» 10-26 13:0x)
+
+## 마감 상태(10-26)
+
+- main `42863fe`(변경 없음) · 열린 PR: #17 PR5(feat/s2-port-screens `59c5583`, critic 8/10 PASS·LC 게이트 중) · WIP 가지 feat/s2-mode-copy(PR6 코드 `2f413b8` + 이 인계 커밋, PR 미개설 — critic(high) 검수가 마감 시점에 끝나지 않음)
+- 다음 세션 첫 작업: PR6 critic(high) 재실행(`git diff 59c5583..2f413b8`) → 반영 → PR 개설(base feat/s2-port-screens) → LC 게이트 → PR7(Next 화면 제거, 열어 두되 머지 금지)
+
+## 한 일 / 발견 / LC·사용자에게 필요한 것
+
+- 한 일: PR5 #17(10화면·외부 href·보고서 어댑터, 116→131) · PR6 코드(모드 문구·임대 잔여·백필·areas[0], 131→140, 빌드 3종 exit 0)
+- 발견: 의도된 Next 웹 변경 3건(팝업 차단 안내 · 빈 체크리스트 escape · 준비물 «표시 스티커») · PR7 뒤에도 `public/sw.js`가 남아 옛 SW 설치 브라우저는 캐시된 옛 화면을 볼 수 있음 · 세션 목록 삭제가 `confirm()`(토스 WebView 대화상자 동작은 실기기 QR에서 확인)
+- 필요한 것: #17 LC 게이트 판정(PR 코멘트) · 머지는 사용자(PR7은 10-28 복귀 뒤 판단)
+
+## effort
+
+- 세션 medium · critic high 2회(PR5·PR6, 검수 규약) · 올린 곳 없음
 
 발주서: `life-coordinator/handoffs/HO-2026-1026-haja-s2-port-02.md` · 기준 main `42863fe` · 116/116
 
 ## 완료 조건 체크리스트
 
 - [x] 1. 계획 REPLY(≤15분) — PR 3개 스택(PR5 이식 / PR6 문구·임대 / PR7 Next 화면 제거) · (가) · LC ACK + 보강 2건(PR7 머지 금지 · Next 웹 회귀 0 어댑터)
-- [x] 2. 9화면 이식 — `toss/src/pages/` 10화면 · 쿼리 라우팅 · 왕복 경로 테스트 · «뒤로» 제거 · `document.title` · public/ 방침 · `@source` (PR5)
-- [x] 3. Link shim 외부 href(개발 중 throw + 빌드본 openExternal 스텁) · scroll · next 전용 import 금지(변이 1회) (PR5)
-- [x] 4. 인쇄·새 창 4곳 대체 — 플랫폼 어댑터(Next 웹 = 기존 동작, toss = 스텁 TODO(QR-1029)) · toss 그래프 window.print/open 0 · Next 웹 회귀 0 테스트 (PR5)
-- [x] 5. findingNoun·«하자/시공» 문구 일괄 · NewSessionForm 모드별 필드 · 목록·대시보드 mode 표시 (PR6)
-- [x] 6. 임대 모드 잔여(AI CTA·7절 면책 절 비렌더) · recipientType 백필 · areas[0] · 고지 게이트 toss 진입점 전수(PR5에서 테스트 선반영) (PR6)
-- [ ] 7. Next 화면 제거 (가) — PR7, **열어 두되 머지 금지**(머지 = Vercel 웹 UI 소멸)
-- [ ] 8. PR마다 critic(high) → LC 게이트 → 열어 둠
-- [ ] 9. 인계 블록(REPORT 마감 · AGENT_STATUS · WORKLOG)
+- [x] 2. (PR #17 열림·LC 게이트 중) 9화면 이식 — `toss/src/pages/` 10화면 · 쿼리 라우팅 · 왕복 경로 테스트 · «뒤로» 제거 · `document.title` · public/ 방침 · `@source` (PR5)
+- [x] 3. (PR #17) Link shim 외부 href(개발 중 throw + 빌드본 openExternal 스텁) · scroll · next 전용 import 금지(변이 1회) (PR5)
+- [x] 4. (PR #17) 인쇄·새 창 4곳 대체 — 플랫폼 어댑터(Next 웹 = 기존 동작, toss = 스텁 TODO(QR-1029)) · toss 그래프 window.print/open 0 · Next 웹 회귀 0 테스트 (PR5)
+- [x] 5. (PR6 `2f413b8`, PR 미개설·critic 미완) findingNoun — `lib/seed/modeCopy.ts` · `app/sessions/new/NewSessionForm.tsx` · `app/sessions/SessionsList.tsx`·«하자/시공» 문구 일괄 · NewSessionForm 모드별 필드 · 목록·대시보드 mode 표시 (PR6)
+- [x] 6. (PR6 `2f413b8`, 동일) 임대 모드 잔여 — `app/sessions/[sessionId]/report/ReportView.tsx` `{aiOn && <ReportAiDisclaimer`· `lib/seed/modes.ts` `sessionRecipient`·`pickArea` · `__tests__/modeCopy.test.ts`(AI CTA·7절 면책 절 비렌더) · recipientType 백필 · areas[0] · 고지 게이트 toss 진입점 전수(PR5에서 테스트 선반영) (PR6)
+- [ ] 7. (미착수) Next 화면 제거 (가) — 대상: `app/**/page.tsx` 10개 + `app/layout.tsx`·`globals.css`·`components/SwRegister.tsx`·`PageStub.tsx` 검토, `app/api`·`public/` 유지 — PR7, **열어 두되 머지 금지**(머지 = Vercel 웹 UI 소멸)
+- [ ] 8. (PR5 끝 · PR6 critic 미완) PR마다 critic(high) → LC 게이트 → 열어 둠
+- [x] 9. 인계 블록(중간 마감)(REPORT 마감 · AGENT_STATUS · WORKLOG)
 
 ## 경계 테스트 확장(계획 REPLY ①~⑥)
 
