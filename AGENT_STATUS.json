@@ -1,16 +1,20 @@
 {
   "project": "haja-checker-ai",
-  "as_of": "2026-10-26T15:30+09:00",
-  "state": "working",
-  "head": "main e7487be(#17) · feat/s2-mode-copy PR6(critic 8/10 PASS) → PR 개설·LC 게이트 · PR #8(무관)",
-  "working_on": "HO-2026-1026-haja-s2-port-02 — PR6 LC 게이트 대기(PASS면 사용자 위임대로 머지) · PR7 미착수",
-  "waiting_on": "LC: PR6 게이트 · 사용자: PR7 머지 판단(웹 UI 소멸) · 문안 확정 · 실기기 QR 10-29",
+  "as_of": "2026-10-26T14:40+09:00",
+  "state": "handover",
+  "head": "2a5d438",
+  "working_on": null,
+  "waiting_on": "사용자: #19 머지/보류·웹 세션 백업·SW a/b(LC 적재) · 승인 뒤 문서 표 · 문안 확정 · 실기기 QR 10-29 / LC: #20 게이트",
   "next_actions": [
-    "PR6 LC 게이트 PASS → 스쿼시 머지(사용자 위임) → 가지 정리",
-    "PR7 Next 화면 제거(가) — app/**/page.tsx 10개, next build(api만)·build:toss·테스트 ≥140, 열어 두되 머지 금지",
-    "실기기 스텁(카메라·공유·광고·식별키) QR 10-29 · /api/analyze 분리+CORS · KV(S3)"
+    "실기기 스텁 QR 10-29: 카메라·광고·식별키 인터페이스(지금 없음) + 공유·저장·openURL 스텁 실측",
+    "/api/analyze Vercel 함수 분리 + CORS(*.apps.tossmini.com) — 배포·env는 사용자",
+    "LC #18 관찰 후속: recipientLabel 폴백(임대+BUILDER 옛 세션) · 빈 체크리스트 제목 모드별 · 임대 화면 실기기 눈 확인"
   ],
   "recent": [
+    {
+      "at": "2026-10-26",
+      "what": "#18 PR6 스쿼시 머지 2a5d438(사용자 위임 · critic 8/10 · LC PASS 관찰 5) · feat/s2-mode-copy 삭제 · #19 PR7 rebase 4a52bc3(+docs 61dc719)(base main, 144/144, next build api만, critic 8/10 조건부 PASS, LC PASS, ⛔ 머지 금지) · 실기기 스텁 점검(공유·openURL 있음 / 카메라·광고·식별키 없음)"
+    },
     {
       "at": "2026-10-26",
       "what": "PR6 critic 7/10 → b45cd40(신축 «시공사» 표시 라벨 원복·원문 26개 표 고정) → 8/10 PASS → 세션 없음/로딩 구분·배선 단언 · 143/143"
@@ -26,38 +30,11 @@
     {
       "at": "2026-10-26",
       "what": "S2 착수: #11 19e6cda Vite 골격 · #12 57513ab 모드 3종 · #13 6ac6a15 고지·상한 · #14 71ba72f 동의·자가점검 · #15 b174dc0 서버 mode 가드 · npm test 116/116 · worktree 3개 정리(junction rmdir 먼저, --force 0)"
-    },
-    {
-      "at": "2026-10-26",
-      "what": "#9 72fe71e 머지(템플릿 v3 병합, critic 8/10·LC PASS) · spike worktree 정리(stash 보존·junction rmdir·remove --force 0) · spike/next-export -d · S2 REPORT 초안"
-    },
-    {
-      "at": "2026-10-17",
-      "what": "#5 264733e·#6 b39639d 스쿼시 머지(사용자 위임 10-17 아침) · 원격 fix/seed-28·docs/s1-spike-report 삭제(원격 = main만) · 워크트리 제거 중 node_modules junction 사고 → npm ci 복구 · test 74/74 · typecheck 0"
-    },
-    {
-      "at": "2026-10-17",
-      "what": "PR #6 S1 REPORT critic 7/10 → 반영 13건 ef84fc2 · LC 게이트 PASS · #5 LC PASS — 머지는 사용자 한 줄 대기"
-    },
-    {
-      "at": "2026-10-17",
-      "what": "S1 스파이크 12항목: 됨 ②③④⑧⑪ · 조건부 ①⑤⑥⑦⑨⑩⑫ · 안 됨 0 — Next export 쿼리 라우팅 변환 Chrome 실측 · ait build 로컬 exit 0(504KB) · Vite 1화면 11분 · iOS IndexedDB 7일 삭제(문서) · 비교표"
-    },
-    {
-      "at": "2026-10-17",
-      "what": "원격 claude/review-inspection-app-plan-RbozI 부재 확인 01:0x(gh api branches) — 삭제 주체 미상(LC 아님), 로컬 추적 ref 정리는 아침 문항 · PR #5 LC 게이트 PASS"
-    },
-    {
-      "at": "2026-10-17",
-      "what": "#4 스쿼시 머지 35319b5(critic 8/10 · LC PASS · 사용자 위임 10-17) · 원격·로컬 chore/harness-pr0 삭제 · 로컬 master·claude/review 삭제 · build exit 0 · PR #5 critic 8.5 PASS"
-    },
-    {
-      "at": "2026-10-17",
-      "what": "PR #4 42770d6·d8d0053(effort medium·critic high, 사용자 한 줄) · critic 8/10 PASS · 레포 PUBLIC 발견 → 발주서 사본 gitignore · npm ci 0 · test 72/72 · typecheck 0"
-    },
-    {
-      "at": "2026-10-17",
-      "what": "LC 협업 첫 창 개설 · git fetch: origin/main a320218 · 로컬 claude/review-…(0c8ea94)·master(0f45988) 모두 main에 포함 · 하네스 PR-0 브랜치 chore/harness-pr0"
     }
+  ],
+  "open_prs": [
+    "#19 PR7 Next 화면 제거 ⛔ 머지 금지(코드 4a52bc3 · HEAD 61dc719 · LC PASS)",
+    "#20 인계 docs",
+    "#8(무관)"
   ]
 }

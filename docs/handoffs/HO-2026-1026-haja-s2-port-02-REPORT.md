@@ -1,20 +1,56 @@
-# HO-2026-1026-haja-s2-port-02 REPORT (중간 마감 — 사용자 지시 «모든 창 마감하고 새창» 10-26 13:0x)
+# HO-2026-1026-haja-s2-port-02 REPORT (인계 블록 — 완료 조건 9)
 
-## 마감 상태(10-26)
+## 마감 상태(10-26 오후)
 
-- (갱신 10-26 오후) #17 PR5 → main `e7487be` 스쿼시 머지(사용자 위임 «critic+lc 게이트 pass면 알아서 머지해» · critic 8/10 · LC PASS) · feat/s2-port-screens 원격·로컬 삭제
-- PR6 feat/s2-mode-copy: main 위로 rebase → 코드 `8790e37` · critic(high) 6/10 → 반영 `1e891cc` → 7/10 → 반영 `b45cd40` → **8/10 PASS** → 경미 반영(세션 없음/로딩 구분 · 배선 단언) → PR 개설(base main) → LC 게이트 → PASS면 사용자 위임대로 머지
-- PR7(Next 화면 제거): 미착수. 머지 = 웹 UI 소멸이라 위임과 별개로 머지 전 사용자 확인
+- main `2a5d438` · #17 PR5 → `e7487be`, #18 PR6 → `2a5d438` 스쿼시 머지(사용자 위임 «critic+lc 게이트 pass면 알아서 머지해» · 각 critic(high) 8/10 PASS · LC PASS) · 가지 feat/s2-port-screens·feat/s2-mode-copy 원격·로컬 삭제
+- 열린 PR: **#19 PR7 Next 화면 제거 ⛔ 머지 금지**(base main, chore/s2-remove-next-pages 코드 `4a52bc3` · HEAD `61dc719`(docs), critic 8/10 조건부 PASS · LC 게이트 PASS(issuecomment-6409033304, 차단 0·관찰 6) · 사용자 결정 10-28 복귀 뒤, 기본값 (b) sw.js 유지) · 이 인계 PR · #8(무관)
+- 완료 조건: 1~6 끝 · 7 = #19 열림(⛔ 머지 대기) · 8 = #17·#18·#19 LC 게이트 PASS · #20 critic 8/10 PASS → 게이트 요청 · 9 = 이 블록(#20)
+- 테스트 116 → 143(main) · 144(#19) · typecheck·next build·build:toss exit 0
 
 ## 한 일 / 발견 / LC·사용자에게 필요한 것
 
-- 한 일: PR5 #17(10화면·외부 href·보고서 어댑터, 116→131) · PR6 코드(모드 문구·임대 잔여·백필·areas[0], 131→143, 빌드 3종 exit 0, critic 6→7 → 반영)
-- 발견: 의도된 Next 웹 변경: #17 2건(팝업 차단 안내 · 빈 체크리스트 escape) + PR6 신축은 목록·대시보드 모드 표시뿐 · PR7 뒤에도 `public/sw.js`가 남아 옛 SW 설치 브라우저는 캐시된 옛 화면을 볼 수 있음 · 세션 목록 삭제가 `confirm()`(토스 WebView 대화상자 동작은 실기기 QR에서 확인)
-- 필요한 것: PR6 LC 게이트 판정(«게이트 판단 항목» Next 웹 임대 혼재 6곳 포함) · PR7 머지는 사용자 별도 확인(웹 UI 소멸)
+- 한 일: toss 10화면·쿼리 라우팅·외부 href 가드·보고서 출력 어댑터(#17) · 모드 문구 표·임대 AI 잔여 숨김·recipientType 백필·areas[0](#18) · Next 화면 제거(#19, 열어 둠)
+- 발견: **Vercel 배포 한도**(무료 «api-deployments-free-per-day» 100, LC 확인)는 **간헐적** — 04:25Z~05:33Z 사이 성공·실패가 섞였다(프리뷰 11b6fd5·892012b·d7da36a success / 38351d0·cea7cbd·61dc719 failure «Deployment rate limited — retry in 24 hours»). **prod 웹 = `2a5d438`(#18)** — Production deployment 05:08Z success(38351d0 프리뷰 실패 04:37Z 뒤에도 성공), `e7487be` 04:07Z success. #19 머지 뒤에는 prod 배포 성공 여부를 반드시 확인(`gh api …/commits/<sha>/status`). 재배포·#19 머지는 사용자 복귀 뒤 · Next 웹 의도된 변경 = #17 2건(팝업 차단 안내·빈 체크리스트 escape) + #18 목록·대시보드 모드 표시 · #19 머지 시 웹 UI 소멸·웹 IndexedDB 데이터 갇힘·SW 좀비(#19 본문) · 세션 삭제 `confirm()`의 WebView 동작 미확인
+- 필요한 것: 사용자 — #19 머지 시점·SW (a)/(b) · 아래 «사용자 승인 뒤» 문서 수정 승인 / LC — #19 게이트 코멘트
+
+## 다음 조각
+
+1. **실기기 스텁 → QR 10-29** — 이번 조각은 발주서가 허용한 «없음» 3종 인터페이스(동작 없는 함수 + 호출 지점 `TODO(QR-1029)`)를 만들지 않고 넘겼다(PR 3개 critic 반복에 시간 사용). 다음 세션 첫 작업 후보: `toss/src/platform/camera.ts`(`openCamera`/`getPhotos` → 호출 지점 `PhotoCaptureButton.tsx`, vite alias로 Next 웹은 `<input type="file">` 유지) · `toss/src/platform/ads.ts`(전면·리워드, 테스트 ID — 리워드 성공 → 서버 `grantReward` 라우트는 그때 노출) · `toss/src/platform/identity.ts`(`getAnonymousKey` → 상한 카운터 키). 실측 뒤 구현
+2. `/api/analyze` Vercel 함수 분리 + CORS(`*.apps.tossmini.com`) — 배포·env는 사용자
+3. 문안 확정(동의 3줄·고지 3줄·보고서 면책 중복 · 홈 면책 1줄) + AiNoticeDialog focus trap — 사용자 ASK
+4. 상한 KV 어댑터(S3)
+5. LC #18 관찰: ① 임대 비렌더는 전부 정적 테스트 — QR 10-29에 임대 대시보드·체크리스트·보고서 눈 확인 1회 ② #19 전까지 Vercel 웹 임대 세션은 page.tsx 6곳 «하자» 혼재 ③ PR5 이전 임대+수신처 BUILDER 세션은 «수신처: 시공사» 표시 — `recipientLabel` 폴백 ④ `reportRepo.ts` 빈 체크리스트 제목 «사전점검» — 모드별 ⑤ toss `HomePage.tsx` 소개 문구 신축 중심 — 문안 ASK 때
+6. LC #19 관찰: ③ 문서 잔재 `CLAUDE.md:35·50`(SwRegister)·`.claude/agents/critic.md:24`(고지 출처 `app/page.tsx`) — 아래 «사용자 승인 뒤» 표 ④ stale `.next/types`가 남은 트리에서는 `npm run typecheck`가 TS2307×10으로 깨짐 — `npx next build` 1회로 자가 치유(#19 머지 뒤 다른 창에서 typecheck 실패 시 이 원인)
+7. `next.config.ts` `largePageDataBytes`(페이지 0이라 무의미) 정리 · SW (a)를 고르면 sw.js 자폭 버전 PR
+
+### 실기기 스텁 인터페이스 점검(10-26, `grep -rn "TODO(QR-1029)"`)
+
+| REPORT S2 «다음 조각» 5 | 지금 | 위치 |
+|---|---|---|
+| 4 공유·저장(PNG `File.saveBase64` + `intoss://`) | 스텁 있음(동작 0, «곧 지원» 1줄) | `toss/src/platform/reportActions.ts:15·20·25` |
+| (외부 링크 openURL) | 스텁 있음 | `toss/src/platform/openURL.ts:2` · 호출 `toss/src/shims/next-link.tsx` |
+| 3 카메라(`Device.openCamera`/`getPhotos`) | **없음** — `<input type="file">` 그대로 | `app/sessions/[sessionId]/checklist/PhotoCaptureButton.tsx` |
+| 6 광고(전면·리워드, 테스트 ID) | **없음** — 리워드 +10 자리만 서버(`grantReward`, 라우트 미노출) | — |
+| 7 식별키(`getAnonymousKey`) | **없음** | — |
+
+### 사용자 승인 뒤 고칠 문서(PR 열지 않음)
+
+| 파일 | 지금 서술 | 고칠 내용 | 승인 필요 이유 |
+|---|---|---|---|
+| `CLAUDE.md:35-50` | 루트 레이아웃 + SwRegister · `page.tsx` 구조 · `SwRegister.tsx` | toss/src/pages 10화면 · Next는 `/api/analyze`만 | 프로젝트 지침(#19 머지 뒤 사실이 됨) |
+| `README.md:66` | «page.tsx 홈» | toss 홈 `/home` | #19 머지 뒤 |
+| `AGENTS.md:86` | Vercel 프로덕션 «Service Worker 등록됨» | 등록 안 함(SwRegister 제거) | #19 머지 뒤 |
+| `PRD.md:68·132` | SW 페이지 캐싱 | toss WebView·SW 없음 | 제품 문서 |
+| `README.md:14` | «PWA manifest + (이후) Service Worker» | toss 미니앱(WebView) · manifest 미사용 | #19 머지 뒤 |
+| `CLAUDE.md:22` | «2026-10-17 main 74» | 143(10-26 main) | 숫자 낡음 |
+| `AGENTS.md:45` | 예시 경로 `app/sessions/page.tsx` | toss 페이지 예시 | #19 머지 뒤 없는 파일 |
+| `CLAUDE.md:87·174` | sw.js 구조·`no-cache` 서빙 | SW (a) 자폭을 고를 때만 | SW 결정에 따름 |
+| `.claude/agents/critic.md:24` | 고지 문구 출처 `app/page.tsx` | `toss/src/pages/HomePage.tsx` | `.claude/agents/*.md`는 사용자 직접 승인(CLAUDE.md 규약) |
 
 ## effort
 
-- 세션 medium · critic high 4회(PR5 1 · PR6 3 — 6→7→8, 검수 규약) · 올린 곳 없음
+- 세션 medium · critic high 7회(PR5 1 · PR6 3 — 6→7→8 · PR7 1 · 인계 #20 2 — 6/10 → 반영 → 재검), 검수 규약 · 올린 곳 없음
+- 컨텍스트 약 55%(추정)
 
 발주서: `life-coordinator/handoffs/HO-2026-1026-haja-s2-port-02.md` · 기준 main `42863fe` · 116/116
 
@@ -26,9 +62,9 @@
 - [x] 4. (#17 머지) 인쇄·새 창 4곳 대체 — 플랫폼 어댑터(Next 웹 = 기존 동작, toss = 스텁 TODO(QR-1029)) · toss 그래프 window.print/open 0 · Next 웹 회귀 0 테스트 (PR5)
 - [x] 5. (PR6 `8790e37`+`1e891cc`) findingNoun — `lib/seed/modeCopy.ts` · `app/sessions/new/NewSessionForm.tsx` · `app/sessions/SessionsList.tsx`·«하자/시공» 문구 일괄 · NewSessionForm 모드별 필드 · 목록·대시보드 mode 표시 (PR6)
 - [x] 6. (PR6 동일) 임대 모드 잔여 — `app/sessions/[sessionId]/report/ReportView.tsx` `{copy.aiOn && <ReportAiDisclaimer` · `lib/seed/modes.ts` `analysisPath`· `lib/seed/modes.ts` `sessionRecipient`·`pickArea` · `__tests__/modeCopy.test.ts`(AI CTA·7절 면책 절 비렌더) · recipientType 백필 · areas[0] · 고지 게이트 toss 진입점 전수(PR5에서 테스트 선반영) (PR6)
-- [ ] 7. (미착수) Next 화면 제거 (가) — 대상: `app/**/page.tsx` 10개 + `app/layout.tsx`·`globals.css`·`components/SwRegister.tsx`·`PageStub.tsx` 검토, `app/api`·`public/` 유지 — PR7, **열어 두되 머지 금지**(머지 = Vercel 웹 UI 소멸)
-- [ ] 8. (PR5 끝 · PR6 critic 미완) PR마다 critic(high) → LC 게이트 → 열어 둠
-- [x] 9. 인계 블록(중간 마감)(REPORT 마감 · AGENT_STATUS · WORKLOG)
+- [x] 7. (PR7 chore/s2-remove-next-pages, critic 8/10 조건부 PASS, **⛔ 머지 금지 — 사용자 확인**) Next 화면 제거 (가) — page.tsx 10 + SwRegister·PageStub, next build exit 0(`/api/analyze`만) · build:toss 0 · 144/144
+- [x] 8. PR마다 critic(high) → LC 게이트 요청(PR 코멘트 + SendMessage) — #17·#18 PASS·머지 · #19 요청 10-26(issuecomment-6408938298) · #20 critic 6/10 → 반영 → 재검
+- [x] 9. 인계 블록 — 이 파일 위쪽 «마감 상태»~«effort» · AGENT_STATUS · WORKLOG(PR #20)
 
 ## 경계 테스트 확장(계획 REPLY ①~⑥)
 
