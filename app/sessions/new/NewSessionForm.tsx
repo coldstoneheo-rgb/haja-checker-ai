@@ -4,15 +4,11 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { createSessionWithSeed } from "@/lib/repo/sessionRepo";
 import type { InspectionMode, RecipientType } from "@/lib/domain/types";
-import { INSPECTION_MODE_LABELS, RECIPIENT_TYPE_LABELS } from "@/lib/util/labels";
+import { INSPECTION_MODE_LABELS } from "@/lib/util/labels";
+import { DEFAULT_RECIPIENT } from "@/lib/seed/modes";
+import { MODE_COPY } from "@/lib/seed/modeCopy";
 
 const MODES = Object.keys(INSPECTION_MODE_LABELS) as InspectionMode[];
-const RECIPIENTS = Object.keys(RECIPIENT_TYPE_LABELS) as RecipientType[];
-const DEFAULT_RECIPIENT: Record<InspectionMode, RecipientType> = {
-  NEW_BUILD: "BUILDER",
-  MOVE_IN: "HOUSE_OWNER",
-  MOVE_OUT: "HOUSE_OWNER",
-};
 
 interface FormState {
   mode: InspectionMode;
@@ -47,6 +43,7 @@ export default function NewSessionForm() {
   const [state, setState] = useState<FormState>(INITIAL);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const copy = MODE_COPY[state.mode];
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setState((prev) => ({ ...prev, [key]: value }));
@@ -67,7 +64,13 @@ export default function NewSessionForm() {
 
     setSubmitting(true);
     try {
-      const sessionId = await createSessionWithSeed(state);
+      // 신축 전용 필드(시공사·입주예정일)는 다른 모드로 바꾼 뒤에는 저장하지 않는다
+      const input = {
+        ...state,
+        builderName: copy.builderLabel ? state.builderName : "",
+        moveInDate: copy.moveInDateLabel ? state.moveInDate : "",
+      };
+      const sessionId = await createSessionWithSeed(input);
       router.push(`/sessions/${sessionId}`);
     } catch (err) {
       console.error(err);
@@ -110,9 +113,9 @@ export default function NewSessionForm() {
             value={state.recipientType}
             onChange={(e) => update("recipientType", e.target.value as RecipientType)}
           >
-            {RECIPIENTS.map((r) => (
+            {copy.recipients.map((r) => (
               <option key={r} value={r}>
-                {RECIPIENT_TYPE_LABELS[r]}
+                {copy.recipientLabel(r)}
               </option>
             ))}
           </select>
@@ -152,12 +155,14 @@ export default function NewSessionForm() {
           onChange={(v) => update("floorPlanType", v)}
           placeholder="예: 84A"
         />
-        <Field
-          label="시공사 / 시행사"
-          value={state.builderName}
-          onChange={(v) => update("builderName", v)}
-          placeholder="시공자에게 보낼 보고서에 표시됩니다"
-        />
+        {copy.builderLabel && (
+          <Field
+            label={copy.builderLabel}
+            value={state.builderName}
+            onChange={(v) => update("builderName", v)}
+            placeholder={copy.builderPlaceholder}
+          />
+        )}
       </fieldset>
 
       <fieldset className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
@@ -166,7 +171,7 @@ export default function NewSessionForm() {
           label="점검자 이름"
           value={state.inspectorName}
           onChange={(v) => update("inspectorName", v)}
-          placeholder="입주예정자 또는 동행자"
+          placeholder={copy.inspectorPlaceholder}
         />
         <Field
           label="연락처"
@@ -186,12 +191,14 @@ export default function NewSessionForm() {
           onChange={(v) => update("inspectionDate", v)}
           type="date"
         />
-        <Field
-          label="입주예정일"
-          value={state.moveInDate}
-          onChange={(v) => update("moveInDate", v)}
-          type="date"
-        />
+        {copy.moveInDateLabel && (
+          <Field
+            label={copy.moveInDateLabel}
+            value={state.moveInDate}
+            onChange={(v) => update("moveInDate", v)}
+            type="date"
+          />
+        )}
       </fieldset>
 
       {error && (

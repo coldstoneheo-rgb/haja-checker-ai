@@ -72,7 +72,7 @@ describe("쿼리 라우팅 10화면", () => {
     }
   });
 
-  it("새 세션→대시보드→체크리스트→하자→분석→보고서 왕복: 화면 안 이동 대상이 전부 이식 화면이다", () => {
+  it("새 세션→대시보드→체크리스트→하자→분석→보고서 왕복: 화면 안 이동 대상이 전부 이식 화면이다", async () => {
     // 이식 화면이 실제로 내보내는 이동 대상(href·router.push·replace)을 출발 파일과 함께 모은다
     const edges = new Set<string>();
     const all = new Set<string>();
@@ -87,7 +87,8 @@ describe("쿼리 라우팅 10화면", () => {
       }
       // 변수 href(href={x})는 정적 검사가 못 따라간다 — 0이어야 한다(Link shim의 assert가 런타임 그물)
       const dynamicHref = [...src.matchAll(/href=\{(?!["'`])([^}]+)\}/g)].map((m) => m[1]);
-      expect(dynamicHref.filter((h) => !/^(internal \? hrefFor\(href\) : "#")$/.test(h)), f).toEqual([]);
+      // aiHref = analysisPath() 값(modes.ts, 아래에서 경로 확인)
+      expect(dynamicHref.filter((h) => !/^(internal \? hrefFor\(href\) : "#"|aiHref)$/.test(h)), f).toEqual([]);
     }
     const pending = [...all].filter((t) => matchRoute(t).name === "pending");
     expect(pending).toEqual([]);
@@ -101,13 +102,15 @@ describe("쿼리 라우팅 10화면", () => {
       `${D}/SessionOverview.tsx → /sessions/x/defects`, // 대시보드 → 하자 목록
       `toss/src/pages/DefectsPage.tsx → /sessions/x/defects/new`, // 하자 목록 → 신규
       `${D}/defects/new/NewDefectForm.tsx → /sessions/x/defects/x`, // 신규 → 상세
-      `${D}/checklist/ChecklistView.tsx → /sessions/x/analysis`, // 체크리스트 → 분석
       `${D}/analysis/AnalysisView.tsx → /sessions/x/report`, // 분석 → 보고서
       `${D}/SessionOverview.tsx → /sessions/x/report`, // 대시보드 → 보고서
       `${S}/SessionsList.tsx → /sessions/x`, // 목록 → 대시보드
     ]) {
       expect(edges, leg).toContain(leg);
     }
+    // 대시보드·체크리스트 → 분석은 analysisPath()로 간다(신축만)
+    const { analysisPath } = await import("@/lib/seed/modes");
+    expect(matchRoute(analysisPath("x", "NEW_BUILD")!).name).toBe("analysis");
     // 돌아오는 방향은 토스 상단 바 «뒤로»(history.back) — 라우터가 popstate를 구독해야 한다
     expect(read("toss/src/router.ts")).toMatch(/addEventListener\("popstate", cb\)/);
   });

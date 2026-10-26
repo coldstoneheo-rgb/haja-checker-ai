@@ -24,7 +24,7 @@ export default function App() {
     case "overview":
       return <OverviewPage key={route.sessionId} />;
     case "checklist":
-      return <ChecklistPage key={route.sessionId} />;
+      return <ChecklistPage key={route.sessionId} sessionId={route.sessionId} />;
     case "defects":
       return <DefectsPage key={route.sessionId} sessionId={route.sessionId} />;
     case "defectNew":

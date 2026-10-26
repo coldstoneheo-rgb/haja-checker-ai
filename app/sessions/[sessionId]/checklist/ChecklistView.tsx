@@ -13,18 +13,21 @@ import type {
   ChecklistItemStatus,
   ChecklistPriority,
 } from "@/lib/domain/types";
+import { getDB } from "@/lib/db/db";
+import { analysisPath, sessionMode } from "@/lib/seed/modes";
+import { MODE_COPY } from "@/lib/seed/modeCopy";
 import PhotoCaptureButton from "./PhotoCaptureButton";
 import PhotoGrid from "./PhotoGrid";
 
+// 라벨은 모드 문구(MODE_COPY.statusLabel)에서 — 임대는 DEFECT = «손상»
 const STATUS_BUTTONS: {
   value: ChecklistItemStatus;
-  label: string;
   tone: string;
 }[] = [
-  { value: "GOOD", label: "양호", tone: "emerald" },
-  { value: "SUSPECTED", label: "의심", tone: "amber" },
-  { value: "DEFECT", label: "하자", tone: "rose" },
-  { value: "CANNOT_CHECK", label: "확인불가", tone: "slate" },
+  { value: "GOOD", tone: "emerald" },
+  { value: "SUSPECTED", tone: "amber" },
+  { value: "DEFECT", tone: "rose" },
+  { value: "CANNOT_CHECK", tone: "slate" },
 ];
 
 const PRIORITY_BADGE: Record<ChecklistPriority, { label: string; cls: string }> = {
@@ -45,8 +48,10 @@ export default function ChecklistView() {
     [sessionId],
     undefined,
   );
+  // null = 세션 없음(잘못된 링크) · undefined = 로딩 중 — 없음을 로딩으로 착각해 «불러오는 중…»이 끝나지 않는 것을 막는다
+  const session = useLiveQuery(async () => (await getDB().sessions.get(sessionId)) ?? null, [sessionId]);
 
-  if (areas === undefined) {
+  if (areas === undefined || session === undefined) {
     return <p className="text-sm text-slate-500">불러오는 중…</p>;
   }
 
@@ -59,6 +64,8 @@ export default function ChecklistView() {
     );
   }
 
+  const copy = MODE_COPY[session ? sessionMode(session) : "NEW_BUILD"];
+  const aiHref = session ? analysisPath(sessionId, sessionMode(session)) : null;
   const currentAreaId = activeAreaId ?? areasWithItems[0].area.id;
   const current = areasWithItems.find((a) => a.area.id === currentAreaId);
   const currentIndex = areasWithItems.findIndex((a) => a.area.id === currentAreaId);
@@ -116,6 +123,7 @@ export default function ChecklistView() {
             item={item}
             sessionId={sessionId}
             areaName={current.area.name}
+            statusLabel={copy.statusLabel}
           />
         ))}
       </ul>
@@ -123,11 +131,20 @@ export default function ChecklistView() {
       {/* Sticky bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-slate-200 bg-white/95 px-5 py-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm">
         <div className="mx-auto flex w-full max-w-2xl items-center gap-2">
-          {isLastArea ? (
+          {isLastArea && !aiHref ? (
+            // 임대(AI 끔): 마지막 영역 → 보고서
+            <button
+              type="button"
+              onClick={() => router.push(`/sessions/${sessionId}/report`)}
+              className="flex-1 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white"
+            >
+              보고서로 이동 →
+            </button>
+          ) : isLastArea && aiHref ? (
             // 마지막 영역 → AI 분석으로 바로 이동
             <button
               type="button"
-              onClick={() => router.push(`/sessions/${sessionId}/analysis`)}
+              onClick={() => router.push(aiHref)}
               className={`flex-1 rounded-xl py-3 text-sm font-semibold transition ${
                 suspectedCount > 0
                   ? "bg-slate-900 text-white"
@@ -135,7 +152,7 @@ export default function ChecklistView() {
               }`}
             >
               {suspectedCount > 0
-                ? `AI 분석 시작 → (의심·하자 ${suspectedCount}건)`
+                ? `AI 분석 시작 → (${copy.flaggedCta} ${suspectedCount}건)`
                 : "AI 분석으로 이동 →"}
             </button>
           ) : (
@@ -153,10 +170,10 @@ export default function ChecklistView() {
                   다음: {nextArea.area.name} →
                 </button>
               )}
-              {suspectedCount > 0 && (
+              {aiHref && suspectedCount > 0 && (
                 <button
                   type="button"
-                  onClick={() => router.push(`/sessions/${sessionId}/analysis`)}
+                  onClick={() => router.push(aiHref)}
                   className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-white"
                 >
                   AI 분석 ({suspectedCount})
@@ -174,10 +191,12 @@ function ChecklistRow({
   item,
   sessionId,
   areaName,
+  statusLabel,
 }: {
   item: ChecklistItem;
   sessionId: string;
   areaName: string;
+  statusLabel: (status: ChecklistItemStatus) => string;
 }) {
   const [pending, setPending] = useState<ChecklistItemStatus | null>(null);
   const [memoOpen, setMemoOpen] = useState(false);
@@ -249,7 +268,7 @@ function ChecklistRow({
               onClick={() => onStatus(b.value)}
               className={cls}
             >
-              {isPending ? "…" : b.label}
+              {isPending ? "…" : statusLabel(b.value)}
             </button>
           );
         })}

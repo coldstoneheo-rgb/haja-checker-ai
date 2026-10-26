@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getDB } from "@/lib/db/db";
 import { computeSessionProgress } from "@/lib/repo/checklistRepo";
-import { PREP_ITEMS, RECOMMENDED_ROUTE } from "@/lib/seed/prep";
+import { RECOMMENDED_ROUTE } from "@/lib/seed/prep";
+import { analysisPath, sessionMode, sessionRecipient } from "@/lib/seed/modes";
+import { MODE_COPY } from "@/lib/seed/modeCopy";
 
 export default function SessionOverview() {
   const params = useParams<{ sessionId: string }>();
@@ -42,20 +44,30 @@ export default function SessionOverview() {
   }
 
   const ratio = Math.round(progress.ratio * 100);
+  const copy = MODE_COPY[sessionMode(session)];
+  const aiHref = analysisPath(sessionId, sessionMode(session));
 
   return (
     <div className="flex flex-col gap-5">
       <section className="flex flex-col gap-2 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <h2 className="text-base font-semibold">세대 정보</h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-base font-semibold">세대 정보</h2>
+          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
+            {copy.modeLabel}
+          </span>
+        </div>
         <dl className="grid grid-cols-2 gap-y-2 text-sm">
           <Detail label="단지" value={session.complexName} />
           <Detail label="동/호수" value={`${session.buildingNo}동 ${session.unitNo}호`} />
           <Detail label="평형/타입" value={session.floorPlanType ?? "—"} />
-          <Detail label="시공사" value={session.builderName ?? "—"} />
+          {copy.builderDisplayLabel && <Detail label={copy.builderDisplayLabel} value={session.builderName ?? "—"} />}
+          {copy.showModeMeta && (
+            <Detail label="수신처" value={copy.recipientLabel(sessionRecipient(session))} />
+          )}
           <Detail label="점검자" value={session.inspectorName ?? "—"} />
           <Detail label="연락처" value={session.phone ?? "—"} />
           <Detail label="점검일" value={session.inspectionDate} />
-          <Detail label="입주예정일" value={session.moveInDate ?? "—"} />
+          {copy.moveInDateLabel && <Detail label={copy.moveInDateLabel} value={session.moveInDate ?? "—"} />}
         </dl>
       </section>
 
@@ -73,7 +85,7 @@ export default function SessionOverview() {
         <div className="grid grid-cols-4 gap-2 text-center text-xs">
           <Stat label="총 항목" value={progress.total} tone="slate" />
           <Stat label="완료" value={progress.done} tone="emerald" />
-          <Stat label="의심/하자" value={progress.suspected + progress.defects} tone="amber" />
+          <Stat label={copy.flagged} value={progress.suspected + progress.defects} tone="amber" />
           <Stat label="미점검" value={progress.notStarted} tone="slate" />
         </div>
 
@@ -84,7 +96,7 @@ export default function SessionOverview() {
             className="flex items-center justify-between rounded-xl bg-rose-50 px-3 py-2.5 ring-1 ring-rose-100"
           >
             <span className="text-xs font-semibold text-rose-800">
-              직접 추가 하자 {progress.directDefectsTotal}건
+              {copy.directTitle} {progress.directDefectsTotal}건
             </span>
             <span className="flex gap-1.5 text-xs">
               {progress.directDefectsUrgent > 0 && (
@@ -113,14 +125,16 @@ export default function SessionOverview() {
               href={`/sessions/${sessionId}/defects`}
               className="flex-1 rounded-xl bg-slate-100 px-3 py-2.5 text-center text-sm font-semibold text-slate-700"
             >
-              하자 추가
+              {copy.directAdd}
             </Link>
-            <Link
-              href={`/sessions/${sessionId}/analysis`}
-              className="flex-1 rounded-xl bg-slate-100 px-3 py-2.5 text-center text-sm font-semibold text-slate-700"
-            >
-              AI 분석
-            </Link>
+            {aiHref && (
+              <Link
+                href={aiHref}
+                className="flex-1 rounded-xl bg-slate-100 px-3 py-2.5 text-center text-sm font-semibold text-slate-700"
+              >
+                AI 분석
+              </Link>
+            )}
             <Link
               href={`/sessions/${sessionId}/report`}
               className="flex-1 rounded-xl bg-slate-100 px-3 py-2.5 text-center text-sm font-semibold text-slate-700"
@@ -134,7 +148,7 @@ export default function SessionOverview() {
       <section className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="text-base font-semibold">사전 준비물</h2>
         <ul className="columns-2 gap-x-4 text-sm text-slate-700">
-          {PREP_ITEMS.map((item) => (
+          {copy.prepItems.map((item) => (
             <li key={item.name} className="mb-1.5 break-inside-avoid flex flex-col">
               <span className="font-medium break-keep">· {item.name}</span>
               {item.note && (

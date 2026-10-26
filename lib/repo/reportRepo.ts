@@ -123,6 +123,8 @@ export function buildBlankChecklistHtml(
   sessionTitle: string,
   inspectionDate: string,
   areasWithItems: { area: { name: string }; items: { title: string }[] }[],
+  /** 체크 칸 «하자» 자리 — 모드 문구(임대 = «손상») */
+  defectLabel = "하자",
 ): string {
   const rows = areasWithItems
     .flatMap(({ area, items }) =>
@@ -131,7 +133,7 @@ export function buildBlankChecklistHtml(
           <tr>
             <td style="padding:6px 8px;border:1px solid #e2e8f0;font-size:11px;color:#64748b;white-space:nowrap">${escapeHtml(area.name)}</td>
             <td style="padding:6px 8px;border:1px solid #e2e8f0;font-size:12px">${escapeHtml(item.title)}</td>
-            <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:center;font-size:11px">□ 양호&nbsp;&nbsp;□ 의심&nbsp;&nbsp;□ 하자&nbsp;&nbsp;□ 확인불가</td>
+            <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:center;font-size:11px">□ 양호&nbsp;&nbsp;□ 의심&nbsp;&nbsp;□ ${escapeHtml(defectLabel)}&nbsp;&nbsp;□ 확인불가</td>
             <td style="padding:6px 8px;border:1px solid #e2e8f0;min-width:120px">&nbsp;</td>
           </tr>`,
       ),

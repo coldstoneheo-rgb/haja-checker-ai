@@ -5,15 +5,14 @@ import { useState } from "react";
 import { addDefect } from "@/lib/repo/defectRepo";
 import type { DefectType, RepairDifficulty, RiskLevel } from "@/lib/domain/types";
 import {
-  DEFECT_TYPE_LABELS,
   REPAIR_DIFFICULTY_LABELS,
   RISK_LEVEL_LABELS,
 } from "@/lib/util/labels";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getDB } from "@/lib/db/db";
-import { MODE_CONFIG, sessionMode } from "@/lib/seed/modes";
+import { MODE_CONFIG, pickArea, sessionMode } from "@/lib/seed/modes";
+import { MODE_COPY } from "@/lib/seed/modeCopy";
 
-const DEFECT_TYPES = Object.keys(DEFECT_TYPE_LABELS) as DefectType[];
 const RISK_LEVELS = Object.keys(RISK_LEVEL_LABELS) as RiskLevel[];
 const REPAIR_DIFFICULTIES = Object.keys(
   REPAIR_DIFFICULTY_LABELS,
@@ -28,10 +27,15 @@ export default function NewDefectForm({ sessionId }: Props) {
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const session = useLiveQuery(() => getDB().sessions.get(sessionId), [sessionId]);
+  // null = 세션 없음(잘못된 링크) · undefined = 로딩 중 — 없음을 로딩으로 착각해 «불러오는 중…»이 끝나지 않는 것을 막는다
+  const session = useLiveQuery(async () => (await getDB().sessions.get(sessionId)) ?? null, [sessionId]);
   // 공간 목록은 세션 모드의 시드 공간(임대: 욕실·침실·전기·설비 …)
-  const areas = MODE_CONFIG[session ? sessionMode(session) : "NEW_BUILD"].areas;
-  const [areaName, setAreaName] = useState(areas[0]);
+  const mode = session ? sessionMode(session) : "NEW_BUILD";
+  const areas = MODE_CONFIG[mode].areas;
+  const copy = MODE_COPY[mode];
+  // 세션을 읽기 전에는 고른 값이 없다(null) → 읽은 뒤 그 모드의 areas[0]
+  const [chosenArea, setAreaName] = useState<string | null>(null);
+  const areaName = pickArea(areas, chosenArea);
   const [customArea, setCustomArea] = useState("");
   const [useCustomArea, setUseCustomArea] = useState(false);
   const [detailLocation, setDetailLocation] = useState("");
@@ -68,6 +72,9 @@ export default function NewDefectForm({ sessionId }: Props) {
       setBusy(false);
     }
   }
+
+  // 모드를 알기 전에는 신축 문구·공간을 보이지 않는다
+  if (session === undefined) return <p className="text-sm text-slate-500">불러오는 중…</p>;
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
@@ -126,16 +133,16 @@ export default function NewDefectForm({ sessionId }: Props) {
       {/* Defect type */}
       <div className="flex flex-col gap-1.5">
         <span className="text-sm font-semibold text-slate-700">
-          하자 유형 <span className="text-rose-500">*</span>
+          {copy.directTypeLabel} <span className="text-rose-500">*</span>
         </span>
         <select
           value={defectType}
           onChange={(e) => setDefectType(e.target.value as DefectType)}
           className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
         >
-          {DEFECT_TYPES.map((t) => (
+          {copy.defectTypes.map((t) => (
             <option key={t} value={t}>
-              {DEFECT_TYPE_LABELS[t]}
+              {copy.defectTypeLabel(t)}
             </option>
           ))}
         </select>
@@ -201,7 +208,7 @@ export default function NewDefectForm({ sessionId }: Props) {
         <textarea
           value={userMemo}
           onChange={(e) => setUserMemo(e.target.value)}
-          placeholder="하자 상태, 발견 경위, 시공사 요청 내용 등"
+          placeholder={copy.directMemoPlaceholder}
           rows={4}
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-base text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
         />
@@ -212,7 +219,7 @@ export default function NewDefectForm({ sessionId }: Props) {
         disabled={busy}
         className="rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white disabled:opacity-50"
       >
-        {busy ? "저장 중…" : "하자 저장"}
+        {busy ? "저장 중…" : copy.directSave}
       </button>
     </form>
   );

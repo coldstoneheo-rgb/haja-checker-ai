@@ -6,8 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { getDB } from "@/lib/db/db";
 import { deleteDefect } from "@/lib/repo/defectRepo";
+import { useModeCopy } from "@/components/useModeCopy";
 import {
-  DEFECT_TYPE_LABELS,
   REPAIR_DIFFICULTY_LABELS,
   RISK_LEVEL_COLORS,
   RISK_LEVEL_LABELS,
@@ -17,6 +17,7 @@ export default function DefectsList() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const router = useRouter();
   const [deleting, setDeleting] = useState<string | null>(null);
+  const copy = useModeCopy(sessionId);
 
   const defects = useLiveQuery(
     () =>
@@ -32,26 +33,26 @@ export default function DefectsList() {
     [sessionId],
   );
 
-  if (defects === undefined) {
+  if (defects === undefined || copy === undefined) {
     return <p className="text-sm text-slate-500">불러오는 중…</p>;
   }
 
   if (defects.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-2xl bg-white px-6 py-10 text-center shadow-sm ring-1 ring-slate-200">
-        <p className="text-sm text-slate-500">직접 추가한 하자가 없습니다.</p>
+        <p className="text-sm text-slate-500">{copy.directEmpty}</p>
         <Link
           href={`/sessions/${sessionId}/defects/new`}
           className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white"
         >
-          첫 하자 추가
+          {copy.directFirstAdd}
         </Link>
       </div>
     );
   }
 
   async function onDelete(defectId: string) {
-    if (!confirm("이 하자를 삭제하시겠습니까?")) return;
+    if (!confirm(copy!.directDeleteConfirm)) return;
     setDeleting(defectId);
     try {
       await deleteDefect(defectId);
@@ -77,7 +78,7 @@ export default function DefectsList() {
                 {defect.displayId}
               </span>
               <p className="text-sm font-semibold text-slate-900">
-                {DEFECT_TYPE_LABELS[defect.defectType]}
+                {copy.defectTypeLabel(defect.defectType)}
               </p>
             </div>
             <span

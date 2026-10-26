@@ -1,16 +1,28 @@
 {
   "project": "haja-checker-ai",
-  "as_of": "2026-10-26T06:40+09:00",
-  "state": "idle",
-  "head": "main b174dc0(#15) · #9~#15 머지 · 열린 PR #8(docs/close-1017, 무관) + 인계 PR",
-  "working_on": "없음 — HO-2026-1026-haja-s2-start-01 완료(조건 1~7)",
-  "waiting_on": "사용자: 동의 3줄·AI 고지 3줄·보고서 면책 문안 확정 · 실기기 QR 10-29 · GCP 예산 한도(S3 전) · PR #8 처리",
+  "as_of": "2026-10-26T15:30+09:00",
+  "state": "working",
+  "head": "main e7487be(#17) · feat/s2-mode-copy PR6(critic 8/10 PASS) → PR 개설·LC 게이트 · PR #8(무관)",
+  "working_on": "HO-2026-1026-haja-s2-port-02 — PR6 LC 게이트 대기(PASS면 사용자 위임대로 머지) · PR7 미착수",
+  "waiting_on": "LC: PR6 게이트 · 사용자: PR7 머지 판단(웹 UI 소멸) · 문안 확정 · 실기기 QR 10-29",
   "next_actions": [
-    "toss 이식 9화면(Next 제거 조각) — 외부 href·next/image 금지·findingNoun·문구 일괄 포함",
-    "실기기 전 스텁: 카메라·공유·광고·식별키 → QR 10-29",
-    "/api/analyze Vercel 함수 분리+CORS · 상한 KV 어댑터(S3)"
+    "PR6 LC 게이트 PASS → 스쿼시 머지(사용자 위임) → 가지 정리",
+    "PR7 Next 화면 제거(가) — app/**/page.tsx 10개, next build(api만)·build:toss·테스트 ≥140, 열어 두되 머지 금지",
+    "실기기 스텁(카메라·공유·광고·식별키) QR 10-29 · /api/analyze 분리+CORS · KV(S3)"
   ],
   "recent": [
+    {
+      "at": "2026-10-26",
+      "what": "PR6 critic 7/10 → b45cd40(신축 «시공사» 표시 라벨 원복·원문 26개 표 고정) → 8/10 PASS → 세션 없음/로딩 구분·배선 단언 · 143/143"
+    },
+    {
+      "at": "2026-10-26",
+      "what": "#17 스쿼시 머지 e7487be(사용자 위임) · 가지 정리 · PR6 rebase 8790e37 · critic 6/10 → 반영 1e891cc(신축 원문 복구·analysisPath·AST 리터럴 검사, 143/143, 빌드 3종 0)"
+    },
+    {
+      "at": "2026-10-26",
+      "what": "S2 port-02: #17 PR5 59c5583(10화면·외부 href·보고서 어댑터, critic 8/10 PASS, 131/131) · PR6 2f413b8(모드 문구·임대 잔여·백필·areas[0], 140/140, next build·build:toss 0) · 사용자 지시로 중간 마감"
+    },
     {
       "at": "2026-10-26",
       "what": "S2 착수: #11 19e6cda Vite 골격 · #12 57513ab 모드 3종 · #13 6ac6a15 고지·상한 · #14 71ba72f 동의·자가점검 · #15 b174dc0 서버 mode 가드 · npm test 116/116 · worktree 3개 정리(junction rmdir 먼저, --force 0)"
