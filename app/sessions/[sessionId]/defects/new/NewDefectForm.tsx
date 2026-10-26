@@ -27,7 +27,8 @@ export default function NewDefectForm({ sessionId }: Props) {
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const session = useLiveQuery(() => getDB().sessions.get(sessionId), [sessionId]);
+  // null = 세션 없음(잘못된 링크) · undefined = 로딩 중 — 없음을 로딩으로 착각해 «불러오는 중…»이 끝나지 않는 것을 막는다
+  const session = useLiveQuery(async () => (await getDB().sessions.get(sessionId)) ?? null, [sessionId]);
   // 공간 목록은 세션 모드의 시드 공간(임대: 욕실·침실·전기·설비 …)
   const mode = session ? sessionMode(session) : "NEW_BUILD";
   const areas = MODE_CONFIG[mode].areas;

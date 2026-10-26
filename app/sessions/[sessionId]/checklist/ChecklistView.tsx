@@ -48,7 +48,8 @@ export default function ChecklistView() {
     [sessionId],
     undefined,
   );
-  const session = useLiveQuery(() => getDB().sessions.get(sessionId), [sessionId]);
+  // null = 세션 없음(잘못된 링크) · undefined = 로딩 중 — 없음을 로딩으로 착각해 «불러오는 중…»이 끝나지 않는 것을 막는다
+  const session = useLiveQuery(async () => (await getDB().sessions.get(sessionId)) ?? null, [sessionId]);
 
   if (areas === undefined || session === undefined) {
     return <p className="text-sm text-slate-500">불러오는 중…</p>;

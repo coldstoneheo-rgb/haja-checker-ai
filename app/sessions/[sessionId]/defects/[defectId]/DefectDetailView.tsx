@@ -31,7 +31,8 @@ export default function DefectDetailView({ sessionId, defectId }: Props) {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const { guarded, dialog: aiNoticeDialog } = useAiNoticeGate();
 
-  const session = useLiveQuery(() => getDB().sessions.get(sessionId), [sessionId]);
+  // null = 세션 없음(잘못된 링크) · undefined = 로딩 중 — 없음을 로딩으로 착각해 «불러오는 중…»이 끝나지 않는 것을 막는다
+  const session = useLiveQuery(async () => (await getDB().sessions.get(sessionId)) ?? null, [sessionId]);
   // 세션을 읽기 전에는 버튼을 숨겨 둔다(임대 모드에서 깜빡이며 보이지 않게)
   const aiOn = session ? isAiEnabled(sessionMode(session)) : false;
   const copy = MODE_COPY[session ? sessionMode(session) : "NEW_BUILD"];

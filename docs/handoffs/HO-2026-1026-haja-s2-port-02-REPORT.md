@@ -3,18 +3,18 @@
 ## 마감 상태(10-26)
 
 - (갱신 10-26 오후) #17 PR5 → main `e7487be` 스쿼시 머지(사용자 위임 «critic+lc 게이트 pass면 알아서 머지해» · critic 8/10 · LC PASS) · feat/s2-port-screens 원격·로컬 삭제
-- PR6 feat/s2-mode-copy: main 위로 rebase → 코드 `8790e37` · critic(high) 6/10 NEEDS_REVISION → 반영 `1e891cc` → critic 재검수 → PR 개설(base main) → LC 게이트
+- PR6 feat/s2-mode-copy: main 위로 rebase → 코드 `8790e37` · critic(high) 6/10 → 반영 `1e891cc` → 7/10 → 반영 `b45cd40` → **8/10 PASS** → 경미 반영(세션 없음/로딩 구분 · 배선 단언) → PR 개설(base main) → LC 게이트 → PASS면 사용자 위임대로 머지
 - PR7(Next 화면 제거): 미착수. 머지 = 웹 UI 소멸이라 위임과 별개로 머지 전 사용자 확인
 
 ## 한 일 / 발견 / LC·사용자에게 필요한 것
 
 - 한 일: PR5 #17(10화면·외부 href·보고서 어댑터, 116→131) · PR6 코드(모드 문구·임대 잔여·백필·areas[0], 131→143, 빌드 3종 exit 0, critic 6→7 → 반영)
 - 발견: 의도된 Next 웹 변경: #17 2건(팝업 차단 안내 · 빈 체크리스트 escape) + PR6 신축은 목록·대시보드 모드 표시뿐 · PR7 뒤에도 `public/sw.js`가 남아 옛 SW 설치 브라우저는 캐시된 옛 화면을 볼 수 있음 · 세션 목록 삭제가 `confirm()`(토스 WebView 대화상자 동작은 실기기 QR에서 확인)
-- 필요한 것: #17 LC 게이트 판정(PR 코멘트) · 머지는 사용자(PR7은 10-28 복귀 뒤 판단)
+- 필요한 것: PR6 LC 게이트 판정(«게이트 판단 항목» Next 웹 임대 혼재 6곳 포함) · PR7 머지는 사용자 별도 확인(웹 UI 소멸)
 
 ## effort
 
-- 세션 medium · critic high 2회(PR5·PR6, 검수 규약) · 올린 곳 없음
+- 세션 medium · critic high 4회(PR5 1 · PR6 3 — 6→7→8, 검수 규약) · 올린 곳 없음
 
 발주서: `life-coordinator/handoffs/HO-2026-1026-haja-s2-port-02.md` · 기준 main `42863fe` · 116/116
 
@@ -67,6 +67,9 @@
 - recipientType 백필은 표시용(`sessionRecipient()`)만. DB 마이그레이션·JSON export에는 적용하지 않는다(v1 export는 원본 그대로 — 의도).
 - AI CTA 가드: `analysisPath(sessionId, mode)`가 AI 끈 모드에서 null → `href`·`router.push`에 null을 넘길 수 없어 극성 실수는 타입 오류(변이 `{!aiHref &&` → tsc error 1 + 테스트 실패 확인).
 - 리터럴 검사: typescript AST로 문자열·템플릿·JSX 텍스트만 본다(주석 정규식 제거). 임대 렌더 .ts 상수(공간·추천 동선·빠른 태그·임대 시드·위험도·보수·하자상태 라벨)도 검사.
+
+- toss 전용 변경(Next 웹 무관): 분석 화면 `document.title` «AI 하자 분석» → «AI 분석»(임대 직접 진입에도 쓰이는 제목이라 중립어).
+- critic 3차 경미 1 반영: ChecklistView·NewDefectForm·DefectDetailView 세션 조회를 `?? null`로 — 잘못된 링크에서 원문처럼 «항목 없음»·폼이 뜨고 무한 «불러오는 중…» 0.
 
 ## 다음 PR 후보(범위 밖 메모)
 

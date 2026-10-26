@@ -68,6 +68,20 @@ describe("모드 문구 표", () => {
       Object.entries(MODE_COPY.NEW_BUILD).filter(([, v]) => typeof v === "string"),
     );
     expect(strings).toEqual(ORIGINAL);
+    // 배선: 표시 행은 표시 라벨, 입력란만 입력 라벨(«시공사» vs «시공사 / 시행사» 회귀 재발 방지)
+    for (const f of ["app/sessions/[sessionId]/SessionOverview.tsx", "app/sessions/[sessionId]/report/ReportView.tsx"]) {
+      expect(read(f), f).toContain("copy.builderDisplayLabel");
+      expect(read(f), f).not.toContain("copy.builderLabel");
+    }
+    expect(read("app/sessions/new/NewSessionForm.tsx")).not.toContain("builderDisplayLabel");
+    // 세션 없음(null)과 로딩(undefined)을 가른다 — 원문처럼 잘못된 링크에서 무한 로딩 0
+    for (const f of [
+      "app/sessions/[sessionId]/checklist/ChecklistView.tsx",
+      "app/sessions/[sessionId]/defects/new/NewDefectForm.tsx",
+      "app/sessions/[sessionId]/defects/[defectId]/DefectDetailView.tsx",
+    ]) {
+      expect(read(f), f).toContain("(await getDB().sessions.get(sessionId)) ?? null");
+    }
     const c = MODE_COPY.NEW_BUILD;
     expect(c.aiOn).toBe(true);
     expect(STATUSES.map(c.statusLabel)).toEqual(STATUSES.map((s) => CHECKLIST_STATUS_LABELS[s]));
