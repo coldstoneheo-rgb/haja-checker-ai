@@ -8,10 +8,10 @@ project: haja-checker-ai
 agent: claude-code
 summary: S2 이식 조각 마감 — #17·#18 머지(사용자 위임) · #19 Next 화면 제거 열어 둠(머지 금지) · 실기기 스텁 점검
 status: on_track
-progress: "HO-2026-1026-haja-s2-port-02 조건 1~6·8·9 끝, 7 = #19 열림 (근거: main 2a5d438 · npx vitest run 143/143(main)·144/144(#19) · typecheck 0 · next build 0 · build:toss 0 · critic high 8/10 ×3 PR · LC PASS #17·#18)"
+progress: "HO-2026-1026-haja-s2-port-02 조건 1~6 끝 · 7 = #19 열림(⛔) · 8 = #17·#18 PASS, #19 게이트 요청 · 9 = #20 (근거: main 2a5d438 · npx vitest run 143/143(main)·144/144(#19) · typecheck 0 · next build 0 · build:toss 0 · critic high 8/10 ×3 PR · LC PASS #17·#18)"
 changes: ["https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/17 PR5 이식", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/18 PR6 모드 문구", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/19 PR7 Next 화면 제거(열림)"]
 next: 실기기 QR 10-29(카메라·광고·식별키 인터페이스부터) → /api/analyze 분리 → 문안 ASK
-blockers: #19 머지는 사용자(웹 UI·웹 데이터·SW 좀비 확인)
+blockers: #19 머지는 사용자(웹 UI·웹 데이터·SW 좀비 확인) · Vercel 배포 한도(PR 프리뷰 rate limited)
 monetization: 광고 스텁 없음(다음 조각)
 learning_need: 신축 회귀를 «원문 표 1:1» 테스트로 묶어야 critic 반복(6→7→8)이 줄어든다
 ---
