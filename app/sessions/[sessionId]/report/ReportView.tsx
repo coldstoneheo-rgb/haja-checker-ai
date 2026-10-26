@@ -128,7 +128,7 @@ export default function ReportView({ sessionId }: Props) {
             {copy.showModeMeta && (
               <Detail label="수신처" value={copy.recipientLabel(sessionRecipient(session))} />
             )}
-            {copy.builderLabel && <Detail label={copy.builderLabel} value={session.builderName ?? "—"} />}
+            {copy.builderDisplayLabel && <Detail label={copy.builderDisplayLabel} value={session.builderName ?? "—"} />}
             <Detail label="점검자" value={session.inspectorName ?? "—"} />
             <Detail label="연락처" value={session.phone ?? "—"} />
             <Detail label="점검일" value={session.inspectionDate} />

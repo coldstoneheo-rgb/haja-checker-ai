@@ -21,6 +21,7 @@ function rendered(mode: InspectionMode): string[] {
   out.push(...STATUSES.map(c.statusLabel));
   out.push(...c.defectTypes.map(c.defectTypeLabel));
   out.push(...c.recipients.map(c.recipientLabel));
+  out.push(...c.prepItems.flatMap((p) => [p.name, p.note ?? ""]));
   return out;
 }
 
@@ -28,11 +29,48 @@ describe("모드 문구 표", () => {
   it.each(RENTAL)("%s: 노출 값에 «하자»·«시공» 0", (mode) => {
     expect(rendered(mode).filter((s) => BANNED.test(s))).toEqual([]);
     expect(MODE_COPY[mode].builderLabel).toBeNull();
+    expect(MODE_COPY[mode].builderDisplayLabel).toBeNull();
     expect(MODE_COPY[mode].moveInDateLabel).toBeNull();
   });
 
-  it("신축은 기존 문구 그대로(Next 웹 회귀 0)", () => {
+  it("신축 문자열 필드 전부 = main e7487be 원문(Next 웹 회귀 0)", () => {
+    // 원문 출처(e7487be): NewSessionForm·SessionOverview·ChecklistView·DefectsList·NewDefectForm·DefectDetailView·ReportView, toss 페이지
+    const ORIGINAL: Record<string, string> = {
+      modeLabel: "신축 사전점검",
+      flaggedCta: "의심·하자",
+      flagged: "의심/하자",
+      builderLabel: "시공사 / 시행사",
+      builderDisplayLabel: "시공사",
+      builderPlaceholder: "시공자에게 보낼 보고서에 표시됩니다",
+      moveInDateLabel: "입주예정일",
+      inspectorPlaceholder: "입주예정자 또는 동행자",
+      checklistIntro: "공간 탭을 눌러 이동하고, 항목별로 양호/의심/하자/확인불가를 표시하세요.",
+      entry: "하자",
+      directTitle: "직접 추가 하자",
+      directEmpty: "직접 추가한 하자가 없습니다.",
+      directFirstAdd: "첫 하자 추가",
+      directAdd: "하자 추가",
+      directDeleteConfirm: "이 하자를 삭제하시겠습니까?",
+      directNewTitle: "하자 직접 추가",
+      directNewIntro:
+        "체크리스트 항목과 무관하게 현장에서 발견한 하자를 직접 기록합니다. 하자 ID(D-YYYYMMDD-NNN)가 자동으로 생성됩니다.",
+      directTypeLabel: "하자 유형",
+      directMemoPlaceholder: "하자 상태, 발견 경위, 시공사 요청 내용 등",
+      directSave: "하자 저장",
+      directDetailTitle: "하자 상세",
+      directNotFound: "하자를 찾을 수 없습니다.",
+      reportTitle: "사전점검 하자 보고서",
+      reportDirectSection: "직접 추가 하자 목록",
+      reportRequestSection: "시공자 요청 문구 모음",
+      reportRequestIntro: "아래 문구를 시공사 하자 접수 시 그대로 사용하실 수 있습니다.",
+    };
+    const strings = Object.fromEntries(
+      Object.entries(MODE_COPY.NEW_BUILD).filter(([, v]) => typeof v === "string"),
+    );
+    expect(strings).toEqual(ORIGINAL);
     const c = MODE_COPY.NEW_BUILD;
+    expect(c.aiOn).toBe(true);
+    expect(STATUSES.map(c.statusLabel)).toEqual(STATUSES.map((s) => CHECKLIST_STATUS_LABELS[s]));
     expect(c.statusLabel("DEFECT")).toBe("하자");
     expect(c.builderLabel).toBe("시공사 / 시행사");
     expect(c.moveInDateLabel).toBe("입주예정일");

@@ -60,7 +60,7 @@ export default function SessionOverview() {
           <Detail label="단지" value={session.complexName} />
           <Detail label="동/호수" value={`${session.buildingNo}동 ${session.unitNo}호`} />
           <Detail label="평형/타입" value={session.floorPlanType ?? "—"} />
-          {copy.builderLabel && <Detail label={copy.builderLabel} value={session.builderName ?? "—"} />}
+          {copy.builderDisplayLabel && <Detail label={copy.builderDisplayLabel} value={session.builderName ?? "—"} />}
           {copy.showModeMeta && (
             <Detail label="수신처" value={copy.recipientLabel(sessionRecipient(session))} />
           )}

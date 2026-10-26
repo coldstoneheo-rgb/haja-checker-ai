@@ -38,6 +38,8 @@ export interface ModeCopy {
   recipientLabel: (type: RecipientType) => string;
   /** 신축만: 시공사 필드 라벨. null이면 필드·표시를 숨긴다 */
   builderLabel: string | null;
+  /** 대시보드·보고서 표지의 시공사 행 라벨(입력란 라벨과 다름 — 신축 원문 «시공사»). null이면 숨긴다 */
+  builderDisplayLabel: string | null;
   builderPlaceholder: string;
   /** 신축만: 입주예정일 라벨. null이면 숨긴다 */
   moveInDateLabel: string | null;
@@ -75,6 +77,7 @@ const NEW_BUILD: ModeCopy = {
   recipients: Object.keys(RECIPIENT_TYPE_LABELS) as RecipientType[],
   recipientLabel: (r) => RECIPIENT_TYPE_LABELS[r],
   builderLabel: "시공사 / 시행사",
+  builderDisplayLabel: "시공사",
   builderPlaceholder: "시공자에게 보낼 보고서에 표시됩니다",
   moveInDateLabel: "입주예정일",
   inspectorPlaceholder: "입주예정자 또는 동행자",
@@ -117,6 +120,7 @@ function rental(mode: "MOVE_IN" | "MOVE_OUT"): ModeCopy {
     recipients: NEW_BUILD.recipients.filter((r) => r !== "BUILDER"),
     recipientLabel: (r) => RECIPIENT_TYPE_LABELS[r],
     builderLabel: null,
+    builderDisplayLabel: null,
     builderPlaceholder: "",
     moveInDateLabel: null,
     inspectorPlaceholder: "본인 또는 동행자",

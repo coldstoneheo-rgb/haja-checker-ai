@@ -8,8 +8,8 @@
 
 ## 한 일 / 발견 / LC·사용자에게 필요한 것
 
-- 한 일: PR5 #17(10화면·외부 href·보고서 어댑터, 116→131) · PR6 코드(모드 문구·임대 잔여·백필·areas[0], 131→140, 빌드 3종 exit 0)
-- 발견: 의도된 Next 웹 변경 3건(팝업 차단 안내 · 빈 체크리스트 escape · 준비물 «표시 스티커») · PR7 뒤에도 `public/sw.js`가 남아 옛 SW 설치 브라우저는 캐시된 옛 화면을 볼 수 있음 · 세션 목록 삭제가 `confirm()`(토스 WebView 대화상자 동작은 실기기 QR에서 확인)
+- 한 일: PR5 #17(10화면·외부 href·보고서 어댑터, 116→131) · PR6 코드(모드 문구·임대 잔여·백필·areas[0], 131→143, 빌드 3종 exit 0, critic 6→7 → 반영)
+- 발견: 의도된 Next 웹 변경: #17 2건(팝업 차단 안내 · 빈 체크리스트 escape) + PR6 신축은 목록·대시보드 모드 표시뿐 · PR7 뒤에도 `public/sw.js`가 남아 옛 SW 설치 브라우저는 캐시된 옛 화면을 볼 수 있음 · 세션 목록 삭제가 `confirm()`(토스 WebView 대화상자 동작은 실기기 QR에서 확인)
 - 필요한 것: #17 LC 게이트 판정(PR 코멘트) · 머지는 사용자(PR7은 10-28 복귀 뒤 판단)
 
 ## effort
@@ -60,10 +60,14 @@
 - 문구 표 `lib/seed/modeCopy.ts`(MODE_COPY): 신축 = 기존 문구 그대로, 임대 = «기록/손상/전달». findingNoun «상태»는 «직접 추가 상태»처럼 어색해 직접 추가 항목은 «기록», 체크 상태 DEFECT는 «손상».
 - 임대에서 숨김: 시공사·입주예정일 필드·표시 · 수신처 «시공사» 선택지 · 유형 «미시공» · «AI 분석» CTA(대시보드·체크리스트, 마지막 공간은 «보고서로 이동») · 보고서 7절 AI 면책 절(문안은 `ReportAiDisclaimer.tsx`로 옮겼을 뿐 그대로).
 - 렌더 테스트 대신(node 환경·useLiveQuery): 문구 표 임대 값 «하자»·«시공» 0 + toss 진입 그래프 .tsx 리터럴 0(브랜드 «하자체크», 신축 전용 AI 화면 2·면책 파일·홈 제외) + 라벨 맵 직접 사용 0.
-- recipientType 백필 `sessionRecipient()` = `recipientType ?? DEFAULT_RECIPIENT[mode]`(v1은 mode도 없어 «BUILDER»). 대시보드·보고서 표지에 «수신처»·«점검 종류» 표시, 목록에 모드 표시.
+- recipientType 백필 `sessionRecipient()` = `recipientType ?? DEFAULT_RECIPIENT[mode]`(v1은 mode도 없어 «BUILDER»). 임대만: 대시보드 «수신처» 행 · 보고서 표지 «점검 종류»·«수신처» 행. 전 모드: 목록 모드 표시 · 대시보드 모드 배지.
 - NewDefectForm 공간: `pickArea(areas, chosen)` — 세션 로드 전 고른 값 없음(null) → 로드 뒤 그 모드의 areas[0]. 로드 전에는 폼 대신 «불러오는 중…».
-- Next 웹(신축)에 실리는 변경 = 세션 목록 모드 표시 · 대시보드 모드 배지 2곳뿐(발주서 요구). 체크리스트 CTA «의심·하자»·보고서 표지·대시보드 행·준비물은 신축 원문 그대로(critic 1차 지적 1 반영, 테스트 «신축은 기존 문구 그대로»가 flaggedCta·showModeMeta·prepItems까지 고정).
-- **게이트 판단 항목(critic 지적 6)**: PR6 머지 뒤 PR7 전까지, Next 웹에서 임대 세션을 만들면 Next `page.tsx` 헤더 4곳(체크리스트 안내 «양호/의심/하자/확인불가», 하자 목록·신규·상세 제목)이 «하자»로 남고 본문은 «손상»·«기록»으로 섞인다. toss 번들은 0. Next 화면은 PR7에서 빠지므로 손대지 않았다.
+- Next 웹(신축)에 실리는 변경 = 세션 목록 모드 표시 · 대시보드 모드 배지 2곳뿐(발주서 요구). 그 밖 신축 문구는 원문 그대로 — 테스트 «신축 문자열 필드 전부 = main e7487be 원문»이 MODE_COPY.NEW_BUILD 문자열 26개를 표로 1:1 고정(대시보드·표지 «시공사» 라벨 포함, critic 2차 지적 1·2) + 상태 라벨·prepItems·showModeMeta.
+- **게이트 판단 항목(critic 지적 6)**: PR6 머지 뒤 PR7 전까지, Next 웹에서 임대 세션을 만들면 Next `page.tsx` 6곳(체크리스트 안내 «양호/의심/하자/확인불가» · 하자 목록·신규·상세 제목 · 신규 안내 문단 «하자를 직접 기록… 하자 ID» · 분석 화면 «AI 하자 분석 / 의심/하자 항목…»(임대는 CTA 없음, URL 직접 진입 때만))이 «하자»로 남고 본문은 «손상»·«기록»으로 섞인다. toss 번들은 0. Next 화면은 PR7에서 빠지므로 손대지 않았다.
 - recipientType 백필은 표시용(`sessionRecipient()`)만. DB 마이그레이션·JSON export에는 적용하지 않는다(v1 export는 원본 그대로 — 의도).
 - AI CTA 가드: `analysisPath(sessionId, mode)`가 AI 끈 모드에서 null → `href`·`router.push`에 null을 넘길 수 없어 극성 실수는 타입 오류(변이 `{!aiHref &&` → tsc error 1 + 테스트 실패 확인).
 - 리터럴 검사: typescript AST로 문자열·템플릿·JSX 텍스트만 본다(주석 정규식 제거). 임대 렌더 .ts 상수(공간·추천 동선·빠른 태그·임대 시드·위험도·보수·하자상태 라벨)도 검사.
+
+## 다음 PR 후보(범위 밖 메모)
+
+- `lib/repo/reportRepo.ts` 빈 체크리스트 제목 «사전점검 체크리스트 (종이 백업)» — 임대에도 신축 용어(금지어 아님, critic 2차 지적 7). toss는 스텁이라 현재 노출 0.

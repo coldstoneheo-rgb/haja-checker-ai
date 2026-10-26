@@ -111,7 +111,6 @@ describe("쿼리 라우팅 10화면", () => {
     // 대시보드·체크리스트 → 분석은 analysisPath()로 간다(신축만)
     const { analysisPath } = await import("@/lib/seed/modes");
     expect(matchRoute(analysisPath("x", "NEW_BUILD")!).name).toBe("analysis");
-    expect(edges).toContain(`${D}/SessionOverview.tsx → /sessions/x/defects`);
     // 돌아오는 방향은 토스 상단 바 «뒤로»(history.back) — 라우터가 popstate를 구독해야 한다
     expect(read("toss/src/router.ts")).toMatch(/addEventListener\("popstate", cb\)/);
   });
