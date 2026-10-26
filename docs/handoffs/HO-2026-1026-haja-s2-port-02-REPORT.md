@@ -10,7 +10,7 @@
 ## 한 일 / 발견 / LC·사용자에게 필요한 것
 
 - 한 일: toss 10화면·쿼리 라우팅·외부 href 가드·보고서 출력 어댑터(#17) · 모드 문구 표·임대 AI 잔여 숨김·recipientType 백필·areas[0](#18) · Next 화면 제거(#19, 열어 둠)
-- 발견: **Vercel 배포 한도** — #18·#19·#20 PR 프리뷰가 «Deployment rate limited — retry in 24 hours»로 실패(`gh api …/commits/4a52bc3/status` = failure). main `2a5d438` 프로덕션은 success. #19 머지 = 프로덕션 배포라 한도가 풀린 뒤에 · Next 웹 의도된 변경 = #17 2건(팝업 차단 안내·빈 체크리스트 escape) + #18 목록·대시보드 모드 표시 · #19 머지 시 웹 UI 소멸·웹 IndexedDB 데이터 갇힘·SW 좀비(#19 본문) · 세션 삭제 `confirm()`의 WebView 동작 미확인
+- 발견: **Vercel 배포 한도** — #18·#19·#20 PR 프리뷰가 «Deployment rate limited — retry in 24 hours»로 실패(`gh api …/commits/4a52bc3/status` = failure). 한도 = Vercel 무료 «api-deployments-free-per-day» 100 초과(LC 확인). **prod 웹 = `2a5d438`(#18)** — GitHub Production deployment `2a5d438` 05:08Z · 커밋 상태 «Deployment has completed»(`e7487be` 04:07Z도 success), 한도 전에 끝났다. 재배포·#19 머지는 사용자 복귀 뒤·한도 해제 뒤 · Next 웹 의도된 변경 = #17 2건(팝업 차단 안내·빈 체크리스트 escape) + #18 목록·대시보드 모드 표시 · #19 머지 시 웹 UI 소멸·웹 IndexedDB 데이터 갇힘·SW 좀비(#19 본문) · 세션 삭제 `confirm()`의 WebView 동작 미확인
 - 필요한 것: 사용자 — #19 머지 시점·SW (a)/(b) · 아래 «사용자 승인 뒤» 문서 수정 승인 / LC — #19 게이트 코멘트
 
 ## 다음 조각
