@@ -3,16 +3,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // PWA 메타(manifest·appleWebApp)는 뺀다 — 404 화면을 «홈 화면에 추가»하면 404만 뜨는 아이콘이 생긴다
   title: "하자체크 AI",
-  description:
-    "신축 아파트 사전점검에서 사진 증거를 빠짐없이 수집하고, AI 보조 분석으로 하자 의심 보고서를 작성합니다.",
-  manifest: "/manifest.webmanifest",
-  applicationName: "하자체크 AI",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "하자체크 AI",
-  },
 };
 
 export const viewport: Viewport = {
