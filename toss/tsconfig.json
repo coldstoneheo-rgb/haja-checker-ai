@@ -13,6 +13,7 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
+      "@/lib/platform/reportActions": ["./src/platform/reportActions.ts"],
       "@/*": ["../*"],
       "next/link": ["./src/shims/next-link.tsx"],
       "next/navigation": ["./src/shims/next-navigation.ts"]

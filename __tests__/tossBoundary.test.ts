@@ -74,9 +74,9 @@ describe("toss 쿼리 라우터", () => {
     expect(hrefFor("/sessions/new")).toBe("?p=/sessions/new");
   });
 
-  it("matchRoute: 이식한 경로만 화면, 나머지는 준비 중", () => {
+  it("matchRoute: 이식한 경로는 화면, 모르는 경로는 pending(10경로 전수는 tossPort.test.ts)", () => {
     expect(matchRoute("/sessions")).toEqual({ name: "sessions" });
-    expect(matchRoute("/sessions/x/report")).toEqual({ name: "pending", path: "/sessions/x/report" });
+    expect(matchRoute("/sessions/x/nope")).toEqual({ name: "pending", path: "/sessions/x/nope" });
   });
 });
 
@@ -93,5 +93,15 @@ describe("next/navigation shim useParams", () => {
     expect(path).toBe("/sessions/%zz");
     expect(() => paramsFromPath(path)).not.toThrow();
     expect(paramsFromPath(path)).toEqual({ sessionId: "%zz" });
+  });
+});
+
+describe("toss 번들의 next import", () => {
+  it("shim 있는 next/link·next/navigation 말고는 next 패키지 import가 없다(next/image 등)", async () => {
+    const { tossGraph } = await import("./helpers/tossGraph");
+    const bad = tossGraph()
+      .bare.filter(({ spec }) => /^next(\/|$)/.test(spec))
+      .map(({ file, spec }) => `${file} → ${spec}`);
+    expect(bad).toEqual([]);
   });
 });
