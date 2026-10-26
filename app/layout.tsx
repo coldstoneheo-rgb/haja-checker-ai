@@ -1,5 +1,5 @@
+// 전환기(S2): 화면은 toss/(Vite)로 옮겼고 Next에는 /api/analyze만 남는다 — 이 레이아웃은 404 페이지용.
 import type { Metadata, Viewport } from "next";
-import SwRegister from "@/components/SwRegister";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -31,7 +31,6 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full bg-slate-50 text-slate-900 flex flex-col">
-        <SwRegister />
         {children}
       </body>
     </html>
