@@ -27,8 +27,8 @@
 - [x] 5. (PR6 `8790e37`+`1e891cc`) findingNoun — `lib/seed/modeCopy.ts` · `app/sessions/new/NewSessionForm.tsx` · `app/sessions/SessionsList.tsx`·«하자/시공» 문구 일괄 · NewSessionForm 모드별 필드 · 목록·대시보드 mode 표시 (PR6)
 - [x] 6. (PR6 동일) 임대 모드 잔여 — `app/sessions/[sessionId]/report/ReportView.tsx` `{copy.aiOn && <ReportAiDisclaimer` · `lib/seed/modes.ts` `analysisPath`· `lib/seed/modes.ts` `sessionRecipient`·`pickArea` · `__tests__/modeCopy.test.ts`(AI CTA·7절 면책 절 비렌더) · recipientType 백필 · areas[0] · 고지 게이트 toss 진입점 전수(PR5에서 테스트 선반영) (PR6)
 - [x] 7. (PR7 chore/s2-remove-next-pages, critic 8/10 조건부 PASS, **⛔ 머지 금지 — 사용자 확인**) Next 화면 제거 (가) — page.tsx 10 + SwRegister·PageStub, next build exit 0(`/api/analyze`만) · build:toss 0 · 144/144
-- [ ] 8. (PR5 끝 · PR6 critic 미완) PR마다 critic(high) → LC 게이트 → 열어 둠
-- [x] 9. 인계 블록(중간 마감)(REPORT 마감 · AGENT_STATUS · WORKLOG)
+- [x] 8. PR마다 critic(high) → LC 게이트 요청(PR 코멘트 + SendMessage) — #17·#18 PASS·머지 · #19 요청 10-26(issuecomment-6408938298) · #20 critic 6/10 → 반영 → 재검
+- [x] 9. 인계 블록 — 이 파일 위쪽 «마감 상태»~«effort» · AGENT_STATUS · WORKLOG(PR #20)
 
 ## 경계 테스트 확장(계획 REPLY ①~⑥)
 
