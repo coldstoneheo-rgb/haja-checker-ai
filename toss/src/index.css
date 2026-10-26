@@ -1,6 +1,6 @@
 @import "tailwindcss";
-/* 전환기: 레포 원본 화면(app/·components/)을 그대로 import하므로 그쪽 클래스도 스캔 */
-@source "../../app";
+/* 전환기: toss/src/pages가 import하는 레포 원본(app/sessions·components)의 클래스도 스캔 */
+@source "../../app/sessions";
 @source "../../components";
 
 html,

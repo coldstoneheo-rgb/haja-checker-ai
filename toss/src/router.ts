@@ -33,17 +33,45 @@ export function usePath(): string {
   return useSyncExternalStore(subscribe, getPath, () => DEFAULT_PATH);
 }
 
-export function navigate(to: string, replace = false) {
+export function navigate(to: string, replace = false, scroll = true) {
   const url = hrefFor(to);
   if (replace) window.history.replaceState(null, "", url);
   else window.history.pushState(null, "", url);
   window.dispatchEvent(new Event(NAV_EVENT));
-  window.scrollTo(0, 0);
+  if (scroll) window.scrollTo(0, 0);
 }
 
-export type Route = { name: "sessions" } | { name: "pending"; path: string };
+export type Route =
+  | { name: "home" }
+  | { name: "sessions" }
+  | { name: "sessionNew" }
+  | { name: "overview"; sessionId: string }
+  | { name: "checklist"; sessionId: string }
+  | { name: "defects"; sessionId: string }
+  | { name: "defectNew"; sessionId: string }
+  | { name: "defectDetail"; sessionId: string; defectId: string }
+  | { name: "analysis"; sessionId: string }
+  | { name: "report"; sessionId: string }
+  | { name: "pending"; path: string };
+
+const SESSION_SUB = { checklist: "checklist", defects: "defects", analysis: "analysis", report: "report" } as const;
 
 export function matchRoute(path: string): Route {
+  if (path === "/home") return { name: "home" };
   if (path === "/sessions") return { name: "sessions" };
+  if (path === "/sessions/new") return { name: "sessionNew" };
+  const parts = path.split("/").slice(1); // ["sessions", id, ...]
+  if (parts[0] !== "sessions" || !parts[1] || parts.some((s) => s === "")) return { name: "pending", path };
+  const sessionId = parts[1];
+  if (parts.length === 2) return { name: "overview", sessionId };
+  const sub = parts[2];
+  if (parts.length === 3 && sub in SESSION_SUB) {
+    return { name: SESSION_SUB[sub as keyof typeof SESSION_SUB], sessionId };
+  }
+  if (parts.length === 4 && sub === "defects") {
+    return parts[3] === "new"
+      ? { name: "defectNew", sessionId }
+      : { name: "defectDetail", sessionId, defectId: parts[3] };
+  }
   return { name: "pending", path };
 }

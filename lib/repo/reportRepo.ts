@@ -115,11 +115,50 @@ export function buildJsonExport(data: ReportData): Blob {
   });
 }
 
-export function triggerDownload(blob: Blob, filename: string): void {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+const escapeHtml = (v: string) =>
+  v.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+
+/** 종이 백업용 빈 체크리스트(완결된 HTML 문서). 출력은 플랫폼 어댑터(lib/platform/reportActions)가 맡는다. */
+export function buildBlankChecklistHtml(
+  sessionTitle: string,
+  inspectionDate: string,
+  areasWithItems: { area: { name: string }; items: { title: string }[] }[],
+): string {
+  const rows = areasWithItems
+    .flatMap(({ area, items }) =>
+      items.map(
+        (item) => `
+          <tr>
+            <td style="padding:6px 8px;border:1px solid #e2e8f0;font-size:11px;color:#64748b;white-space:nowrap">${escapeHtml(area.name)}</td>
+            <td style="padding:6px 8px;border:1px solid #e2e8f0;font-size:12px">${escapeHtml(item.title)}</td>
+            <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:center;font-size:11px">□ 양호&nbsp;&nbsp;□ 의심&nbsp;&nbsp;□ 하자&nbsp;&nbsp;□ 확인불가</td>
+            <td style="padding:6px 8px;border:1px solid #e2e8f0;min-width:120px">&nbsp;</td>
+          </tr>`,
+      ),
+    )
+    .join("");
+  return `<!doctype html><html lang="ko"><head>
+      <meta charset="utf-8">
+      <title>하자체크 체크리스트 — ${escapeHtml(sessionTitle)}</title>
+      <style>
+        body{font-family:system-ui,sans-serif;margin:20px;color:#0f172a}
+        h1{font-size:16px;margin-bottom:4px}
+        p{font-size:12px;color:#64748b;margin:0 0 12px}
+        table{width:100%;border-collapse:collapse}
+        th{background:#f1f5f9;padding:6px 8px;border:1px solid #e2e8f0;font-size:11px;text-align:left}
+        @media print{body{margin:10px}}
+      </style>
+    </head><body>
+      <h1>하자체크 AI — 사전점검 체크리스트 (종이 백업)</h1>
+      <p>${escapeHtml(sessionTitle)} · 점검일: ${escapeHtml(inspectionDate)}</p>
+      <table>
+        <thead><tr>
+          <th style="width:70px">공간</th>
+          <th>점검 항목</th>
+          <th style="width:200px">상태</th>
+          <th style="width:140px">메모</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </body></html>`;
 }

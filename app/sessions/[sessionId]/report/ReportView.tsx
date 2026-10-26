@@ -1,8 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
-import { buildJsonExport, buildReportData, triggerDownload } from "@/lib/repo/reportRepo";
+import { buildBlankChecklistHtml, buildJsonExport, buildReportData } from "@/lib/repo/reportRepo";
+import {
+  REPORT_ACTION_LABELS,
+  printBlankChecklist,
+  printReport,
+  saveFile,
+} from "@/lib/platform/reportActions";
+import type { PlatformResult } from "@/lib/platform/types";
 import {
   CHECKLIST_STATUS_COLORS,
   CHECKLIST_STATUS_LABELS,
@@ -20,6 +28,7 @@ interface Props {
 
 export default function ReportView({ sessionId }: Props) {
   const data = useLiveQuery(() => buildReportData(sessionId), [sessionId]);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   if (!data) {
     return <p className="text-sm text-slate-500">보고서 생성 중…</p>;
@@ -37,58 +46,22 @@ export default function ReportView({ sessionId }: Props) {
   const riskCounts: Record<RiskLevel, number> = { LOW: 0, MEDIUM: 0, HIGH: 0, URGENT: 0 };
   for (const d of allDefects) riskCounts[d.riskLevel] += 1;
 
+  function show(result: PlatformResult) {
+    setActionMessage(result.ok ? null : result.message);
+  }
+
   function onPrint() {
-    window.print();
+    show(printReport());
   }
 
   function onJsonExport() {
     const blob = buildJsonExport(data!);
     const date = session.inspectionDate.replace(/-/g, "");
-    triggerDownload(blob, `하자체크-${date}-${session.buildingNo}동${session.unitNo}호.json`);
+    show(saveFile(blob, `하자체크-${date}-${session.buildingNo}동${session.unitNo}호.json`));
   }
 
   function onPrintBlankChecklist() {
-    const w = window.open("", "_blank");
-    if (!w) return;
-    const rows = areasWithItems
-      .flatMap(({ area, items }) =>
-        items.map(
-          (item) => `
-          <tr>
-            <td style="padding:6px 8px;border:1px solid #e2e8f0;font-size:11px;color:#64748b;white-space:nowrap">${area.name}</td>
-            <td style="padding:6px 8px;border:1px solid #e2e8f0;font-size:12px">${item.title}</td>
-            <td style="padding:6px 8px;border:1px solid #e2e8f0;text-align:center;font-size:11px">□ 양호&nbsp;&nbsp;□ 의심&nbsp;&nbsp;□ 하자&nbsp;&nbsp;□ 확인불가</td>
-            <td style="padding:6px 8px;border:1px solid #e2e8f0;min-width:120px">&nbsp;</td>
-          </tr>`,
-        ),
-      )
-      .join("");
-    w.document.write(`<!doctype html><html lang="ko"><head>
-      <meta charset="utf-8">
-      <title>하자체크 체크리스트 — ${sessionTitle}</title>
-      <style>
-        body{font-family:system-ui,sans-serif;margin:20px;color:#0f172a}
-        h1{font-size:16px;margin-bottom:4px}
-        p{font-size:12px;color:#64748b;margin:0 0 12px}
-        table{width:100%;border-collapse:collapse}
-        th{background:#f1f5f9;padding:6px 8px;border:1px solid #e2e8f0;font-size:11px;text-align:left}
-        @media print{body{margin:10px}}
-      </style>
-    </head><body>
-      <h1>하자체크 AI — 사전점검 체크리스트 (종이 백업)</h1>
-      <p>${sessionTitle} · 점검일: ${session.inspectionDate}</p>
-      <table>
-        <thead><tr>
-          <th style="width:70px">공간</th>
-          <th>점검 항목</th>
-          <th style="width:200px">상태</th>
-          <th style="width:140px">메모</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </body></html>`);
-    w.document.close();
-    w.print();
+    show(printBlankChecklist(buildBlankChecklistHtml(sessionTitle, session.inspectionDate, areasWithItems)));
   }
 
   return (
@@ -101,14 +74,14 @@ export default function ReportView({ sessionId }: Props) {
             onClick={onPrint}
             className="flex-1 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white"
           >
-            인쇄 / PDF 저장
+            {REPORT_ACTION_LABELS.report}
           </button>
           <button
             type="button"
             onClick={onJsonExport}
             className="rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700"
           >
-            JSON 백업
+            {REPORT_ACTION_LABELS.json}
           </button>
         </div>
         <button
@@ -116,8 +89,13 @@ export default function ReportView({ sessionId }: Props) {
           onClick={onPrintBlankChecklist}
           className="w-full rounded-xl bg-slate-50 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200"
         >
-          📋 빈 체크리스트 출력 (종이 백업용)
+          {REPORT_ACTION_LABELS.blankChecklist}
         </button>
+        {actionMessage && (
+          <p role="status" className="text-xs text-slate-500">
+            {actionMessage}
+          </p>
+        )}
       </div>
 
       {/* ── REPORT DOCUMENT ── */}
