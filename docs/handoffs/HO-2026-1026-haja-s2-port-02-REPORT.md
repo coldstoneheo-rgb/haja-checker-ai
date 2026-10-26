@@ -110,3 +110,11 @@
 ## 다음 PR 후보(범위 밖 메모)
 
 - `lib/repo/reportRepo.ts` 빈 체크리스트 제목 «사전점검 체크리스트 (종이 백업)» — 임대에도 신축 용어(금지어 아님, critic 2차 지적 7). toss는 스텁이라 현재 노출 0.
+
+## PR7 머지 전 사용자 확인 자료(critic 조건)
+
+1. **웹 UI 소멸**: 머지 = main push = Vercel 배포 → 웹 주소에는 404와 `/api/analyze`만 남는다.
+2. **웹 데이터 갇힘**: 웹(Vercel 도메인)에서 쌓은 점검 세션은 그 브라우저 IndexedDB에만 있다. 머지 뒤 보고서·JSON 백업 화면이 사라져 꺼낼 길이 없다. toss 앱은 출처가 달라 같은 데이터를 못 읽는다. 대안: 머지 전 공지·백업 기간 / 머지 미룸.
+3. **서비스워커 좀비**: `public/sw.js`가 그대로라 이미 설치된 SW가 남는다. 온라인이면 404, 오프라인·약한 신호면 캐시된 옛 화면이 뜨고 다시 온라인이 되면 404 → «데이터가 사라졌다»로 보인다. 선택: (a) sw.js를 자폭 버전(캐시 전부 삭제 + unregister)으로 교체하는 후속 PR / (b) 오프라인 열람용으로 그대로 둠. sw.js 파일을 지우는 것은 답이 아니다(업데이트 404 → 옛 SW 영구 잔류).
+4. 후속 docs PR: CLAUDE.md·README·AGENTS.md·PRD.md의 SwRegister·page.tsx·«SW 등록됨» 서술 정리. `.claude/agents/critic.md:24`의 고지 문구 출처 `app/page.tsx` → `toss/src/pages/HomePage.tsx`는 사용자 승인이 있어야 고칠 수 있다(규약).
+5. 이번 PR 안 반영: layout metadata에서 manifest·appleWebApp 제거(404를 홈 화면에 추가하는 것 방지) · page 검사 `page.[jt]sx?`로 넓힘. `next.config.ts` `largePageDataBytes`는 무해해 후속 정리.

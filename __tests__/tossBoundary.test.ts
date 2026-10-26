@@ -105,3 +105,17 @@ describe("toss 번들의 next import", () => {
     expect(bad).toEqual([]);
   });
 });
+
+describe("Next 화면 제거(S2 (가))", () => {
+  it("app/에 page.tsx 0 · /api/analyze 라우트는 남는다", () => {
+    // walk()는 .ts/.tsx만 모으므로 page.js·jsx까지 보려고 따로 훑는다
+    const all = (dir: string): string[] =>
+      readdirSync(dir).flatMap((n) => {
+        const p = join(dir, n);
+        return statSync(p).isDirectory() ? all(p) : [relative(ROOT, p).replace(/\\/g, "/")];
+      });
+    const appFiles = all(join(ROOT, "app"));
+    expect(appFiles.filter((f) => /\/page\.[jt]sx?$/.test(f))).toEqual([]);
+    expect(appFiles).toContain("app/api/analyze/route.ts");
+  });
+});
