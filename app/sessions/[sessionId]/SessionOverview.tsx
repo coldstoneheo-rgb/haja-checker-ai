@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { getDB } from "@/lib/db/db";
 import { computeSessionProgress } from "@/lib/repo/checklistRepo";
-import { PREP_ITEMS, RECOMMENDED_ROUTE } from "@/lib/seed/prep";
-import { isAiEnabled, sessionMode, sessionRecipient } from "@/lib/seed/modes";
+import { RECOMMENDED_ROUTE } from "@/lib/seed/prep";
+import { analysisPath, sessionMode, sessionRecipient } from "@/lib/seed/modes";
 import { MODE_COPY } from "@/lib/seed/modeCopy";
 
 export default function SessionOverview() {
@@ -45,7 +45,7 @@ export default function SessionOverview() {
 
   const ratio = Math.round(progress.ratio * 100);
   const copy = MODE_COPY[sessionMode(session)];
-  const aiOn = isAiEnabled(sessionMode(session));
+  const aiHref = analysisPath(sessionId, sessionMode(session));
 
   return (
     <div className="flex flex-col gap-5">
@@ -61,7 +61,9 @@ export default function SessionOverview() {
           <Detail label="동/호수" value={`${session.buildingNo}동 ${session.unitNo}호`} />
           <Detail label="평형/타입" value={session.floorPlanType ?? "—"} />
           {copy.builderLabel && <Detail label={copy.builderLabel} value={session.builderName ?? "—"} />}
-          <Detail label="수신처" value={copy.recipientLabel(sessionRecipient(session))} />
+          {copy.showModeMeta && (
+            <Detail label="수신처" value={copy.recipientLabel(sessionRecipient(session))} />
+          )}
           <Detail label="점검자" value={session.inspectorName ?? "—"} />
           <Detail label="연락처" value={session.phone ?? "—"} />
           <Detail label="점검일" value={session.inspectionDate} />
@@ -125,9 +127,9 @@ export default function SessionOverview() {
             >
               {copy.directAdd}
             </Link>
-            {aiOn && (
+            {aiHref && (
               <Link
-                href={`/sessions/${sessionId}/analysis`}
+                href={aiHref}
                 className="flex-1 rounded-xl bg-slate-100 px-3 py-2.5 text-center text-sm font-semibold text-slate-700"
               >
                 AI 분석
@@ -146,7 +148,7 @@ export default function SessionOverview() {
       <section className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="text-base font-semibold">사전 준비물</h2>
         <ul className="columns-2 gap-x-4 text-sm text-slate-700">
-          {PREP_ITEMS.map((item) => (
+          {copy.prepItems.map((item) => (
             <li key={item.name} className="mb-1.5 break-inside-avoid flex flex-col">
               <span className="font-medium break-keep">· {item.name}</span>
               {item.note && (

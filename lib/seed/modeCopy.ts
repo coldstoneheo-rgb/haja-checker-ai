@@ -8,6 +8,7 @@ import type {
   RecipientType,
 } from "@/lib/domain/types";
 import { MODE_CONFIG } from "@/lib/seed/modes";
+import { PREP_ITEMS } from "@/lib/seed/prep";
 import {
   CHECKLIST_STATUS_LABELS,
   DEFECT_TYPE_LABELS,
@@ -17,6 +18,13 @@ import {
 
 export interface ModeCopy {
   modeLabel: string;
+  /** MODE_CONFIG.aiEnabled */
+  aiOn: boolean;
+  /** 보고서 표지·대시보드에 «점검 종류»·«수신처» 행을 둘지 — 신축은 기존 화면 그대로(false) */
+  showModeMeta: boolean;
+  /** 체크리스트 마지막 CTA의 묶음 이름(신축 기존 «의심·하자») */
+  flaggedCta: string;
+  prepItems: { name: string; note?: string }[];
   /** 직접 추가한 항목 하나를 부르는 말. 신축 = MODE_CONFIG.findingNoun(«하자»),
    *  임대는 findingNoun «상태»가 «직접 추가 상태»처럼 어색해 «기록» */
   entry: string;
@@ -55,6 +63,10 @@ export interface ModeCopy {
 
 const NEW_BUILD: ModeCopy = {
   modeLabel: INSPECTION_MODE_LABELS.NEW_BUILD,
+  aiOn: MODE_CONFIG.NEW_BUILD.aiEnabled,
+  showModeMeta: false,
+  flaggedCta: "의심·하자",
+  prepItems: PREP_ITEMS,
   entry: MODE_CONFIG.NEW_BUILD.findingNoun,
   statusLabel: (s) => CHECKLIST_STATUS_LABELS[s],
   flagged: "의심/하자",
@@ -91,6 +103,12 @@ const RENTAL_STATUS: Partial<Record<ChecklistItemStatus, string>> = { DEFECT: "�
 function rental(mode: "MOVE_IN" | "MOVE_OUT"): ModeCopy {
   return {
     modeLabel: INSPECTION_MODE_LABELS[mode],
+    aiOn: MODE_CONFIG[mode].aiEnabled,
+    showModeMeta: true,
+    flaggedCta: "의심·손상",
+    prepItems: PREP_ITEMS.map((p) =>
+      p.name === "포스트잇 또는 하자 표시 스티커" ? { ...p, name: "포스트잇 또는 표시 스티커" } : p,
+    ),
     entry: "기록",
     statusLabel: (s) => RENTAL_STATUS[s] ?? CHECKLIST_STATUS_LABELS[s],
     flagged: "의심/손상",

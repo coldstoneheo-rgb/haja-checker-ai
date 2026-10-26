@@ -17,7 +17,7 @@ import {
   RISK_LEVEL_COLORS,
   RISK_LEVEL_LABELS,
 } from "@/lib/util/labels";
-import { isAiEnabled, sessionMode, sessionRecipient } from "@/lib/seed/modes";
+import { sessionMode, sessionRecipient } from "@/lib/seed/modes";
 import { MODE_COPY, type ModeCopy } from "@/lib/seed/modeCopy";
 import ReportAiDisclaimer from "./ReportAiDisclaimer";
 import { SectionTitle } from "./reportParts";
@@ -45,7 +45,6 @@ export default function ReportView({ sessionId }: Props) {
 
   const mode = sessionMode(session);
   const copy = MODE_COPY[mode];
-  const aiOn = isAiEnabled(mode);
   const sessionTitle = `${session.complexName} ${session.buildingNo}동 ${session.unitNo}호`;
   const riskCounts: Record<RiskLevel, number> = { LOW: 0, MEDIUM: 0, HIGH: 0, URGENT: 0 };
   for (const d of allDefects) riskCounts[d.riskLevel] += 1;
@@ -125,8 +124,10 @@ export default function ReportView({ sessionId }: Props) {
             <Detail label="단지명" value={session.complexName} />
             <Detail label="동/호수" value={`${session.buildingNo}동 ${session.unitNo}호`} />
             <Detail label="평형/타입" value={session.floorPlanType ?? "—"} />
-            <Detail label="점검 종류" value={copy.modeLabel} />
-            <Detail label="수신처" value={copy.recipientLabel(sessionRecipient(session))} />
+            {copy.showModeMeta && <Detail label="점검 종류" value={copy.modeLabel} />}
+            {copy.showModeMeta && (
+              <Detail label="수신처" value={copy.recipientLabel(sessionRecipient(session))} />
+            )}
             {copy.builderLabel && <Detail label={copy.builderLabel} value={session.builderName ?? "—"} />}
             <Detail label="점검자" value={session.inspectorName ?? "—"} />
             <Detail label="연락처" value={session.phone ?? "—"} />
@@ -316,7 +317,7 @@ export default function ReportView({ sessionId }: Props) {
         )}
 
         {/* ── SECTION 8: 면책 고지 — AI를 쓰는 모드(신축)만 ── */}
-        {aiOn && <ReportAiDisclaimer generatedAt={data.generatedAt} sessionTitle={sessionTitle} />}
+        {copy.aiOn && <ReportAiDisclaimer generatedAt={data.generatedAt} sessionTitle={sessionTitle} />}
       </div>
     </>
   );

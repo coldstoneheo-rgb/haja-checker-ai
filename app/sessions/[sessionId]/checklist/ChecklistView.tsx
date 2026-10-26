@@ -14,7 +14,7 @@ import type {
   ChecklistPriority,
 } from "@/lib/domain/types";
 import { getDB } from "@/lib/db/db";
-import { isAiEnabled, sessionMode } from "@/lib/seed/modes";
+import { analysisPath, sessionMode } from "@/lib/seed/modes";
 import { MODE_COPY } from "@/lib/seed/modeCopy";
 import PhotoCaptureButton from "./PhotoCaptureButton";
 import PhotoGrid from "./PhotoGrid";
@@ -64,7 +64,7 @@ export default function ChecklistView() {
   }
 
   const copy = MODE_COPY[session ? sessionMode(session) : "NEW_BUILD"];
-  const aiOn = session ? isAiEnabled(sessionMode(session)) : false;
+  const aiHref = session ? analysisPath(sessionId, sessionMode(session)) : null;
   const currentAreaId = activeAreaId ?? areasWithItems[0].area.id;
   const current = areasWithItems.find((a) => a.area.id === currentAreaId);
   const currentIndex = areasWithItems.findIndex((a) => a.area.id === currentAreaId);
@@ -130,7 +130,7 @@ export default function ChecklistView() {
       {/* Sticky bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-slate-200 bg-white/95 px-5 py-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur-sm">
         <div className="mx-auto flex w-full max-w-2xl items-center gap-2">
-          {isLastArea && !aiOn ? (
+          {isLastArea && !aiHref ? (
             // 임대(AI 끔): 마지막 영역 → 보고서
             <button
               type="button"
@@ -139,11 +139,11 @@ export default function ChecklistView() {
             >
               보고서로 이동 →
             </button>
-          ) : isLastArea && aiOn ? (
+          ) : isLastArea && aiHref ? (
             // 마지막 영역 → AI 분석으로 바로 이동
             <button
               type="button"
-              onClick={() => router.push(`/sessions/${sessionId}/analysis`)}
+              onClick={() => router.push(aiHref)}
               className={`flex-1 rounded-xl py-3 text-sm font-semibold transition ${
                 suspectedCount > 0
                   ? "bg-slate-900 text-white"
@@ -151,7 +151,7 @@ export default function ChecklistView() {
               }`}
             >
               {suspectedCount > 0
-                ? `AI 분석 시작 → (${copy.flagged} ${suspectedCount}건)`
+                ? `AI 분석 시작 → (${copy.flaggedCta} ${suspectedCount}건)`
                 : "AI 분석으로 이동 →"}
             </button>
           ) : (
@@ -169,10 +169,10 @@ export default function ChecklistView() {
                   다음: {nextArea.area.name} →
                 </button>
               )}
-              {aiOn && suspectedCount > 0 && (
+              {aiHref && suspectedCount > 0 && (
                 <button
                   type="button"
-                  onClick={() => router.push(`/sessions/${sessionId}/analysis`)}
+                  onClick={() => router.push(aiHref)}
                   className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-white"
                 >
                   AI 분석 ({suspectedCount})

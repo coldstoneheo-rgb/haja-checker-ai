@@ -45,6 +45,11 @@ export function pickArea(areas: string[], chosen: string | null): string {
   return chosen !== null && areas.includes(chosen) ? chosen : areas[0];
 }
 
+/** AI 분석 화면 경로 — AI를 끈 모드면 null. CTA는 이 값이 있을 때만 렌더한다(극성 실수는 타입이 막는다: href·push에 null 불가). */
+export function analysisPath(sessionId: string, mode: InspectionMode): string | null {
+  return isAiEnabled(mode) ? `/sessions/${sessionId}/analysis` : null;
+}
+
 export function isAiEnabled(mode: InspectionMode): boolean {
   return MODE_CONFIG[mode].aiEnabled;
 }
