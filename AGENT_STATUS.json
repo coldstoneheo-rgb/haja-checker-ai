@@ -4,7 +4,7 @@
   "state": "handover",
   "head": "7ce4d0e",
   "working_on": null,
-  "waiting_on": "사용자: #19+#23 묶음 결정 · 문안(리워드 제안 포함) · QR 10-29 실기기(콘솔 광고 그룹·카메라 권한·.ait 업로드) / LC: 인계 PR 게이트",
+  "waiting_on": "사용자: #19+#23 묶음 결정 · 문안(리워드 제안 포함) · QR 10-29 실기기(.ait 업로드·콘솔 권한 사유·기기 QR) / LC: #24 게이트",
   "next_actions": [
     "QR 10-29: 스텁 3종 + 공유·저장·openURL 실기기 실측(REPORT port-03 준비 표 · 광고는 테스트 ID 고정값 · 카메라는 현행 Device.* 이름)",
     "/api/analyze Vercel 함수 분리 + CORS(x-haja-anon-key 허용) — 배포·env는 사용자",

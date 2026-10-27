@@ -35,7 +35,7 @@
 | 보고서 저장 | `toss/src/platform/reportActions.ts:15·20·25` | PNG → `File.saveBase64`(구 `saveBase64Data`) / 공유 | — |
 | 외부 링크 | `toss/src/platform/openURL.ts:2` | `openURL` 연결 | — |
 | 임대 화면 | — | #18 관찰 ① 임대 세션 눈 확인 1회(수신처 «기타» 폴백·빈 체크리스트 제목 포함) | 기기·QR 스캔 |
-| 공통 | — | `/api/analyze` 다른 출처 호출(분리 + CORS)은 이번 밖 — 토스에서 AI 분석은 그 전까지 실패가 정상 | .ait 업로드·콘솔 등록 |
+| 공통 | — | `/api/analyze` 다른 출처 호출(분리 + CORS)은 이번 밖 — 토스에서 AI 분석은 그 전까지 실패가 정상 | .ait 업로드·콘솔 권한 사유·기기 QR |
 
 ## LC 게이트 관찰
 - #22
@@ -58,7 +58,7 @@
 2. `/api/analyze` 분리 + CORS(`x-haja-anon-key`는 Allow-Headers에 넣기). 배포·env는 사용자.
 3. 리워드 제안 UI·문구(문안 ASK) · 서버 `grantReward` 라우트(광고 검증과 함께) · DefectDetailView 단건 분석의 429 호출 지점.
 4. #19 + #23 사용자 결정. 머지하면 #23은 rebase --onto main 또는 #19에 합친다. 실측 절차는 #23 본문에 있다.
-- camera.ts TODO의 옛 API 이름(`openCamera`·`fetchAlbumPhotos`)은 QR-1029 SDK 연결 때 현행 `Device.*`로 고친다.
+5. camera.ts TODO의 옛 API 이름(`openCamera`·`fetchAlbumPhotos`)은 QR-1029 SDK 연결 때 현행 `Device.*`로 고친다.
 
 ## SHA·열린 PR
 - main 7ce4d0e(#21) · ae8ea33(#22)
