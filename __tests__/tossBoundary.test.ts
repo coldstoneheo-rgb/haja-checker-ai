@@ -50,6 +50,17 @@ describe("toss/ import 경계", () => {
     expect(bad).toEqual([]);
   });
 
+  it("toss/src/platform 스텁은 @/lib/platform/types·@/lib/db/id만 import한다(SDK·Next·dexie 0, 실기기 실측 전)", () => {
+    const platform = tossFiles.filter((f) => /[\\/]platform[\\/]/.test(f));
+    expect(platform.length).toBe(5);
+    const bad = platform.flatMap((f) =>
+      importsOf(f)
+        .filter((s) => !["@/lib/platform/types", "@/lib/db/id"].includes(s))
+        .map((s) => `${relative(ROOT, f)} → ${s}`),
+    );
+    expect(bad).toEqual([]);
+  });
+
   it("vite 설정: @/ = 레포 루트, dexie·dexie-react-hooks dedupe(S1 ③ 필수)", () => {
     const cfg = readFileSync(join(ROOT, "vite.config.mts"), "utf8");
     expect(cfg).toMatch(/find:\s*\/\^@\\\/\/,\s*replacement:\s*here\("\.\/"\)/);

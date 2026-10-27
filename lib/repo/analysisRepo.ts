@@ -5,6 +5,8 @@ import { newId, newDefectDisplayId, computeNextDefectSequence } from "@/lib/db/i
 import type { AiAnalysisPayload } from "@/lib/ai/types";
 import type { AiAnalysisResult, DefectCandidate, InspectionMode } from "@/lib/domain/types";
 import { isAiEnabled, sessionMode } from "@/lib/seed/modes";
+// 플랫폼 어댑터: Next 웹 = null(헤더 없음) · 토스 = 익명 식별키 자리(TODO(QR-1029), toss/src/platform/identity.ts)
+import { getAnonymousKey } from "@/lib/platform/identity";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -31,18 +33,25 @@ async function callAnalyzeApi(
   },
   signal?: AbortSignal,
 ): Promise<AiAnalysisPayload> {
+  // 상한 카운터 키 자리 — 서버는 아직 이 헤더를 믿지 않는다(app/api/analyze/route.ts userKeyOf, KV는 S3).
+  const anonKey = await getAnonymousKey();
   const response = await fetch("/api/analyze", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(anonKey ? { "x-haja-anon-key": anonKey } : {}) },
     body: JSON.stringify(input),
     signal,
   });
   const data = (await response.json()) as AiAnalysisPayload & {
     error?: string;
+    reason?: string;
+    canReward?: boolean;
   };
   if (!response.ok) {
+    // reason·canReward = 상한(429) 응답만 담는다(lib/ai/limitError.ts가 읽음)
     throw Object.assign(new Error((data as { error?: string }).error ?? `HTTP ${response.status}`), {
       status: response.status,
+      reason: data.reason,
+      canReward: data.canReward,
     });
   }
   return data;

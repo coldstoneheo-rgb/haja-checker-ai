@@ -14,6 +14,9 @@ import {
 import { DEFECT_TYPE_LABELS, RISK_LEVEL_COLORS, RISK_LEVEL_LABELS } from "@/lib/util/labels";
 import AnalysisResultCard from "./AnalysisResultCard";
 import { useAiNoticeGate } from "@/components/useAiNoticeGate";
+// 플랫폼 어댑터: Next 웹 = 동작 0 · 토스 = 리워드 광고 자리(TODO(QR-1029), toss/src/platform/ads.ts)
+import { onDailyLimit } from "@/lib/platform/ads";
+import { canOfferReward, isRateLimited } from "@/lib/ai/limitError";
 import { isAiEnabled, sessionMode } from "@/lib/seed/modes";
 
 interface Props {
@@ -62,8 +65,12 @@ export default function AnalysisView({ sessionId }: Props) {
   // 첫 AI 분석 직전 1회 고지 — 확인 전에는 사진을 서버로 보내지 않는다
   const { guarded, dialog: aiNoticeDialog } = useAiNoticeGate();
 
-  /** 상한(429)에 걸리면 true — 일괄 분석이 남은 항목을 계속 보내지 않게 한다. */
-  const isLimited = (err: unknown) => (err as { status?: number })?.status === 429;
+  /** 상한(429)에 걸리면 true — 일괄 분석이 남은 항목을 계속 보내지 않게 한다.
+   * 하루 상한이면 리워드 광고 자리를 부른다(기다리지 않는다 — 웹은 동작 0). 월 예산 소진은 제안하지 않는다. */
+  function noteLimit(err: unknown): boolean {
+    if (canOfferReward(err)) void onDailyLimit();
+    return isRateLimited(err);
+  }
 
   async function runChecklistAnalysis(item: ChecklistAnalyzable): Promise<boolean> {
     if (item.photoCount === 0) return false;
@@ -76,7 +83,7 @@ export default function AnalysisView({ sessionId }: Props) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setItemState(item.itemId, { id: item.itemId, status: "error", error: msg });
-      return isLimited(err);
+      return noteLimit(err);
     }
   }
 
@@ -92,7 +99,7 @@ export default function AnalysisView({ sessionId }: Props) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setItemState(id, { id, status: "error", error: msg });
-      return isLimited(err);
+      return noteLimit(err);
     }
   }
 
