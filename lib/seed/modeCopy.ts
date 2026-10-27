@@ -121,7 +121,8 @@ function rental(mode: "MOVE_IN" | "MOVE_OUT"): ModeCopy {
     defectTypes: NEW_BUILD.defectTypes.filter((t) => t !== "MISSING_WORK"),
     defectTypeLabel: (t) => DEFECT_TYPE_LABELS[t],
     recipients: NEW_BUILD.recipients.filter((r) => r !== "BUILDER"),
-    // PR5 이전 임대 세션에 저장된 BUILDER는 값은 두고 중립 라벨로만 보인다(«시공사» 노출 0)
+    // PR5 이전 임대 세션에 저장된 BUILDER는 값은 두고 중립 라벨로만 보인다(«시공사» 노출 0).
+    // RecipientType에 «기타» 값이 생기면 이 라벨과 겹치니 그때 다시 정한다.
     recipientLabel: (r) => (r === "BUILDER" ? "기타" : RECIPIENT_TYPE_LABELS[r]),
     builderLabel: null,
     builderDisplayLabel: null,

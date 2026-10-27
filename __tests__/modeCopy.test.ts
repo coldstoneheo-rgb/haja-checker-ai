@@ -260,6 +260,7 @@ describe("#18 관찰 ③④(port-03 PR C)", () => {
       const html = buildBlankChecklistHtml("단지", "2026-10-27", areas, c.statusLabel("DEFECT"), c.blankChecklistTitle);
       expect(html).toContain(`<h1>하자체크 AI — ${c.blankChecklistTitle}</h1>`);
     }
+    expect(buildBlankChecklistHtml("단지", "2026-10-27", areas, "하자", "<b>&")).toContain("<h1>하자체크 AI — &lt;b&gt;&amp;</h1>");
     expect(read("app/sessions/[sessionId]/report/ReportView.tsx")).toContain(
       'copy.statusLabel("DEFECT"), copy.blankChecklistTitle)',
     );
