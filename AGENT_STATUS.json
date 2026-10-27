@@ -1,16 +1,20 @@
 {
   "project": "haja-checker-ai",
-  "as_of": "2026-10-26T14:40+09:00",
+  "as_of": "2026-10-27T13:40+09:00",
   "state": "handover",
-  "head": "2a5d438",
+  "head": "7ce4d0e",
   "working_on": null,
-  "waiting_on": "사용자: #19 머지/보류·웹 세션 백업·SW a/b(LC 적재) · 승인 뒤 문서 표 · 문안 확정 · 실기기 QR 10-29 / LC: #20 게이트",
+  "waiting_on": "사용자: #19+#23 묶음 결정 · 문안(리워드 제안 포함) · QR 10-29 실기기(콘솔 광고 그룹·카메라 권한·.ait 업로드) / LC: 인계 PR 게이트",
   "next_actions": [
-    "실기기 스텁 QR 10-29: 카메라·광고·식별키 인터페이스(지금 없음) + 공유·저장·openURL 스텁 실측",
-    "/api/analyze Vercel 함수 분리 + CORS(*.apps.tossmini.com) — 배포·env는 사용자",
-    "LC #18 관찰 후속: recipientLabel 폴백(임대+BUILDER 옛 세션) · 빈 체크리스트 제목 모드별 · 임대 화면 실기기 눈 확인"
+    "QR 10-29: 스텁 3종 + 공유·저장·openURL 실기기 실측(REPORT port-03 준비 표)",
+    "/api/analyze Vercel 함수 분리 + CORS(x-haja-anon-key 허용) — 배포·env는 사용자",
+    "리워드 제안 UI·grantReward 라우트(광고 검증과 함께) · DefectDetailView 429 호출 지점"
   ],
   "recent": [
+    {
+      "at": "2026-10-27",
+      "what": "S2 port-03: #22 PR A 스쿼시 ae8ea33(스텁 3종·어댑터, critic 7.5→8.5, LC PASS, 162/162) · #21 PR C 스쿼시 7ce4d0e(임대 BUILDER→«기타»·빈 체크리스트 제목, critic 8.5, LC PASS, 164/164) · #23 PR B sw.js 자폭(⛔ base #19, critic 8, LC PASS, 147/147)"
+    },
     {
       "at": "2026-10-26",
       "what": "#18 PR6 스쿼시 머지 2a5d438(사용자 위임 · critic 8/10 · LC PASS 관찰 5) · feat/s2-mode-copy 삭제 · #19 PR7 rebase 4a52bc3(+docs 61dc719)(base main, 144/144, next build api만, critic 8/10 조건부 PASS, LC PASS, ⛔ 머지 금지) · 실기기 스텁 점검(공유·openURL 있음 / 카메라·광고·식별키 없음)"
@@ -26,15 +30,12 @@
     {
       "at": "2026-10-26",
       "what": "S2 port-02: #17 PR5 59c5583(10화면·외부 href·보고서 어댑터, critic 8/10 PASS, 131/131) · PR6 2f413b8(모드 문구·임대 잔여·백필·areas[0], 140/140, next build·build:toss 0) · 사용자 지시로 중간 마감"
-    },
-    {
-      "at": "2026-10-26",
-      "what": "S2 착수: #11 19e6cda Vite 골격 · #12 57513ab 모드 3종 · #13 6ac6a15 고지·상한 · #14 71ba72f 동의·자가점검 · #15 b174dc0 서버 mode 가드 · npm test 116/116 · worktree 3개 정리(junction rmdir 먼저, --force 0)"
     }
   ],
   "open_prs": [
-    "#19 PR7 Next 화면 제거 ⛔ 머지 금지(코드 4a52bc3 · HEAD 61dc719 · LC PASS)",
-    "#20 인계 docs",
+    "#19 PR7 Next 화면 제거 ⛔ 머지 금지(사용자 보류)",
+    "#23 SW 자폭 ⛔ 머지 금지(base #19, 묶음, LC PASS)",
+    "인계 docs PR",
     "#8(무관)"
   ]
 }

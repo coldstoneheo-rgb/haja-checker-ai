@@ -3,6 +3,22 @@
 규약: https://github.com/coldstoneheo-rgb/life-coordinator/blob/main/docs/WORKLOG_PROTOCOL.md (최신이 위, append-only)
 
 ---
+date: 2026-10-27
+project: haja-checker-ai
+agent: claude-code
+summary: S2 이식 조각 3 — 실기기 스텁 3종(카메라·광고·식별키) 머지 · SW 자폭 열어 둠(#19 묶음) · #18 관찰 ③④
+status: on_track
+progress: "HO-2026-1026-haja-s2-port-03 조건 1~7 끝 (근거: main 7ce4d0e(#21)·ae8ea33(#22) · 164/164(main) · vitest 162/162(A)·147/147(B)·145/145(C) · typecheck 0 · next build 0 · build:toss 0 · critic high A 8.5·B 8·C 8.5 · LC PASS #21·#22·#23)"
+changes: ["https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/22 PR A 스텁 3종", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/21 PR C 임대 잔여", "https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/23 PR B SW 자폭(열림)"]
+next: QR 10-29 실기기(준비 표) → /api/analyze 분리+CORS → 리워드 UI·문안 ASK
+blockers: #19·#23 머지는 사용자 · 문안 ASK · 콘솔·.ait 업로드는 사용자 손
+monetization: 광고 자리 생김(AD_GROUP_IDS 빈 값, 하루 상한∧canReward → onDailyLimit) — 실 호출 0
+learning_need: 스텁을 «켜진» 상태로 두면 아직 없는 기능이 있는 기능을 막는다 — 스텁 기본값은 기존 경로 유지
+---
+## 의미
+critic 1차가 잡은 것은 «토스 카메라 스텁을 true로 두면 사진 기능 전체가 막힌다»였다. 자리만 만든다는 목표가 기존 동작을 끄는 쪽으로 미끄러진 것이다. 스텁은 꺼 두고, 실측 뒤 SDK 연결과 같은 커밋에서 켠다.
+
+---
 date: 2026-10-26
 project: haja-checker-ai
 agent: claude-code
