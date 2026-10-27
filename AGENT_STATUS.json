@@ -1,12 +1,12 @@
 {
   "project": "haja-checker-ai",
-  "as_of": "2026-10-27T13:40+09:00",
+  "as_of": "2026-10-27T12:20+09:00",
   "state": "handover",
   "head": "7ce4d0e",
   "working_on": null,
   "waiting_on": "사용자: #19+#23 묶음 결정 · 문안(리워드 제안 포함) · QR 10-29 실기기(콘솔 광고 그룹·카메라 권한·.ait 업로드) / LC: 인계 PR 게이트",
   "next_actions": [
-    "QR 10-29: 스텁 3종 + 공유·저장·openURL 실기기 실측(REPORT port-03 준비 표)",
+    "QR 10-29: 스텁 3종 + 공유·저장·openURL 실기기 실측(REPORT port-03 준비 표 · 광고는 테스트 ID 고정값 · 카메라는 현행 Device.* 이름)",
     "/api/analyze Vercel 함수 분리 + CORS(x-haja-anon-key 허용) — 배포·env는 사용자",
     "리워드 제안 UI·grantReward 라우트(광고 검증과 함께) · DefectDetailView 429 호출 지점"
   ],
@@ -35,7 +35,7 @@
   "open_prs": [
     "#19 PR7 Next 화면 제거 ⛔ 머지 금지(사용자 보류)",
     "#23 SW 자폭 ⛔ 머지 금지(base #19, 묶음, LC PASS)",
-    "인계 docs PR",
+    "#24 port-03 인계 docs",
     "#8(무관)"
   ]
 }

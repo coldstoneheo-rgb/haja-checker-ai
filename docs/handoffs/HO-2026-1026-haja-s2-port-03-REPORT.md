@@ -13,7 +13,7 @@
   - 서버 429 응답의 reason·canReward를 클라이언트가 버리고 있었다. 지금은 오류 객체에 싣는다.
 - **LC·사용자에게 필요한 것**
   - **사용자 결정 묶음 1줄**: #19(Next 화면 제거) + #23(SW 자폭)은 한 번에 정한다. 머지하면 #19 다음 #23(`rebase --onto origin/main`)을 넣거나 하나로 합친다. 배포 뒤 #23 본문의 실측을 한다.
-  - QR 10-29 표의 «사용자 손» 열: 콘솔 광고 그룹 발급, 카메라 권한 선언, .ait 업로드.
+  - QR 10-29 표의 «사용자 손» 열: 기기·QR 스캔과 .ait 업로드. 콘솔에서는 카메라 권한 사유를 적는다(권한 선언은 config에 이미 있음). 실 광고 그룹은 출시 전에 발급한다(테스트 ID는 고정값이라 발급이 필요 없다).
   - 문안 ASK: 리워드 제안 문구가 아직 없다.
 - **effort**: 세션 medium. critic 4회(A 2회·B·C)는 high(규약).
 
@@ -29,27 +29,20 @@
 ## QR 10-29 준비 표 — 실기기에서 채울 것
 | 자리 | 스텁(파일:줄) | 실기기에서 할 것 | 사용자 손 |
 |---|---|---|---|
-| 카메라 | `toss/src/platform/camera.ts` `nativeCamera=false` · 호출 `PhotoCaptureButton.tsx` pickNative | ① WebView `<input type=file capture>`로 촬영·앨범이 되는지 먼저 실측 ② 안 되면 `openCamera({base64:true,maxWidth:1024})`·`fetchAlbumPhotos` → `ImageResponse{id,dataUri}` → File 변환 → `nativeCamera=true` ③ 권한 거부(`OpenCameraPermissionError`) 문구 | 카메라 권한 콘솔 선언 여부 |
-| 광고 | `toss/src/platform/ads.ts` `AD_GROUP_IDS` 빈 값 · 호출 `AnalysisView.tsx` noteLimit(하루 상한·canReward일 때만) | 테스트 광고 그룹 ID로 `loadFullScreenAd`→`showFullScreenAd` · `userEarnedReward` 수신 → 서버 `grantReward` 라우트 노출(광고 검증 붙인 뒤) · 리워드 제안 UI·문구(문안 ASK) · 전면 광고 호출 지점 미정 · `DefectDetailView` 단건 분석 429도 호출 지점 추가 여부 | 콘솔 광고 그룹 발급(테스트·실), 광고 문안 승인 |
-| 식별키 | `toss/src/platform/identity.ts` localStorage `haja.anonKey` 폴백 · 호출 `analysisRepo.ts` 헤더 `x-haja-anon-key` | `getAnonymousKey()` → `hash` 실측(미지원 버전 `"ERROR"`/undefined 처리) · 서버는 S3 KV + 검증 전까지 헤더 불신 유지 · 다른 출처 호출 시 CORS `Access-Control-Allow-Headers`에 헤더 추가 | — |
-| 보고서 저장 | `toss/src/platform/reportActions.ts:15·20·25` | PNG → `saveBase64Data` / 공유 | — |
+| 카메라 | `toss/src/platform/camera.ts` `nativeCamera=false` · 호출 `PhotoCaptureButton.tsx` pickNative | ① WebView `<input type=file capture>`로 촬영·앨범이 되는지 먼저 실측 ② 안 되면 현행 `Device.openCamera({base64:true,maxWidth:1024})`·`Device.getPhotos` → `ImageResponse{id,dataUri}` → File 변환 → SDK 연결과 같은 커밋에서 `nativeCamera=true`(옛 이름 `openCamera`·`fetchAlbumPhotos`는 `@deprecated` — `S1-docs-findings.md:18`, `camera.ts` TODO 문구도 그때 고침) ③ 권한 거부(`OpenCameraPermissionError`) 문구 | 권한은 `apps-in-toss.config.ts` camera·photos 선언됨 → 콘솔 권한 사유만 |
+| 광고 | `toss/src/platform/ads.ts` `AD_GROUP_IDS` 빈 값 · 호출 `AnalysisView.tsx` noteLimit(하루 상한·canReward일 때만) | 테스트 ID `ait-ad-test-interstitial-id`·`ait-ad-test-rewarded-id`(문서 고정값, 콘솔 발급 불필요 — `HO-2026-1017-haja-spike-S0-S1-REPORT.md:44`)를 `AD_GROUP_IDS`에 넣고 `loadFullScreenAd`(사전 로드)→`showFullScreenAd` · `userEarnedReward` 수신 → 서버 `grantReward` 라우트 노출(광고 검증 붙인 뒤) · 리워드 제안 UI·문구(문안 ASK) · 전면 광고 호출 지점 미정 · `DefectDetailView` 단건 분석 429도 호출 지점 추가 여부 | 실 광고 그룹 발급(출시 전), 광고 문안 승인 |
+| 식별키 | `toss/src/platform/identity.ts` localStorage `haja.anonKey` 폴백 · 호출 `analysisRepo.ts` 헤더 `x-haja-anon-key` | `getAnonymousKey()` → `hash` 실측 — `"ERROR"`(알 수 없는 오류)와 `undefined`(앱 버전 낮음)는 따로 분기, 둘 다 로컬 폴백(`S1-docs-findings.md:40`) · 서버는 S3 KV + 검증 전까지 헤더 불신 유지 · 다른 출처 호출 시 CORS `Access-Control-Allow-Headers`에 헤더 추가 | — |
+| 보고서 저장 | `toss/src/platform/reportActions.ts:15·20·25` | PNG → `File.saveBase64`(구 `saveBase64Data`) / 공유 | — |
 | 외부 링크 | `toss/src/platform/openURL.ts:2` | `openURL` 연결 | — |
 | 임대 화면 | — | #18 관찰 ① 임대 세션 눈 확인 1회(수신처 «기타» 폴백·빈 체크리스트 제목 포함) | 기기·QR 스캔 |
 | 공통 | — | `/api/analyze` 다른 출처 호출(분리 + CORS)은 이번 밖 — 토스에서 AI 분석은 그 전까지 실패가 정상 | .ait 업로드·콘솔 등록 |
 
-## LC 게이트 관찰(#22)
-- tsc·vite build는 게이트가 직접 돌리지 못했다(분류기). 워커 실행 결과 0과 Vercel preview pass로 대신했다.
-- 토스 스텁의 «곧 지원» 문구는 지금 화면에 나올 길이 없다. QR-1029에서 `nativeCamera=true` 전환은 SDK 연결과 같은 커밋으로 한다.
-- `canReward === true`는 엄격 비교다. S3 KV 작업 때 429 응답 스키마 테스트를 붙인다.
-- 어댑터 export 동일성 정규식은 `function`·`const`만 본다(`export let`·`export {}`·`export type`은 놓친다).
-
-## 다음 조각
-1. QR 10-29: 위 표를 실기기에서 채운다. 카메라는 input 실측을 먼저 하고, 광고는 테스트 ID로, 식별키는 hash로.
-2. `/api/analyze` 분리 + CORS(`x-haja-anon-key`는 Allow-Headers에 넣기). 배포·env는 사용자.
-3. 리워드 제안 UI·문구(문안 ASK) · 서버 `grantReward` 라우트(광고 검증과 함께) · DefectDetailView 단건 분석의 429 호출 지점.
-4. #19 + #23 사용자 결정. 머지하면 #23은 rebase --onto main 또는 #19에 합친다. 실측 절차는 #23 본문에 있다.
-
-## LC 게이트 관찰(#21·#23)
+## LC 게이트 관찰
+- #22
+  - tsc·vite build는 게이트가 직접 돌리지 못했다(분류기). 워커 실행 결과 0과 Vercel preview pass로 대신했다.
+  - 토스 스텁의 «곧 지원» 문구는 지금 화면에 나올 길이 없다. QR-1029에서 `nativeCamera=true` 전환은 SDK 연결과 같은 커밋으로 한다.
+  - `canReward === true`는 엄격 비교다. S3 KV 작업 때 429 응답 스키마 테스트를 붙인다.
+  - 어댑터 export 동일성 정규식은 `function`·`const`만 본다(`export let`·`export {}`·`export type`은 놓친다).
 - #21
   - `reportRepo.ts` 기본 제목 리터럴이 copy 표와 겹친다.
   - «기타»가 결함 유형 OTHER와 같은 글자다(한 화면에 같이 나올 수 있다).
@@ -59,3 +52,14 @@
   - 테스트가 소스 서식에 밀착돼 있다.
   - register 탐지가 4개 디렉터리로 하드코딩돼 있다.
 - **CI 없음**: 머지 코멘트에 로컬 vitest 수치를 남긴다(#21은 남김).
+
+## 다음 조각
+1. QR 10-29: 위 표를 실기기에서 채운다. 카메라는 input 실측을 먼저 하고, 광고는 테스트 ID로, 식별키는 hash로.
+2. `/api/analyze` 분리 + CORS(`x-haja-anon-key`는 Allow-Headers에 넣기). 배포·env는 사용자.
+3. 리워드 제안 UI·문구(문안 ASK) · 서버 `grantReward` 라우트(광고 검증과 함께) · DefectDetailView 단건 분석의 429 호출 지점.
+4. #19 + #23 사용자 결정. 머지하면 #23은 rebase --onto main 또는 #19에 합친다. 실측 절차는 #23 본문에 있다.
+- camera.ts TODO의 옛 API 이름(`openCamera`·`fetchAlbumPhotos`)은 QR-1029 SDK 연결 때 현행 `Device.*`로 고친다.
+
+## SHA·열린 PR
+- main 7ce4d0e(#21) · ae8ea33(#22)
+- 열린 PR: #19 ⛔(사용자 보류) · #23 ⛔(base #19, 묶음) · #24 이 인계 · #8(무관)
