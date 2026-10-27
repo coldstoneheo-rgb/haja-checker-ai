@@ -14,6 +14,9 @@
     "baseUrl": ".",
     "paths": {
       "@/lib/platform/reportActions": ["./src/platform/reportActions.ts"],
+      "@/lib/platform/camera": ["./src/platform/camera.ts"],
+      "@/lib/platform/ads": ["./src/platform/ads.ts"],
+      "@/lib/platform/identity": ["./src/platform/identity.ts"],
       "@/*": ["../*"],
       "next/link": ["./src/shims/next-link.tsx"],
       "next/navigation": ["./src/shims/next-navigation.ts"]

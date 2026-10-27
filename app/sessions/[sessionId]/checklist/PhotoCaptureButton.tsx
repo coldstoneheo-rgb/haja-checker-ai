@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { addPhoto } from "@/lib/repo/photoRepo";
+// 플랫폼 어댑터: Next 웹 = <input type="file"> 그대로 · 토스 = 네이티브 카메라 자리(TODO(QR-1029), toss/src/platform/camera.ts)
+import { nativeCamera, pickPhotos } from "@/lib/platform/camera";
 
 interface Props {
   sessionId: string;
@@ -39,7 +41,7 @@ export default function PhotoCaptureButton({
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(0);
 
-  async function processFiles(files: FileList) {
+  async function processFiles(files: ArrayLike<File>) {
     setBusy(true);
     setError(null);
     setSaved(0);
@@ -65,9 +67,28 @@ export default function PhotoCaptureButton({
     await processFiles(files);
   }
 
+  async function pickNative() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    let files: File[] = [];
+    try {
+      const result = await pickPhotos();
+      if (!result.ok) setError(result.message);
+      else files = result.files;
+    } catch (err) {
+      console.error("[PhotoCaptureButton]", err);
+      setError(classifyError(err));
+    } finally {
+      setBusy(false);
+    }
+    if (files.length > 0) await processFiles(files);
+  }
+
   function retry() {
     setError(null);
-    inputRef.current?.click();
+    if (nativeCamera) void pickNative();
+    else inputRef.current?.click();
   }
 
   const label = busy
@@ -78,6 +99,19 @@ export default function PhotoCaptureButton({
 
   return (
     <div className="flex flex-col gap-1">
+      {nativeCamera ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void pickNative()}
+          className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 ring-slate-900 transition ${
+            busy ? "cursor-not-allowed bg-slate-300 text-slate-600 ring-slate-300" : "bg-slate-900 text-white"
+          }`}
+        >
+          <span aria-hidden>📷</span>
+          <span>{label}</span>
+        </button>
+      ) : (
       <label
         className={`inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 ring-slate-900 transition ${
           busy ? "cursor-not-allowed bg-slate-300 text-slate-600 ring-slate-300" : "bg-slate-900 text-white"
@@ -96,6 +130,7 @@ export default function PhotoCaptureButton({
           onChange={onChange}
         />
       </label>
+      )}
 
       {error && (
         <div

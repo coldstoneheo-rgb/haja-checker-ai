@@ -10,6 +10,9 @@ export const TOSS_ALIASES: [RegExp, string][] = [
   [/^next\/link$/, "toss/src/shims/next-link.tsx"],
   [/^next\/navigation$/, "toss/src/shims/next-navigation.ts"],
   [/^@\/lib\/platform\/reportActions$/, "toss/src/platform/reportActions.ts"],
+  [/^@\/lib\/platform\/camera$/, "toss/src/platform/camera.ts"],
+  [/^@\/lib\/platform\/ads$/, "toss/src/platform/ads.ts"],
+  [/^@\/lib\/platform\/identity$/, "toss/src/platform/identity.ts"],
 ];
 
 /** from "x" · import "x" · import("x") · export … from "x" 모두 */
