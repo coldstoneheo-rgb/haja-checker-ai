@@ -64,7 +64,7 @@ export default function ReportView({ sessionId }: Props) {
   }
 
   function onPrintBlankChecklist() {
-    show(printBlankChecklist(buildBlankChecklistHtml(sessionTitle, session.inspectionDate, areasWithItems, copy.statusLabel("DEFECT"))));
+    show(printBlankChecklist(buildBlankChecklistHtml(sessionTitle, session.inspectionDate, areasWithItems, copy.statusLabel("DEFECT"), copy.blankChecklistTitle)));
   }
 
   return (

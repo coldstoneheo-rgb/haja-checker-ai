@@ -63,6 +63,8 @@ describe("모드 문구 표", () => {
       reportDirectSection: "직접 추가 하자 목록",
       reportRequestSection: "시공자 요청 문구 모음",
       reportRequestIntro: "아래 문구를 시공사 하자 접수 시 그대로 사용하실 수 있습니다.",
+      // 원문 출처: lib/repo/reportRepo.ts h1(8e1aea4) — port-03 PR C에서 표로 옮김
+      blankChecklistTitle: "사전점검 체크리스트 (종이 백업)",
     };
     const strings = Object.fromEntries(
       Object.entries(MODE_COPY.NEW_BUILD).filter(([, v]) => typeof v === "string"),
@@ -232,5 +234,35 @@ describe("백필·공간 초기값", () => {
     expect(pickArea(rentalAreas, rentalAreas[1])).toBe(rentalAreas[1]);
     const form = read("app/sessions/[sessionId]/defects/new/NewDefectForm.tsx");
     expect(form).toMatch(/pickArea\(areas, chosenArea\)/);
+  });
+});
+
+describe("#18 관찰 ③④(port-03 PR C)", () => {
+  it("③ PR5 이전 임대 세션에 저장된 BUILDER는 «기타»로 보이고, 신축은 «시공사» 그대로(저장값 불변)", async () => {
+    const { sessionRecipient } = await import("@/lib/seed/modes");
+    const legacy = { mode: "MOVE_IN" as const, recipientType: "BUILDER" as const };
+    expect(sessionRecipient(legacy)).toBe("BUILDER");
+    for (const mode of RENTAL) expect(MODE_COPY[mode].recipientLabel(sessionRecipient({ ...legacy, mode }))).toBe("기타");
+    expect(MODE_COPY.NEW_BUILD.recipientLabel("BUILDER")).toBe("시공사");
+  });
+
+  it("④ 빈 체크리스트 제목: 신축 = 원문 «사전점검 체크리스트 (종이 백업)» · 임대 = 모드 이름, 금지어 0", async () => {
+    const { buildBlankChecklistHtml } = await import("@/lib/repo/reportRepo");
+    const areas = [{ area: { name: "거실" }, items: [{ title: "벽지" }] }];
+    expect(MODE_COPY.NEW_BUILD.blankChecklistTitle).toBe("사전점검 체크리스트 (종이 백업)");
+    expect(buildBlankChecklistHtml("단지", "2026-10-27", areas)).toContain(
+      "<h1>하자체크 AI — 사전점검 체크리스트 (종이 백업)</h1>",
+    );
+    for (const mode of RENTAL) {
+      const c = MODE_COPY[mode];
+      expect(c.blankChecklistTitle).not.toMatch(BANNED);
+      expect(c.blankChecklistTitle).not.toContain("사전점검");
+      const html = buildBlankChecklistHtml("단지", "2026-10-27", areas, c.statusLabel("DEFECT"), c.blankChecklistTitle);
+      expect(html).toContain(`<h1>하자체크 AI — ${c.blankChecklistTitle}</h1>`);
+    }
+    expect(buildBlankChecklistHtml("단지", "2026-10-27", areas, "하자", "<b>&")).toContain("<h1>하자체크 AI — &lt;b&gt;&amp;</h1>");
+    expect(read("app/sessions/[sessionId]/report/ReportView.tsx")).toContain(
+      'copy.statusLabel("DEFECT"), copy.blankChecklistTitle)',
+    );
   });
 });

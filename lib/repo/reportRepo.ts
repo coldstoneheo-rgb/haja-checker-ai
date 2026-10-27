@@ -125,6 +125,8 @@ export function buildBlankChecklistHtml(
   areasWithItems: { area: { name: string }; items: { title: string }[] }[],
   /** 체크 칸 «하자» 자리 — 모드 문구(임대 = «손상») */
   defectLabel = "하자",
+  /** 제목 — 모드 문구 blankChecklistTitle(임대 = «입주 상태 기록 체크리스트 (종이 백업)») */
+  title = "사전점검 체크리스트 (종이 백업)",
 ): string {
   const rows = areasWithItems
     .flatMap(({ area, items }) =>
@@ -151,7 +153,7 @@ export function buildBlankChecklistHtml(
         @media print{body{margin:10px}}
       </style>
     </head><body>
-      <h1>하자체크 AI — 사전점검 체크리스트 (종이 백업)</h1>
+      <h1>하자체크 AI — ${escapeHtml(title)}</h1>
       <p>${escapeHtml(sessionTitle)} · 점검일: ${escapeHtml(inspectionDate)}</p>
       <table>
         <thead><tr>
