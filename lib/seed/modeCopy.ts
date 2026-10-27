@@ -58,6 +58,8 @@ export interface ModeCopy {
   directDetailTitle: string;
   directNotFound: string;
   reportTitle: string;
+  /** 종이 백업 빈 체크리스트 제목(reportRepo.buildBlankChecklistHtml) */
+  blankChecklistTitle: string;
   reportDirectSection: string;
   reportRequestSection: string;
   reportRequestIntro: string;
@@ -96,6 +98,7 @@ const NEW_BUILD: ModeCopy = {
   directDetailTitle: "하자 상세",
   directNotFound: "하자를 찾을 수 없습니다.",
   reportTitle: "사전점검 하자 보고서",
+  blankChecklistTitle: "사전점검 체크리스트 (종이 백업)",
   reportDirectSection: "직접 추가 하자 목록",
   reportRequestSection: "시공자 요청 문구 모음",
   reportRequestIntro: "아래 문구를 시공사 하자 접수 시 그대로 사용하실 수 있습니다.",
@@ -118,7 +121,8 @@ function rental(mode: "MOVE_IN" | "MOVE_OUT"): ModeCopy {
     defectTypes: NEW_BUILD.defectTypes.filter((t) => t !== "MISSING_WORK"),
     defectTypeLabel: (t) => DEFECT_TYPE_LABELS[t],
     recipients: NEW_BUILD.recipients.filter((r) => r !== "BUILDER"),
-    recipientLabel: (r) => RECIPIENT_TYPE_LABELS[r],
+    // PR5 이전 임대 세션에 저장된 BUILDER는 값은 두고 중립 라벨로만 보인다(«시공사» 노출 0)
+    recipientLabel: (r) => (r === "BUILDER" ? "기타" : RECIPIENT_TYPE_LABELS[r]),
     builderLabel: null,
     builderDisplayLabel: null,
     builderPlaceholder: "",
@@ -139,6 +143,7 @@ function rental(mode: "MOVE_IN" | "MOVE_OUT"): ModeCopy {
     directDetailTitle: "기록 상세",
     directNotFound: "기록을 찾을 수 없습니다.",
     reportTitle: `${INSPECTION_MODE_LABELS[mode]} 보고서`,
+    blankChecklistTitle: `${INSPECTION_MODE_LABELS[mode]} 체크리스트 (종이 백업)`,
     reportDirectSection: "직접 추가 기록 목록",
     reportRequestSection: "전달 문구 모음",
     reportRequestIntro: "아래 문구를 수신처에 전달할 때 그대로 사용하실 수 있습니다.",
