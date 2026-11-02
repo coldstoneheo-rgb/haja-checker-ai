@@ -1,18 +1,10 @@
+// 전환기(S2): 화면은 toss/(Vite)로 옮겼고 Next에는 /api/analyze만 남는다 — 이 레이아웃은 404 페이지용.
 import type { Metadata, Viewport } from "next";
-import SwRegister from "@/components/SwRegister";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // PWA 메타(manifest·appleWebApp)는 뺀다 — 404 화면을 «홈 화면에 추가»하면 404만 뜨는 아이콘이 생긴다
   title: "하자체크 AI",
-  description:
-    "신축 아파트 사전점검에서 사진 증거를 빠짐없이 수집하고, AI 보조 분석으로 하자 의심 보고서를 작성합니다.",
-  manifest: "/manifest.webmanifest",
-  applicationName: "하자체크 AI",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "하자체크 AI",
-  },
 };
 
 export const viewport: Viewport = {
@@ -31,7 +23,6 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full bg-slate-50 text-slate-900 flex flex-col">
-        <SwRegister />
         {children}
       </body>
     </html>
