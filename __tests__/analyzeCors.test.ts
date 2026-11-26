@@ -87,10 +87,15 @@ describe("허용 출처 목록", () => {
 
   it("버려진 env 항목은 운영 로그용으로 돌려준다(빈 항목 제외)", async () => {
     const { rejectedOriginEntries } = await import("@/lib/ai/cors");
-    expect(rejectedOriginEntries(` ${EXTRA} , * ,, https://x.com/`)).toEqual(["*", "https://x.com/"]);
-    // 계정 정보가 든 값은 가린다 · 긴 값은 40자로 자른다
+    expect(rejectedOriginEntries(` ${EXTRA} , * ,, https://x.com/`)).toEqual(["*…(1자)", "https://x.com/"]);
+    // URL 꼴은 계정 정보만 가린다(마지막 @까지, 비밀번호에 @·/가 있어도) · 그 밖의 값은 앞 4자와 길이만
     expect(rejectedOriginEntries("https://user:secret@host.example.com")).toEqual(["https://***@host.example.com"]);
-    expect(rejectedOriginEntries("sk-" + "a".repeat(80))[0]).toHaveLength(41);
+    expect(rejectedOriginEntries("https://u:p@ss@host.example.com")).toEqual(["https://***@host.example.com"]);
+    expect(rejectedOriginEntries("https://u:pa/ss@host.example.com")[0]).not.toContain("pa");
+    expect(rejectedOriginEntries("AIza" + "b".repeat(35))).toEqual(["AIza…(39자)"]);
+    const { maskForLog } = await import("@/lib/ai/cors");
+    expect(maskForLog(TOSS_QR)).toBe(TOSS_QR); // 정상 출처는 그대로(44자 — 잘리면 안 된다)
+    expect(maskForLog("https://a:b@c.example.com:8443")).toBe("https://***@c.example.com:8443");
     expect(rejectedOriginEntries(undefined)).toEqual([]);
   });
 
@@ -187,6 +192,16 @@ describe("거부 출처 로그", () => {
   it("서로 다른 값 20개까지 기록, 중복은 1번, 그 뒤 «이후 생략» 1회 — 값은 가리고 자른다", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
+      // 앞 시험들의 거부 기록은 상한(20)보다 적다 — 이 긴 출처가 기록 대상이 되는 전제.
+      // 긴 출처 1개: 실기기 QR 꼴 꼬리가 다른 값 → 가림 없이 끝까지(120자 안) 남아야 한다
+      const longOrigin = "https://haja-check.private-apps.tossmini.com.cdn-edge.example.net";
+      await preflight(longOrigin);
+      const first = warn.mock.calls.find((c) => String(c[0]).startsWith("[api/analyze] 허용 안 된 출처:"));
+      expect(first?.[1]).toBe(JSON.stringify(longOrigin));
+      // 라우트 쪽 가림: 계정 정보가 든 Origin은 *** 로 남는다
+      await preflight("https://u:secret@evil-cred.example.com");
+      const cred = warn.mock.calls.map((c) => String(c[1] ?? "")).find((v) => v.includes("evil-cred"));
+      expect(cred).toBe(JSON.stringify("https://***@evil-cred.example.com"));
       // 앞 시험들이 이미 기록한 거부 출처가 있을 수 있으므로 새 값 25개 + 중복으로 상한을 확실히 넘긴다
       for (let i = 0; i < 25; i++) {
         await preflight(`https://scan${i}.example.com`);

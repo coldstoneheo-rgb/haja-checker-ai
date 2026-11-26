@@ -48,20 +48,22 @@ export function normalizeOrigin(raw: string): string | null {
 
 /**
  * env 항목 중 형식이 틀려 버려지는 값(공백 항목 제외) — 운영 로그용.
- * 실수로 붙여 넣은 비밀이 로그로 새지 않게 «@» 앞(계정 정보)은 가리고 40자로 자른다.
+ * URL처럼 생긴 값(http/https)은 계정 정보를 가리고 보여 준다(끝 슬래시·경로 실수를 읽을 수 있게).
+ * 그 밖의 값(잘못 붙여 넣은 키 등)은 앞 4자와 길이만 남긴다.
  */
 export function rejectedOriginEntries(extraEnv: string | undefined): string[] {
   return (extraEnv ?? "")
     .split(",")
     .map((p) => p.trim())
     .filter((p) => p && normalizeOrigin(p) === null)
-    .map(maskForLog);
+    .map((p) => (/^https?:\/\//i.test(p) ? maskForLog(p) : `${p.slice(0, 4)}…(${p.length}자)`));
 }
 
-/** 로그용 가림: «scheme://» 뒤 «@» 앞을 ***로 바꾸고 40자로 자른다. */
-export function maskForLog(raw: string): string {
-  const masked = raw.replace(/^([a-z][a-z0-9+.-]*:\/\/)?[^/@]*@/i, (_m, scheme: string | undefined) => `${scheme ?? ""}***@`);
-  return masked.length > 40 ? masked.slice(0, 40) + "…" : masked;
+/** 로그용 가림: «scheme://» 뒤 마지막 «@»까지(비밀번호에 «/»·«@»가 있어도)를 ***로 바꾸고 max자로 자른다.
+ * Origin에는 경로가 없으므로 «@»가 보이면 통째로 계정 정보로 본다. */
+export function maskForLog(raw: string, max = 120): string {
+  const masked = raw.replace(/^([a-z][a-z0-9+.-]*:\/\/)?.*@/i, (_m, scheme: string | undefined) => `${scheme ?? ""}***@`);
+  return masked.length > max ? masked.slice(0, max) + "…" : masked;
 }
 
 /** 허용 출처 = 기본 2개 + env 덧붙임(쉼표 구분). 형식이 틀린 항목·와일드카드(*)는 버린다. */

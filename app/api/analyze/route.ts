@@ -18,7 +18,7 @@ const corsAllowed = allowedOrigins(process.env.HAJA_CORS_ORIGINS);
 const corsRejected = rejectedOriginEntries(process.env.HAJA_CORS_ORIGINS);
 if (corsRejected.length) console.warn("[api/analyze] HAJA_CORS_ORIGINS에서 버린 값:", JSON.stringify(corsRejected));
 
-// 거부된 Origin 기록: 인스턴스당 서로 다른 값 20개까지만(로그 부풀리기 방지), 값은 가려서 40자로 자른다.
+// 거부된 Origin 기록: 인스턴스당 서로 다른 값 20개까지만(로그 부풀리기 방지), 계정 정보는 가리고 120자로 자른다.
 // 실기기 Origin이 기본 허용값과 다를 때 Vercel 로그에서 읽는다(QR 런북 «결정 대기» ③). 상한에 닿으면 «이후 생략»을 1회 남긴다.
 const loggedDenied = new Set<string>();
 let deniedCapNoted = false;
