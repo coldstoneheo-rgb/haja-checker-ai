@@ -13,6 +13,7 @@ export const TOSS_ALIASES: [RegExp, string][] = [
   [/^@\/lib\/platform\/camera$/, "toss/src/platform/camera.ts"],
   [/^@\/lib\/platform\/ads$/, "toss/src/platform/ads.ts"],
   [/^@\/lib\/platform\/identity$/, "toss/src/platform/identity.ts"],
+  [/^@\/lib\/platform\/analyzeEndpoint$/, "toss/src/platform/analyzeEndpoint.ts"],
 ];
 
 /** from "x" · import "x" · import("x") · export … from "x" 모두 */

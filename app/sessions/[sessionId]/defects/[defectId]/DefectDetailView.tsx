@@ -18,6 +18,8 @@ import PhotoViewer from "../../checklist/PhotoViewer";
 import AnalysisResultCard from "../../analysis/AnalysisResultCard";
 import { useAiNoticeGate } from "@/components/useAiNoticeGate";
 import { isAiEnabled, sessionMode } from "@/lib/seed/modes";
+import { canOfferReward } from "@/lib/ai/limitError";
+import { onDailyLimit } from "@/lib/platform/ads";
 import { MODE_COPY } from "@/lib/seed/modeCopy";
 
 interface Props {
@@ -83,6 +85,8 @@ export default function DefectDetailView({ sessionId, defectId }: Props) {
       await analyzeDirectDefect(defectId);
     } catch (err) {
       setAnalysisError(err instanceof Error ? err.message : String(err));
+      // 단건 분석도 하루 상한(캡 전)이면 리워드 광고 자리를 부른다 — 기다리지 않는다(웹 동작 0, AnalysisView noteLimit과 같은 판정)
+      if (canOfferReward(err)) void onDailyLimit();
     } finally {
       setAnalyzing(false);
     }
