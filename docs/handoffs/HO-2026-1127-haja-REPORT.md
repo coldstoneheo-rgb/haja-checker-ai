@@ -27,11 +27,11 @@
   - 실기기 실측은 런북 D2에 넣음.
 - [x] 3. 토스 호출 지점 = 어댑터 `analyzeEndpoint`(`VITE_HAJA_API_BASE` + `/api/analyze`). 값이 없으면 fetch 전에 «서버 주소 미설정» 안내로 실패. 시험 포함.
   - `DefectDetailView` 429도 같은 흐름에서 닿아 함께 처리(리워드 자리 호출).
-- [x] 4. vitest 191/191 · typecheck 0 · next build 0 · build:toss 0(3ec5dca 기준 재실행) — PR #25 본문.
+- [x] 4. vitest 191/191 · typecheck 0 · next build 0 · build:toss 0(7fde93b 기준 재실행) — PR #25 본문.
 - [x] 5. 런북 `docs/runbooks/QR-TEST-RUNBOOK.md` — 손 분 수(20+29+5) · port-03 표 7항목 · `.ait` 명령 · 권한 사유 초안 · 배포·env 단계.
 - [x] 6. 열린 PR 사실(아래).
-- [x] 7. PR #25 critic(high) 8/10 PASS → 6e002b5 → 8.5/10 PASS → 경미 반영 3ec5dca → (3차 확인) → LC 게이트 요청(머지 0).
-- [ ] 8. AGENT_STATUS · WORKLOG · 이 REPORT → [CLOSED].
+- [x] 7. PR #25 critic(high) 8 → 8.5 → 8 PASS(반영 6e002b5·3ec5dca·7fde93b, 3차의 [중요] = Origin 로그 40자 절단 → 120자) → LC 게이트 요청(a2, 머지 0).
+- [x] 8. AGENT_STATUS · WORKLOG · 이 REPORT(PR #26) → [CLOSED].
 
 ## 한 일
 - **PR #25** `feat/analyze-cors`
@@ -65,6 +65,7 @@
 
 ## 후속(경미, critic 지적 — 이번 PR 밖)
 - `allowedOrigins`와 `rejectedOriginEntries`가 split을 두 번 한다. 한 함수로 합칠 수 있다.
+- 7fde93b 차이분은 critic을 다시 거치지 않았다(변이 1개로만 확인). LC 게이트에서 함께 본다.
 - QR 확인이 끝나면 토스 `[haja] origin` 로그를 정리한다.
 - 출시용 `build:toss`에서 `VITE_HAJA_API_BASE`가 비면 실패하게 하는 가드를 둔다. 지금은 빈 값으로도 exit 0이라, AI가 꺼진 `.ait`가 올라갈 수 있다.
 

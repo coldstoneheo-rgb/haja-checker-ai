@@ -1,7 +1,7 @@
 {
   "project": "haja-checker-ai",
   "as_of": "2026-11-27T02:00+09:00",
-  "state": "handover",
+  "state": "closed",
   "head": "156342f",
   "working_on": null,
   "waiting_on": "LC: #25 게이트 · 사용자: #25 머지·배포 → QR 런북(docs/runbooks/QR-TEST-RUNBOOK.md, 손 ≈55분) · SDK 연결을 1차 QR 앞에 넣을지 · (이월) #19+#23 묶음 · 리워드 문구",
@@ -13,7 +13,7 @@
   "recent": [
     {
       "at": "2026-11-27",
-      "what": "HO-2026-1127: #25 /api/analyze CORS(토스 출처 2 + HAJA_CORS_ORIGINS, * 거부) · 토스 주소 어댑터 VITE_HAJA_API_BASE · DefectDetailView 429 리워드 자리 · 191/191 · typecheck·next build·build:toss 0 · critic high 8 → 8.5 PASS(반영 6e002b5·3ec5dca) · #26 QR 런북 1장"
+      "what": "HO-2026-1127: #25 /api/analyze CORS(토스 출처 2 + HAJA_CORS_ORIGINS, * 거부) · 토스 주소 어댑터 VITE_HAJA_API_BASE · DefectDetailView 429 리워드 자리 · 191/191 · typecheck·next build·build:toss 0 · critic high 8 → 8.5 → 8 PASS(반영 6e002b5·3ec5dca·7fde93b) · #26 QR 런북 1장"
     },
     {
       "at": "2026-10-27",

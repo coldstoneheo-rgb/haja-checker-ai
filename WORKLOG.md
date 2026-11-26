@@ -8,7 +8,7 @@ project: haja-checker-ai
 agent: claude-code
 summary: 새벽 무인 — /api/analyze 다른 출처 호출(CORS) PR #25 · 토스 호출 주소 어댑터 · QR 시험 런북 1장
 status: on_track
-progress: "HO-2026-1127 조건 1~6 끝 · 7 = #25 critic high 8 → 8.5 PASS(반영 6e002b5·3ec5dca) → LC 게이트 요청 · 8 = 이 블록·REPORT·STATUS (근거: npx vitest run 191/191 · typecheck 0 · next build 0 · build:toss 0 · Mock만, 유료 호출 0)"
+progress: "HO-2026-1127 조건 1~6 끝 · 7 = #25 critic high 8 → 8.5 → 8 PASS(반영 6e002b5·3ec5dca·7fde93b) → LC 게이트 요청 · 8 = 이 블록·REPORT·STATUS (근거: npx vitest run 191/191 · typecheck 0 · next build 0 · build:toss 0 · Mock만, 유료 호출 0)"
 changes: ["https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/25 CORS·토스 주소", "docs/runbooks/QR-TEST-RUNBOOK.md", "docs/handoffs/HO-2026-1127-haja-REPORT.md"]
 next: "#25 게이트·머지(사용자) → QR 1차(런북) → SDK 연결 PR → QR 2차"
 blockers: 머지·배포·콘솔 업로드·QR은 사용자 손 · 실기기 Origin 미실측
