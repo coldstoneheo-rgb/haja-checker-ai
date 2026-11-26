@@ -19,7 +19,7 @@
 
 ## 체크리스트(발주서 완료 조건)
 - [x] 1. 계획 REPLY. 01:28 옛 LC `-fd`가 수용했고, 01:30에 `-a2`로 1줄 다시 보냄. 덧붙임 «env 전체 허용 값 금지 시험» 반영.
-- [x] 2. 분석 API 다른 출처 호출 — PR #25. 시험 `__tests__/analyzeCors.test.ts` 25건(Mock만).
+- [x] 2. 분석 API 다른 출처 호출 — PR #25. 시험 `__tests__/analyzeCors.test.ts` 26건(Mock만).
   - 허용 출처 근거: 앱인토스 공식 `guide/operation/toss.md` FAQ «토스 앱에서 통신이 되지 않아요» — «서버의 CORS 허용 Origin에 미니앱 Origin을 추가해야 해요»
     - `https://<appName>.apps.tossmini.com`(실서비스)
     - `https://<appName>.private-apps.tossmini.com`(콘솔 QR, SDK 3.1.0+)
@@ -27,10 +27,10 @@
   - 실기기 실측은 런북 D2에 넣음.
 - [x] 3. 토스 호출 지점 = 어댑터 `analyzeEndpoint`(`VITE_HAJA_API_BASE` + `/api/analyze`). 값이 없으면 fetch 전에 «서버 주소 미설정» 안내로 실패. 시험 포함.
   - `DefectDetailView` 429도 같은 흐름에서 닿아 함께 처리(리워드 자리 호출).
-- [x] 4. vitest 190/190 · typecheck 0 · next build 0 · build:toss 0(6e002b5 기준 재실행) — PR #25 본문.
+- [x] 4. vitest 191/191 · typecheck 0 · next build 0 · build:toss 0(3ec5dca 기준 재실행) — PR #25 본문.
 - [x] 5. 런북 `docs/runbooks/QR-TEST-RUNBOOK.md` — 손 분 수(20+29+5) · port-03 표 7항목 · `.ait` 명령 · 권한 사유 초안 · 배포·env 단계.
 - [x] 6. 열린 PR 사실(아래).
-- [ ] 7. PR #25 → critic → LC 게이트 요청(머지 0).
+- [x] 7. PR #25 critic(high) 8/10 PASS → 6e002b5 → 8.5/10 PASS → 경미 반영 3ec5dca → (3차 확인) → LC 게이트 요청(머지 0).
 - [ ] 8. AGENT_STATUS · WORKLOG · 이 REPORT → [CLOSED].
 
 ## 한 일
@@ -62,6 +62,11 @@
 - **#23** `⛔ SW 자폭`(base #19)
   - main과 · PR #25와 `merge-tree` 충돌 0(main 대비 4 뒤 · 5 앞).
   - GitHub 표시는 MERGEABLE·CLEAN.
+
+## 후속(경미, critic 지적 — 이번 PR 밖)
+- `allowedOrigins`와 `rejectedOriginEntries`가 split을 두 번 한다. 한 함수로 합칠 수 있다.
+- QR 확인이 끝나면 토스 `[haja] origin` 로그를 정리한다.
+- 출시용 `build:toss`에서 `VITE_HAJA_API_BASE`가 비면 실패하게 하는 가드를 둔다. 지금은 빈 값으로도 exit 0이라, AI가 꺼진 `.ait`가 올라갈 수 있다.
 
 ## effort
 - 세션 medium.

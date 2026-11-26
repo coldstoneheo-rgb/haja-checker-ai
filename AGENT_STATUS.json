@@ -13,7 +13,7 @@
   "recent": [
     {
       "at": "2026-11-27",
-      "what": "HO-2026-1127: #25 /api/analyze CORS(토스 출처 2 + HAJA_CORS_ORIGINS, * 거부) · 토스 주소 어댑터 VITE_HAJA_API_BASE · DefectDetailView 429 리워드 자리 · 190/190 · typecheck·next build·build:toss 0 · critic high 8/10 PASS → 반영 6e002b5 · QR 런북 1장(문서 PR)"
+      "what": "HO-2026-1127: #25 /api/analyze CORS(토스 출처 2 + HAJA_CORS_ORIGINS, * 거부) · 토스 주소 어댑터 VITE_HAJA_API_BASE · DefectDetailView 429 리워드 자리 · 191/191 · typecheck·next build·build:toss 0 · critic high 8 → 8.5 PASS(반영 6e002b5·3ec5dca) · #26 QR 런북 1장"
     },
     {
       "at": "2026-10-27",
@@ -34,7 +34,7 @@
   ],
   "open_prs": [
     "#25 /api/analyze CORS(LC 게이트 대기 · 머지 0)",
-    "#26 문서: QR 런북·REPORT(예정 번호)",
+    "#26 문서: QR 런북·REPORT·STATUS",
     "#19 PR7 Next 화면 제거 ⛔ 머지 금지(사용자 보류)",
     "#23 SW 자폭 ⛔ 머지 금지(base #19, 묶음)",
     "#8 10-17 status(CONFLICTING · 내용은 이후 상태가 덮음 — 닫아도 잃는 것 없음)"
