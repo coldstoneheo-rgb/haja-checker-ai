@@ -3,6 +3,9 @@
 > **사용자 손 총 ≈ 55분**: 준비 20분 + 기기 시험 30분(표 합계 29분) + 적어 보내기 5분. AI 분석까지 보려면 PR #25가 머지·배포돼 있어야 합니다.
 > 작성 2026-11-27 (HO-2026-1127). 값(주소·키·ID)은 이 문서에 적지 않습니다. 이 레포는 PUBLIC입니다.
 > 근거 문서: 앱인토스 `guide/operation/toss.md`(테스트하기 · CORS FAQ · 웹 디버그 툴즈) · `guide/operation/console-workspace.md`(번들 업로드 · QR 조건) · 레포 `docs/handoffs/HO-2026-1026-haja-s2-port-03-REPORT.md`(QR 준비 표).
+> 허용 출처 형식의 근거:
+> - `guide/operation/toss.md` FAQ «토스 앱에서 통신이 되지 않아요»: «미니앱에서 서버와 통신하려면, 서버의 CORS 허용 Origin에 미니앱 Origin을 추가해야 해요.» 표에는 `https://<appName>.apps.tossmini.com`(실제 서비스)과 `https://<appName>.private-apps.tossmini.com`(콘솔 QR 테스트, SDK 3.1.0+)이 있습니다.
+> - `documentation/common/file-storage/storage.md` 425행: «`localStorage`, IndexedDB, `window.caches` 같은 웹 표준 저장소는 웹뷰의 origin(URL)을 기준으로 저장돼요.» 같은 절에 출시 origin `https://<appName>.apps.tossmini.com`과 QR 테스트 origin `https://<appName>.private-apps.tossmini.com`이 있습니다(`docs/handoffs/S1-docs-findings.md:136`).
 
 ## 0. 이번 판에서 되는 것과 아직 스텁인 것
 
@@ -24,11 +27,12 @@
 ### 준비 (PC · 약 20분)
 | # | 할 일 | 손 | 화면에서 볼 것 | 실패하면 적을 것 |
 |---|---|---|---|---|
-| P1 | **배포 · env는 사용자**: PR #25가 LC 게이트를 통과하면 머지합니다. 그러면 main push로 Vercel이 자동 배포합니다. Vercel env는 지금 그대로 두면 됩니다(`GEMINI_API_KEY` 등). `HAJA_CORS_ORIGINS`는 **넣지 않습니다**(기본 허용 출처 2개로 시작) | 5분 | Vercel 배포 Ready | 배포 실패 로그 첫 오류 줄 |
-| P2 | 토스 빌드용 주소 넣기: `toss/.env.local` 파일에 `VITE_HAJA_API_BASE=<배포 웹 **프로덕션** 주소>`를 1줄로 적습니다. 끝 슬래시는 붙이지 않고, https여야 합니다. 프리뷰 주소는 Deployment Protection이 켜져 있으면 401로 막히니 쓰지 않습니다. 값이 비어도 빌드는 성공하니 P4로 꼭 확인합니다. 이 파일은 `.gitignore`의 `.env*`라 커밋되지 않습니다 | 2분 | — | — |
+| P1 | **배포 · env는 사용자**: 사용자가 LC 창에 «#25 머지»라고 한 줄 쓰면 LC가 워커 창을 열어 스쿼시 머지합니다(LC 게이트는 11-27에 PASS). 그러면 main push로 Vercel이 자동 배포합니다. 배포 Ready는 Vercel 대시보드 Deployments에서 확인합니다. Vercel env는 지금 그대로 두면 됩니다(`GEMINI_API_KEY` 등). `HAJA_CORS_ORIGINS`는 **넣지 않습니다**(기본 허용 출처 2개로 시작) | 5분 | Vercel 배포 Ready | 배포 실패 로그 첫 오류 줄 |
+| P2 | 토스 빌드용 주소 넣기: 레포 루트의 `toss` 폴더 안에 `.env.local` 파일을 만들고, 한 줄 `VITE_HAJA_API_BASE=https://<프로덕션 호스트>`만 적습니다(따옴표·공백 없이). 만드는 법은 둘 중 하나입니다. Git Bash로 레포 루트에서 `printf 'VITE_HAJA_API_BASE=https://<프로덕션 호스트>
+' > toss/.env.local`을 실행하거나, 메모장에서 그 한 줄을 쓰고 «모든 파일», 이름 `.env.local`, 인코딩 UTF-8로 `toss` 폴더에 저장합니다. `<프로덕션 호스트>`는 Vercel 프로젝트의 Domains에 나오는 주소입니다. 끝 슬래시는 붙이지 않고, https여야 합니다. 프리뷰 주소는 Deployment Protection이 켜져 있으면 401로 막히니 쓰지 않습니다. 값이 비어도 빌드는 성공하니 P4로 꼭 확인합니다. 이 파일은 `.gitignore`의 `.env*`라 커밋되지 않습니다 | 2분 | — | — |
 | P3 | `.ait` 만들기: 레포 루트에서 `npm run build:toss` | 3분 | 끝에 `앱인토스 빌드가 완료되었습니다. (haja-check.ait)` · `deploymentId` 한 줄 | 마지막 오류 20줄 |
-| P4 | 주소가 들어갔는지 확인(Git Bash): `grep -c "<배포 웹 주소의 호스트>" dist/assets/*.js` → 1 이상 | 1분 | 숫자 1 이상 | 0이면 P2 파일 위치(`toss/.env.local`)·이름(`VITE_` 접두어)을 다시 본다 |
-| P5 | 업로드: 콘솔 → 미니앱 → **앱 출시 → [등록하기]** → 앱 번들(`haja-check.ait`)을 올립니다. CLI로 올리려면 `npx ait deploy`를 씁니다. 이때 키는 콘솔 «키» 메뉴에서 받아 `npx ait token add`로 1회 등록합니다(키 값은 어디에도 적지 않는다) | 5분 | 업로드 완료 · 우측 **«토스앱 테스트»** 버튼 | 업로드 오류 문구 |
+| P4 | 주소가 들어갔는지 확인: **레포 루트에서 Git Bash 창**으로 `grep -c "<프로덕션 호스트>" dist/assets/*.js`를 실행합니다. 출력은 `dist/assets/index-xxxx.js:1`처럼 `파일:개수` 꼴로 JS 파일마다 한 줄씩 나옵니다 | 1분 | **어느 한 줄이라도 개수가 1 이상**이면 통과 | 0이면 P2 파일 위치(`toss/.env.local`)·이름(`VITE_` 접두어)을 다시 본다 |
+| P5 | 업로드: 콘솔 → 미니앱 → **앱 출시 → [등록하기]** → 앱 번들(`haja-check.ait`)을 올립니다. ⚠ **업로드만 하고 «검토 요청»은 누르지 않습니다**(QR 시험판이지 출시판이 아님). CLI로 올리려면 `npx ait deploy`를 씁니다. 이때 키는 콘솔 «키» 메뉴에서 받아 `npx ait token add`로 1회 등록합니다(키 값은 어디에도 적지 않는다) | 5분 | 업로드 완료 · 우측 **«토스앱 테스트»** 버튼 | 업로드 오류 문구 |
 | P6 | 권한 사유: 권한 선언은 `apps-in-toss.config.ts`에 이미 있습니다(camera access · photos read). 콘솔에 사용 사유 입력란이 있으면 아래 «카메라 권한 사유 초안»을 붙여 넣습니다. 공식 문서에는 입력 위치가 없어, 화면에서 찾아야 합니다 | 3분 | 저장됨 | 입력란을 찾은 메뉴 이름(다음 판 런북에 반영) |
 | P7 | «토스앱 테스트» → QR 띄우기 | 1분 | QR 코드 | — |
 
@@ -40,7 +44,7 @@
 | D3 | 새 세션 만들기(신축) → 대시보드 | 2분 | 진행률 0% | 어느 단계에서 멈췄는지 |
 | D4 | **카메라 먼저**: 체크리스트 항목 1개 → 사진 추가 → ① 촬영 ② 앨범에서 고르기 | 4분 | 권한 요청 → 촬영 → 썸네일 표시. 앨범도 같다 | 권한 창이 떴는지 · 파일 선택 창이 열렸는지 · 썸네일이 보였는지 · 회전이 틀어졌는지(세 가지 각각 예/아니오) |
 | D5 | 권한 거부 경로: 설정에서 카메라 권한을 끄고 D4를 다시 합니다 | 2분 | 앱이 멈추지 않고 안내가 나온다 | 화면 문구 그대로 |
-| D6 | **AI 분석**: 분석 탭 → 항목 1개 «AI 분석». 첫 회에는 고지 창이 나오므로 확인을 누릅니다 | 3분 | 몇 초 뒤 결과 카드 | 오류 문구 그대로: «서버 주소가 설정되지…» → P2·P4 / «Failed to fetch»·네트워크 오류 → 웹 디버그 툴즈 Network 탭의 상태 코드(403이면 Origin 불일치 → D2 값. Vercel 로그 `[api/analyze] 허용 안 된 출처:` 줄에도 같은 값이 남는다) |
+| D6 | **AI 분석**: 분석 탭 → 항목 1개 «AI 분석». 첫 회에는 고지 창이 나오므로 확인을 누릅니다. ⚠ D6·D7은 **프로덕션 Gemini 실호출 2회**입니다(유료, 하루 상한 30회 안). 그 밖에는 분석 버튼을 누르지 않습니다 | 3분 | 몇 초 뒤 결과 카드 | 오류 문구 그대로: «서버 주소가 설정되지…» → P2·P4 / «Failed to fetch»·네트워크 오류 → 웹 디버그 툴즈 Network 탭의 상태 코드(403이면 Origin 불일치 → D2 값. Vercel 로그 `[api/analyze] 허용 안 된 출처:` 줄에도 같은 값이 남는다) |
 | D7 | 하자 상세 → 단건 «AI 분석» | 2분 | 결과 카드 | D6과 같은 방식으로 적는다 |
 | D8 | 광고 자리(스텁): 하루 상한까지는 볼 수 없으므로 **건너뜁니다**. 광고 테스트 ID(`ait-ad-test-interstitial-id`·`ait-ad-test-rewarded-id`, 문서 고정값이라 발급이 필요 없음)는 SDK 연결 판에서 넣습니다 | 0분 | — | — |
 | D9 | 식별키(스텁): 웹 디버그 툴즈 Network → D6 요청 머리말 `x-haja-anon-key`가 `local:`로 시작하는지 봅니다 | 2분 | `local:…` | 머리말이 없거나 요청이 OPTIONS에서 멈췄는지 |

@@ -4,11 +4,12 @@
   "state": "closed",
   "head": "156342f",
   "working_on": null,
-  "waiting_on": "LC: #25 게이트 · 사용자: #25 머지·배포 → QR 런북(docs/runbooks/QR-TEST-RUNBOOK.md, 손 ≈55분) · SDK 연결을 1차 QR 앞에 넣을지 · (이월) #19+#23 묶음 · 리워드 문구",
+  "waiting_on": "사용자: «#25 머지»·«#26 머지» 한 줄(LC 게이트 PASS-관찰, 재게이트 없음) → QR 런북(손 ≈55분) · SDK 연결을 1차 QR 앞에 넣을지 · (이월) #19+#23 · 리워드 문구",
   "next_actions": [
     "QR 1차: 런북 D1~D14(카메라 input · AI 분석 CORS · 실기기 Origin D2 · 임대 화면) — 사용자 손",
     "SDK 연결 PR: 광고 테스트 ID · getAnonymousKey hash · saveBase64 · (input 실패 시) Device.openCamera → QR 2차",
-    "리워드 제안 UI·grantReward 라우트(광고 검증) · 출시 build:toss에서 VITE_HAJA_API_BASE 빈 값 실패 가드"
+    "리워드 제안 UI·grantReward 라우트(광고 검증) · 출시 build:toss에서 VITE_HAJA_API_BASE 빈 값 실패 가드",
+    "#25 후속 PR(LC 게이트 비차단 4): ① `maskForLog`의 `.*@`가 개행을 넘지 못한다 → `[\\s\\S]*@`로 바꾼다 · ② `HAJA_CORS_ORIGINS`의 `http://`는 localhost·127.0.0.1에만 허용한다(클라이언트 `resolveAnalyzeEndpoint`와 맞춤) · ③ 시험 2건 추가: `https://evil-haja-check.apps.tossmini.com` 거부 · Origin 없는 OPTIONS 204 · ④ 로그 상한 시험이 앞 시험 순서에 의존하는 것을 푼다(모듈 재로드 또는 상한 상태 초기화)"
   ],
   "recent": [
     {

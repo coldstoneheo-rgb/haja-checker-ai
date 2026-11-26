@@ -30,7 +30,7 @@
 - [x] 4. vitest 191/191 · typecheck 0 · next build 0 · build:toss 0(7fde93b 기준 재실행) — PR #25 본문.
 - [x] 5. 런북 `docs/runbooks/QR-TEST-RUNBOOK.md` — 손 분 수(20+29+5) · port-03 표 7항목 · `.ait` 명령 · 권한 사유 초안 · 배포·env 단계.
 - [x] 6. 열린 PR 사실(아래).
-- [x] 7. PR #25 critic(high) 8 → 8.5 → 8 PASS(반영 6e002b5·3ec5dca·7fde93b, 3차의 [중요] = Origin 로그 40자 절단 → 120자) → LC 게이트 요청(a2, 머지 0).
+- [x] 7. PR #25 critic(high) 8 → 8.5 → 8 PASS(반영 6e002b5·3ec5dca·7fde93b, 3차의 [중요] = Origin 로그 40자 절단 → 120자) → LC 게이트 #25·#26 PASS-관찰(차단 0 · 머지는 사용자 복귀 뒤). #26에 런북 보강 5곳(㉮~㉲) 반영.
 - [x] 8. AGENT_STATUS · WORKLOG · 이 REPORT(PR #26) → [CLOSED].
 
 ## 한 일
@@ -62,6 +62,12 @@
 - **#23** `⛔ SW 자폭`(base #19)
   - main과 · PR #25와 `merge-tree` 충돌 0(main 대비 4 뒤 · 5 앞).
   - GitHub 표시는 MERGEABLE·CLEAN.
+
+## 다음 창 인계 — LC 게이트(#25 PASS-관찰 · #26 PASS-관찰, 재게이트 없음) 비차단 4건 = 후속 PR 몫(#25는 건드리지 않음)
+- ① `maskForLog`의 `.*@`가 개행을 넘지 못한다 → `[\s\S]*@`로 바꾼다
+- ② `HAJA_CORS_ORIGINS`의 `http://`는 localhost·127.0.0.1에만 허용한다(클라이언트 `resolveAnalyzeEndpoint`와 맞춤)
+- ③ 시험 2건 추가: `https://evil-haja-check.apps.tossmini.com` 거부 · Origin 없는 OPTIONS 204
+- ④ 로그 상한 시험이 앞 시험 순서에 의존하는 것을 푼다(모듈 재로드 또는 상한 상태 초기화)
 
 ## 후속(경미, critic 지적 — 이번 PR 밖)
 - `allowedOrigins`와 `rejectedOriginEntries`가 split을 두 번 한다. 한 함수로 합칠 수 있다.
