@@ -20,6 +20,7 @@ export default defineConfig({
       { find: /^@\/lib\/platform\/camera$/, replacement: here("./toss/src/platform/camera.ts") },
       { find: /^@\/lib\/platform\/ads$/, replacement: here("./toss/src/platform/ads.ts") },
       { find: /^@\/lib\/platform\/identity$/, replacement: here("./toss/src/platform/identity.ts") },
+      { find: /^@\/lib\/platform\/analyzeEndpoint$/, replacement: here("./toss/src/platform/analyzeEndpoint.ts") },
       { find: /^@\//, replacement: here("./") },
     ],
     // Dexie 인스턴스가 둘이 되면 useLiveQuery 반응성이 깨진다(S1 ③ 실측) — 한 벌 강제

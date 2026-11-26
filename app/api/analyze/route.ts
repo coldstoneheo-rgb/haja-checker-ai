@@ -5,12 +5,53 @@ import {
   validateAnalysisPayload,
 } from "@/lib/ai/validation";
 import { MemoryUsageStore, consumeAnalysis, parseCostPerCall } from "@/lib/ai/usageLimit";
+import { allowedOrigins, corsHeaders, DENIED_LOG_CAP, judgeOrigin, maskForLog, rejectedOriginEntries, type OriginVerdict } from "@/lib/ai/cors";
 
 export const maxDuration = 60;
 
 // 상한 카운터: 지금은 함수 인스턴스 메모리 — 한계는 lib/ai/usageLimit.ts 머리말(월 예산 미보장). KV 어댑터는 S3.
 const usageStore = new MemoryUsageStore();
 const costPerCallUsd = parseCostPerCall(process.env.AI_COST_PER_CALL_USD);
+// 다른 출처 허용 목록(토스 미니앱 출처 2개 + env 덧붙임) — lib/ai/cors.ts 머리말
+const corsAllowed = allowedOrigins(process.env.HAJA_CORS_ORIGINS);
+// env에 넣었는데 버려진 값(*·끝 슬래시·경로 등)을 인스턴스 시작 때 한 번 알린다 — 조용히 403만 이어지지 않게
+const corsRejected = rejectedOriginEntries(process.env.HAJA_CORS_ORIGINS);
+if (corsRejected.length) console.warn("[api/analyze] HAJA_CORS_ORIGINS에서 버린 값:", JSON.stringify(corsRejected));
+
+// 거부된 Origin 기록: 인스턴스당 서로 다른 값 20개까지만(로그 부풀리기 방지), 계정 정보는 가리고 120자로 자른다.
+// 실기기 Origin이 기본 허용값과 다를 때 Vercel 로그에서 읽는다(QR 런북 «결정 대기» ③). 상한에 닿으면 «이후 생략»을 1회 남긴다.
+const loggedDenied = new Set<string>();
+let deniedCapNoted = false;
+function noteDenied(origin: string | null) {
+  const v = maskForLog(String(origin));
+  if (loggedDenied.has(v)) return;
+  if (loggedDenied.size >= DENIED_LOG_CAP) {
+    if (!deniedCapNoted) console.warn(`[api/analyze] 허용 안 된 출처 기록 ${DENIED_LOG_CAP}개 도달 — 이 인스턴스에서 이후 생략`);
+    deniedCapNoted = true;
+    return;
+  }
+  loggedDenied.add(v);
+  console.warn("[api/analyze] 허용 안 된 출처:", JSON.stringify(v));
+}
+
+function verdictOf(request: Request): OriginVerdict {
+  const origin = request.headers.get("origin");
+  const verdict = judgeOrigin(origin, request.headers.get("host"), corsAllowed);
+  if (verdict.kind === "denied") noteDenied(origin);
+  return verdict;
+}
+
+/** Response.json + CORS 머리말(허용 출처일 때만 Allow-*, 늘 Vary: Origin). */
+function reply(verdict: OriginVerdict, body: unknown, status = 200): Response {
+  return Response.json(body, { status, headers: corsHeaders(verdict) });
+}
+
+/** 사전 요청(preflight). 허용 출처 → 204 + Allow-*, 같은 출처 → 204(머리말 없음), 그 밖 → 403. */
+export function OPTIONS(request: NextRequest) {
+  const verdict = verdictOf(request);
+  if (verdict.kind === "denied") return new Response(null, { status: 403, headers: corsHeaders(verdict) });
+  return new Response(null, { status: 204, headers: corsHeaders(verdict) });
+}
 
 /**
  * 사용자 키 = 접속 주소. 클라이언트가 보내는 헤더(식별키 등)는 서버 검증 수단이 붙기 전까지 믿지 않는다.
@@ -23,19 +64,22 @@ function userKeyOf(request: NextRequest): string {
 }
 
 export async function POST(request: NextRequest) {
+  const verdict = verdictOf(request);
+  // 허용 안 된 다른 출처는 본문을 읽기 전에 막는다 — 상한 카운터·분석기를 쓰지 않는다
+  if (verdict.kind === "denied") {
+    return reply(verdict, { error: "허용되지 않은 출처입니다." }, 403);
+  }
+
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return Response.json({ error: "올바른 JSON 형식이 아닙니다." }, { status: 400 });
+    return reply(verdict, { error: "올바른 JSON 형식이 아닙니다." }, 400);
   }
 
   const inputError = validateAnalyzeInput(body);
   if (inputError) {
-    return Response.json(
-      { error: inputError.message, field: inputError.field },
-      { status: 400 },
-    );
+    return reply(verdict, { error: inputError.message, field: inputError.field }, 400);
   }
 
   const decision = await consumeAnalysis({
@@ -48,10 +92,7 @@ export async function POST(request: NextRequest) {
       decision.reason === "MONTHLY_BUDGET"
         ? "이번 달 AI 분석 제공량이 모두 소진되었습니다. 다음 달에 다시 이용해 주세요."
         : "오늘 AI 분석 횟수를 모두 사용했습니다.";
-    return Response.json(
-      { error: message, reason: decision.reason, canReward: decision.canReward },
-      { status: 429 },
-    );
+    return reply(verdict, { error: message, reason: decision.reason, canReward: decision.canReward }, 429);
   }
 
   // Merge 30 s hard timeout with the request's own abort signal
@@ -68,30 +109,25 @@ export async function POST(request: NextRequest) {
     const payloadError = validateAnalysisPayload(result);
     if (payloadError) {
       console.error("[api/analyze] 응답 스키마 오류:", payloadError);
-      return Response.json(
-        { error: "AI 분석 결과를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요." },
-        { status: 502 },
-      );
+      return reply(verdict, { error: "AI 분석 결과를 처리할 수 없습니다. 잠시 후 다시 시도해 주세요." }, 502);
     }
 
-    return Response.json(result);
+    return reply(verdict, result);
   } catch (err) {
     const isTimeout =
       err instanceof Error &&
       (err.name === "TimeoutError" || err.name === "AbortError");
 
     if (isTimeout) {
-      return Response.json(
+      return reply(
+        verdict,
         { error: "분석 시간이 초과되었습니다 (30초). 사진 수를 줄이거나 잠시 후 다시 시도해 주세요." },
-        { status: 504 },
+        504,
       );
     }
 
     const message = err instanceof Error ? err.message : String(err);
     console.error("[api/analyze]", message);
-    return Response.json(
-      { error: "AI 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." },
-      { status: 500 },
-    );
+    return reply(verdict, { error: "AI 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." }, 500);
   }
 }

@@ -50,12 +50,12 @@ describe("toss/ import 경계", () => {
     expect(bad).toEqual([]);
   });
 
-  it("toss/src/platform 스텁은 @/lib/platform/types·@/lib/db/id만 import한다(SDK·Next·dexie 0, 실기기 실측 전)", () => {
+  it("toss/src/platform 스텁은 @/lib/platform/types·@/lib/db/id·@/lib/ai/endpoint(순수 주소 계산)만 import한다(SDK·Next·dexie 0, 실기기 실측 전)", () => {
     const platform = tossFiles.filter((f) => /[\\/]platform[\\/]/.test(f));
-    expect(platform.length).toBe(5);
+    expect(platform.length).toBe(6);
     const bad = platform.flatMap((f) =>
       importsOf(f)
-        .filter((s) => !["@/lib/platform/types", "@/lib/db/id"].includes(s))
+        .filter((s) => !["@/lib/platform/types", "@/lib/db/id", "@/lib/ai/endpoint"].includes(s))
         .map((s) => `${relative(ROOT, f)} → ${s}`),
     );
     expect(bad).toEqual([]);

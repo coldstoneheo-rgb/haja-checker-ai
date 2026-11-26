@@ -5,12 +5,12 @@ import { join } from "node:path";
 import { read, ROOT, tossGraph, TOSS_ALIASES } from "./helpers/tossGraph";
 
 const graph = tossGraph();
-const ADAPTERS = ["reportActions", "camera", "ads", "identity"] as const;
+const ADAPTERS = ["reportActions", "camera", "ads", "identity", "analyzeEndpoint"] as const;
 const exportNames = (src: string) =>
   [...src.matchAll(/export (?:async function|function|const) (\w+)/g)].map((m) => m[1]).sort();
 const todoCount = (src: string) => src.match(/TODO\(QR-1029\)/g)?.length ?? 0;
 
-describe("플랫폼 어댑터 4종(Next 웹 / 토스 스텁)", () => {
+describe("플랫폼 어댑터 5종(Next 웹 / 토스 스텁)", () => {
   it.each(ADAPTERS)("%s: 두 구현이 있고 export 이름이 같다(토스 전용 상수 AD_GROUP_IDS 제외)", (name) => {
     expect(existsSync(join(ROOT, `lib/platform/${name}.ts`))).toBe(true);
     expect(existsSync(join(ROOT, `toss/src/platform/${name}.ts`))).toBe(true);
@@ -22,21 +22,21 @@ describe("플랫폼 어댑터 4종(Next 웹 / 토스 스텁)", () => {
 
   it("toss 그래프에 Next 웹 어댑터가 하나도 실리지 않는다(lib/platform은 types.ts만)", () => {
     expect(graph.files.filter((f) => f.startsWith("lib/platform/"))).toEqual(["lib/platform/types.ts"]);
-    for (const name of ["camera", "ads", "identity"]) expect(graph.files).toContain(`toss/src/platform/${name}.ts`);
+    for (const name of ["camera", "ads", "identity", "analyzeEndpoint"]) expect(graph.files).toContain(`toss/src/platform/${name}.ts`);
   });
 
   it("toss/src/platform에 어댑터 아닌 파일은 openURL.ts뿐이다(새 플랫폼 파일은 이 표에 올린다)", () => {
     const files = readdirSync(join(ROOT, "toss/src/platform")).sort();
-    expect(files).toEqual(["ads.ts", "camera.ts", "identity.ts", "openURL.ts", "reportActions.ts"]);
+    expect(files).toEqual(["ads.ts", "analyzeEndpoint.ts", "camera.ts", "identity.ts", "openURL.ts", "reportActions.ts"]);
   });
 });
 
 describe("TODO(QR-1029) 자리 수 고정", () => {
-  it("토스 스텁: openURL 1 · reportActions 3 · camera 1 · ads 2 · identity 1", () => {
+  it("토스 스텁: openURL 1 · reportActions 3 · camera 1 · ads 2 · identity 1 · analyzeEndpoint 0", () => {
     const counts = Object.fromEntries(
       ["openURL", ...ADAPTERS].map((n) => [n, todoCount(read(`toss/src/platform/${n}.ts`))]),
     );
-    expect(counts).toEqual({ openURL: 1, reportActions: 3, camera: 1, ads: 2, identity: 1 });
+    expect(counts).toEqual({ openURL: 1, reportActions: 3, camera: 1, ads: 2, identity: 1, analyzeEndpoint: 0 });
   });
 
   it.each([

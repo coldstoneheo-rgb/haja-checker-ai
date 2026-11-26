@@ -173,7 +173,10 @@ describe("고지 게이트: toss 진입 그래프 전수", () => {
       "app/sessions/[sessionId]/defects/[defectId]/DefectDetailView.tsx",
     ]);
     for (const f of screens) expect(read(f).includes("useAiNoticeGate()"), f).toBe(true);
-    const fetchers = graph.files.filter((f) => /["'`]\/api\/analyze/.test(read(f)));
+    // 주소 리터럴은 순수 계산(lib/ai/endpoint.ts) 한 곳, 그 주소로 fetch하는 곳은 analysisRepo 한 곳(HO-2026-1127)
+    const literals = graph.files.filter((f) => /["'`]\/api\/analyze/.test(read(f)));
+    expect(literals).toEqual(["lib/ai/endpoint.ts"]);
+    const fetchers = graph.files.filter((f) => /\banalyzeEndpoint\(\)/.test(read(f)) && /\bfetch\(/.test(read(f)));
     expect(fetchers).toEqual(["lib/repo/analysisRepo.ts"]);
   });
 });

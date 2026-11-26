@@ -7,6 +7,9 @@ import type { AiAnalysisResult, DefectCandidate, InspectionMode } from "@/lib/do
 import { isAiEnabled, sessionMode } from "@/lib/seed/modes";
 // 플랫폼 어댑터: Next 웹 = null(헤더 없음) · 토스 = 익명 식별키 자리(TODO(QR-1029), toss/src/platform/identity.ts)
 import { getAnonymousKey } from "@/lib/platform/identity";
+// 플랫폼 어댑터: Next 웹 = 같은 출처 상대 경로 · 토스 = VITE_HAJA_API_BASE + 분석 경로(없으면 null) — lib/ai/endpoint.ts
+import { analyzeEndpoint } from "@/lib/platform/analyzeEndpoint";
+import { ANALYZE_ENDPOINT_MISSING } from "@/lib/ai/endpoint";
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -34,8 +37,10 @@ async function callAnalyzeApi(
   signal?: AbortSignal,
 ): Promise<AiAnalysisPayload> {
   // 상한 카운터 키 자리 — 서버는 아직 이 헤더를 믿지 않는다(app/api/analyze/route.ts userKeyOf, KV는 S3).
+  const endpoint = analyzeEndpoint();
+  if (!endpoint) throw new Error(ANALYZE_ENDPOINT_MISSING);
   const anonKey = await getAnonymousKey();
-  const response = await fetch("/api/analyze", {
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...(anonKey ? { "x-haja-anon-key": anonKey } : {}) },
     body: JSON.stringify(input),
