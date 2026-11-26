@@ -5,6 +5,7 @@ import {
   allowedOrigins,
   CORS_ALLOW_HEADERS,
   DEFAULT_ALLOWED_ORIGINS,
+  DENIED_LOG_CAP,
   judgeOrigin,
   normalizeOrigin,
   TOSS_APP_NAME,
@@ -87,6 +88,9 @@ describe("허용 출처 목록", () => {
   it("버려진 env 항목은 운영 로그용으로 돌려준다(빈 항목 제외)", async () => {
     const { rejectedOriginEntries } = await import("@/lib/ai/cors");
     expect(rejectedOriginEntries(` ${EXTRA} , * ,, https://x.com/`)).toEqual(["*", "https://x.com/"]);
+    // 계정 정보가 든 값은 가린다 · 긴 값은 40자로 자른다
+    expect(rejectedOriginEntries("https://user:secret@host.example.com")).toEqual(["https://***@host.example.com"]);
+    expect(rejectedOriginEntries("sk-" + "a".repeat(80))[0]).toHaveLength(41);
     expect(rejectedOriginEntries(undefined)).toEqual([]);
   });
 
@@ -176,6 +180,30 @@ describe("POST — 출처별", () => {
     const res = await post({ origin: TOSS_LIVE, body: { areaName: "거실" } });
     expect(res.status).toBe(400);
     expect(res.headers.get("access-control-allow-origin")).toBe(TOSS_LIVE);
+  });
+});
+
+describe("거부 출처 로그", () => {
+  it("서로 다른 값 20개까지 기록, 중복은 1번, 그 뒤 «이후 생략» 1회 — 값은 가리고 자른다", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      // 앞 시험들이 이미 기록한 거부 출처가 있을 수 있으므로 새 값 25개 + 중복으로 상한을 확실히 넘긴다
+      for (let i = 0; i < 25; i++) {
+        await preflight(`https://scan${i}.example.com`);
+        await preflight(`https://scan${i}.example.com`);
+      }
+      const lines = warn.mock.calls.map((c) => String(c[0]));
+      const recorded = lines.filter((l) => l.startsWith("[api/analyze] 허용 안 된 출처:"));
+      const capNotes = lines.filter((l) => l.includes("이후 생략"));
+      expect(recorded.length).toBeLessThanOrEqual(DENIED_LOG_CAP);
+      expect(capNotes).toHaveLength(1);
+      const vals = warn.mock.calls.filter((c) => String(c[0]).startsWith("[api/analyze] 허용 안 된 출처:")).map((c) => String(c[1]));
+      expect(new Set(vals).size).toBe(vals.length); // 중복 없음
+      await preflight("https://scan99.example.com");
+      expect(warn.mock.calls.filter((c) => String(c[0]).includes("이후 생략"))).toHaveLength(1);
+    } finally {
+      warn.mockRestore();
+    }
   });
 });
 

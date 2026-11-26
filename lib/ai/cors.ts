@@ -25,6 +25,8 @@ export const CORS_ALLOW_METHODS = "POST, OPTIONS";
 /** x-haja-anon-key = 토스 익명 식별키 자리(서버는 아직 믿지 않는다 — route.ts userKeyOf). */
 export const CORS_ALLOW_HEADERS = "Content-Type, x-haja-anon-key";
 export const CORS_MAX_AGE = "600";
+/** 거부 출처 로그 상한(인스턴스당 서로 다른 값 수) — route.ts noteDenied. */
+export const DENIED_LOG_CAP = 20;
 
 /** 출처 문자열 정규화: scheme+host(+port)만, 소문자. 경로가 붙었거나 형식이 틀리면 null. */
 export function normalizeOrigin(raw: string): string | null {
@@ -44,13 +46,22 @@ export function normalizeOrigin(raw: string): string | null {
   }
 }
 
-/** env 항목 중 형식이 틀려 버려지는 값(공백 항목 제외) — 운영 로그용. */
+/**
+ * env 항목 중 형식이 틀려 버려지는 값(공백 항목 제외) — 운영 로그용.
+ * 실수로 붙여 넣은 비밀이 로그로 새지 않게 «@» 앞(계정 정보)은 가리고 40자로 자른다.
+ */
 export function rejectedOriginEntries(extraEnv: string | undefined): string[] {
   return (extraEnv ?? "")
     .split(",")
     .map((p) => p.trim())
     .filter((p) => p && normalizeOrigin(p) === null)
-    .map((p) => p.slice(0, 100));
+    .map(maskForLog);
+}
+
+/** 로그용 가림: «scheme://» 뒤 «@» 앞을 ***로 바꾸고 40자로 자른다. */
+export function maskForLog(raw: string): string {
+  const masked = raw.replace(/^([a-z][a-z0-9+.-]*:\/\/)?[^/@]*@/i, (_m, scheme: string | undefined) => `${scheme ?? ""}***@`);
+  return masked.length > 40 ? masked.slice(0, 40) + "…" : masked;
 }
 
 /** 허용 출처 = 기본 2개 + env 덧붙임(쉼표 구분). 형식이 틀린 항목·와일드카드(*)는 버린다. */
