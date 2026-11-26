@@ -3,6 +3,22 @@
 규약: https://github.com/coldstoneheo-rgb/life-coordinator/blob/main/docs/WORKLOG_PROTOCOL.md (최신이 위, append-only)
 
 ---
+date: 2026-11-27
+project: haja-checker-ai
+agent: claude-code
+summary: 새벽 무인 — /api/analyze 다른 출처 호출(CORS) PR #25 · 토스 호출 주소 어댑터 · QR 시험 런북 1장
+status: on_track
+progress: "HO-2026-1127 조건 1~6 끝 · 7 = #25 critic high 8 → 8.5 → 8 PASS(반영 6e002b5·3ec5dca·7fde93b) → LC 게이트 요청 · 8 = 이 블록·REPORT·STATUS (근거: npx vitest run 191/191 · typecheck 0 · next build 0 · build:toss 0 · Mock만, 유료 호출 0)"
+changes: ["https://github.com/coldstoneheo-rgb/haja-checker-ai/pull/25 CORS·토스 주소", "docs/runbooks/QR-TEST-RUNBOOK.md", "docs/handoffs/HO-2026-1127-haja-REPORT.md"]
+next: "#25 게이트·머지(사용자) → QR 1차(런북) → SDK 연결 PR → QR 2차"
+blockers: 머지·배포·콘솔 업로드·QR은 사용자 손 · 실기기 Origin 미실측
+monetization: 영향 없음(광고 자리 그대로 스텁) — AI 분석이 토스에서 열리면 하루 상한·리워드 흐름의 전제가 생김
+learning_need: 같은 출처 판정은 Host로, 다른 출처는 정확 일치 Set으로 — 거부는 카운터 앞에서
+---
+## 의미
+토스판이 «AI 분석은 실패가 정상»이던 자리를 코드 쪽에서 풀었다. 남은 것은 배포 주소·실기기 Origin처럼 사람 손과 기기에서만 확인되는 값이고, 그것을 런북 한 장에 모았다.
+
+---
 date: 2026-10-27
 project: haja-checker-ai
 agent: claude-code
