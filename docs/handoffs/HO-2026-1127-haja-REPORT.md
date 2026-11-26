@@ -67,3 +67,17 @@
 - 세션 medium.
 - critic은 high — 정의 frontmatter 규약.
 - 문서 조사 서브에이전트(web-fetch)는 기본값.
+
+## 설계 메모(범위 밖 · 시간 남아 적음) — 리워드 제안 UI · `grantReward` 라우트
+- **흐름**
+  1. 429 `DAILY_LIMIT` + `canReward`이면 `onDailyLimit()`이 리워드 제안 시트를 띄운다(문구는 사용자 ASK).
+  2. 사용자가 수락하면 `loadFullScreenAd` → `showFullScreenAd(rewarded)`.
+  3. `userEarnedReward` 이벤트가 오면 `POST /api/reward`를 부른다.
+  4. 서버는 `grantReward`(`lib/ai/usageLimit.ts:103`)를 부른다. 이것이 오늘 상한 +10이고, 캡은 60이다.
+- **라우트**
+  - `app/api/reward/route.ts`를 새로 둔다. CORS는 `lib/ai/cors.ts`를 그대로 쓴다(같은 허용 목록 · 같은 OPTIONS).
+  - 키는 지금과 같은 IP다. 식별키 헤더는 KV와 서버 검증이 붙기 전까지 믿지 않는다.
+- **위험**: 광고 검증 없이 라우트를 열면 누구나 +10을 반복할 수 있다. 그래서 막는 방법은 둘 중 하나다.
+  - (가) 앱인토스 리워드 서버 검증 수단이 문서에 있으면 그것을 붙인다(확인 필요).
+  - (나) 없으면 하루 리워드 횟수 캡(이미 `DAILY_CAP` 60 = 리워드 3회분)만으로 피해 상한을 둔다. 이때 월 예산 상한이 최종 방어선이다. 다만 메모리 카운터라 월 상한이 보장되지 않으므로, KV(S3)가 먼저 붙어야 한다.
+- **순서 권고**: KV 어댑터 → reward 라우트 + 광고 SDK → 리워드 UI. 광고 SDK 연결 PR(QR 2차)과 묶을 수 있다.
