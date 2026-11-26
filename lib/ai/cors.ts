@@ -6,7 +6,12 @@
  * - 출시: https://<appName>.apps.tossmini.com
  * - QR 테스트: https://<appName>.private-apps.tossmini.com
  * appName은 apps-in-toss.config.ts와 같은 값이다. 실기기 Origin 실측 전이므로, 다른 값이 나오면
- * env HAJA_CORS_ORIGINS(쉼표 구분)로 덧붙인다. 런북은 docs/runbooks/QR-TEST-RUNBOOK.md다.
+ * env HAJA_CORS_ORIGINS(쉼표 구분)로 덧붙인다. 런북은 docs/runbooks/QR-TEST-RUNBOOK.md(문서 PR)다.
+ * 근거는 앱인토스 공식 guide/operation/toss.md FAQ «토스 앱에서 통신이 되지 않아요»에도 있다:
+ * «서버의 CORS 허용 Origin에 미니앱 Origin을 추가». private-apps는 SDK 3.1.0+이고, 이 레포는 3.4.0이다.
+ *
+ * 한계: IPv6 리터럴 host(예: http://[::1]:3000)는 받지 않는다. 같은 출처 판정은 host만 보고 scheme은 보지 않는다
+ * (Vercel이 http를 https로 돌리므로 실제 위험은 없다).
  */
 
 export const TOSS_APP_NAME = "haja-check";
@@ -37,6 +42,15 @@ export function normalizeOrigin(raw: string): string | null {
   } catch {
     return null;
   }
+}
+
+/** env 항목 중 형식이 틀려 버려지는 값(공백 항목 제외) — 운영 로그용. */
+export function rejectedOriginEntries(extraEnv: string | undefined): string[] {
+  return (extraEnv ?? "")
+    .split(",")
+    .map((p) => p.trim())
+    .filter((p) => p && normalizeOrigin(p) === null)
+    .map((p) => p.slice(0, 100));
 }
 
 /** 허용 출처 = 기본 2개 + env 덧붙임(쉼표 구분). 형식이 틀린 항목·와일드카드(*)는 버린다. */

@@ -5,7 +5,7 @@ import {
   validateAnalysisPayload,
 } from "@/lib/ai/validation";
 import { MemoryUsageStore, consumeAnalysis, parseCostPerCall } from "@/lib/ai/usageLimit";
-import { allowedOrigins, corsHeaders, judgeOrigin, type OriginVerdict } from "@/lib/ai/cors";
+import { allowedOrigins, corsHeaders, judgeOrigin, rejectedOriginEntries, type OriginVerdict } from "@/lib/ai/cors";
 
 export const maxDuration = 60;
 
@@ -14,9 +14,25 @@ const usageStore = new MemoryUsageStore();
 const costPerCallUsd = parseCostPerCall(process.env.AI_COST_PER_CALL_USD);
 // 다른 출처 허용 목록(토스 미니앱 출처 2개 + env 덧붙임) — lib/ai/cors.ts 머리말
 const corsAllowed = allowedOrigins(process.env.HAJA_CORS_ORIGINS);
+// env에 넣었는데 버려진 값(*·끝 슬래시·경로 등)을 인스턴스 시작 때 한 번 알린다 — 조용히 403만 이어지지 않게
+const corsRejected = rejectedOriginEntries(process.env.HAJA_CORS_ORIGINS);
+if (corsRejected.length) console.warn("[api/analyze] HAJA_CORS_ORIGINS에서 버린 값:", JSON.stringify(corsRejected));
+
+// 거부된 Origin 기록: 인스턴스당 서로 다른 값 20개까지만(로그 부풀리기 방지), 값은 200자로 자른다.
+// 실기기 Origin이 기본 허용값과 다를 때 Vercel 로그에서 읽는다(QR 런북 «결정 대기» ③).
+const loggedDenied = new Set<string>();
+function noteDenied(origin: string | null) {
+  const v = String(origin).slice(0, 200);
+  if (loggedDenied.has(v) || loggedDenied.size >= 20) return;
+  loggedDenied.add(v);
+  console.warn("[api/analyze] 허용 안 된 출처:", JSON.stringify(v));
+}
 
 function verdictOf(request: Request): OriginVerdict {
-  return judgeOrigin(request.headers.get("origin"), request.headers.get("host"), corsAllowed);
+  const origin = request.headers.get("origin");
+  const verdict = judgeOrigin(origin, request.headers.get("host"), corsAllowed);
+  if (verdict.kind === "denied") noteDenied(origin);
+  return verdict;
 }
 
 /** Response.json + CORS 머리말(허용 출처일 때만 Allow-*, 늘 Vary: Origin). */

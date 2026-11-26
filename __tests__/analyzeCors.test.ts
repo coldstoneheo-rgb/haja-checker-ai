@@ -1,6 +1,6 @@
 // HO-2026-1127: /api/analyze 다른 출처 호출(CORS) — 토스 미니앱 출처 통과 · 허용 안 된 출처 차단 · 상한 429 동작 그대로.
 // 분석기는 Mock만 쓴다(유료 호출 0). 라우트 모듈은 env를 읽은 뒤 import한다(모듈 단위 허용 목록·카운터).
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   allowedOrigins,
   CORS_ALLOW_HEADERS,
@@ -23,9 +23,15 @@ let route: RouteModule;
 
 beforeAll(async () => {
   process.env.AI_ANALYZER = "mock";
+  // 셸·.env에 빌드 값이 있어도 «값 없음» 경로를 시험한다
+  vi.stubEnv("VITE_HAJA_API_BASE", "");
   // 덧붙임 env: 정상 1 + 와일드카드·형식 오류(버려져야 한다)
   process.env.HAJA_CORS_ORIGINS = ` ${EXTRA} , * , https://*.tossmini.com, not a url, https://bad.example.com/path`;
   route = await import("@/app/api/analyze/route");
+});
+
+afterAll(() => {
+  vi.unstubAllEnvs();
 });
 
 const validBody = {
@@ -76,6 +82,12 @@ describe("허용 출처 목록", () => {
     expect(normalizeOrigin("null")).toBeNull();
     expect(normalizeOrigin("ftp://a.com")).toBeNull();
     expect(normalizeOrigin("HTTPS://Haja-Check.Apps.TossMini.com")).toBe(TOSS_LIVE);
+  });
+
+  it("버려진 env 항목은 운영 로그용으로 돌려준다(빈 항목 제외)", async () => {
+    const { rejectedOriginEntries } = await import("@/lib/ai/cors");
+    expect(rejectedOriginEntries(` ${EXTRA} , * ,, https://x.com/`)).toEqual(["*", "https://x.com/"]);
+    expect(rejectedOriginEntries(undefined)).toEqual([]);
   });
 
   it("env가 비면 기본 2개뿐", () => {
