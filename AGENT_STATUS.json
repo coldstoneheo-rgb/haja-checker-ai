@@ -1,16 +1,20 @@
 {
   "project": "haja-checker-ai",
-  "as_of": "2026-10-27T12:20+09:00",
+  "as_of": "2026-11-27T02:00+09:00",
   "state": "handover",
-  "head": "7ce4d0e",
+  "head": "156342f",
   "working_on": null,
-  "waiting_on": "사용자: #19+#23 묶음 결정 · 문안(리워드 제안 포함) · QR 10-29 실기기(.ait 업로드·콘솔 권한 사유·기기 QR) / LC: #24 게이트",
+  "waiting_on": "LC: #25 게이트 · 사용자: #25 머지·배포 → QR 런북(docs/runbooks/QR-TEST-RUNBOOK.md, 손 ≈55분) · SDK 연결을 1차 QR 앞에 넣을지 · (이월) #19+#23 묶음 · 리워드 문구",
   "next_actions": [
-    "QR 10-29: 스텁 3종 + 공유·저장·openURL 실기기 실측(REPORT port-03 준비 표 · 광고는 테스트 ID 고정값 · 카메라는 현행 Device.* 이름)",
-    "/api/analyze Vercel 함수 분리 + CORS(x-haja-anon-key 허용) — 배포·env는 사용자",
-    "리워드 제안 UI·grantReward 라우트(광고 검증과 함께) · DefectDetailView 429 호출 지점"
+    "QR 1차: 런북 D1~D14(카메라 input · AI 분석 CORS · 실기기 Origin D2 · 임대 화면) — 사용자 손",
+    "SDK 연결 PR: 광고 테스트 ID · getAnonymousKey hash · saveBase64 · (input 실패 시) Device.openCamera → QR 2차",
+    "리워드 제안 UI·grantReward 라우트(광고 검증) · 출시 build:toss에서 VITE_HAJA_API_BASE 빈 값 실패 가드"
   ],
   "recent": [
+    {
+      "at": "2026-11-27",
+      "what": "HO-2026-1127: #25 /api/analyze CORS(토스 출처 2 + HAJA_CORS_ORIGINS, * 거부) · 토스 주소 어댑터 VITE_HAJA_API_BASE · DefectDetailView 429 리워드 자리 · 190/190 · typecheck·next build·build:toss 0 · critic high 8/10 PASS → 반영 6e002b5 · QR 런북 1장(문서 PR)"
+    },
     {
       "at": "2026-10-27",
       "what": "S2 port-03: #22 PR A 스쿼시 ae8ea33(스텁 3종·어댑터, critic 7.5→8.5, LC PASS, 162/162) · #21 PR C 스쿼시 7ce4d0e(임대 BUILDER→«기타»·빈 체크리스트 제목, critic 8.5, LC PASS, 164/164) · #23 PR B sw.js 자폭(⛔ base #19, critic 8, LC PASS, 147/147)"
@@ -26,16 +30,13 @@
     {
       "at": "2026-10-26",
       "what": "#17 스쿼시 머지 e7487be(사용자 위임) · 가지 정리 · PR6 rebase 8790e37 · critic 6/10 → 반영 1e891cc(신축 원문 복구·analysisPath·AST 리터럴 검사, 143/143, 빌드 3종 0)"
-    },
-    {
-      "at": "2026-10-26",
-      "what": "S2 port-02: #17 PR5 59c5583(10화면·외부 href·보고서 어댑터, critic 8/10 PASS, 131/131) · PR6 2f413b8(모드 문구·임대 잔여·백필·areas[0], 140/140, next build·build:toss 0) · 사용자 지시로 중간 마감"
     }
   ],
   "open_prs": [
+    "#25 /api/analyze CORS(LC 게이트 대기 · 머지 0)",
+    "#26 문서: QR 런북·REPORT(예정 번호)",
     "#19 PR7 Next 화면 제거 ⛔ 머지 금지(사용자 보류)",
-    "#23 SW 자폭 ⛔ 머지 금지(base #19, 묶음, LC PASS)",
-    "#24 port-03 인계 docs",
-    "#8(무관)"
+    "#23 SW 자폭 ⛔ 머지 금지(base #19, 묶음)",
+    "#8 10-17 status(CONFLICTING · 내용은 이후 상태가 덮음 — 닫아도 잃는 것 없음)"
   ]
 }
